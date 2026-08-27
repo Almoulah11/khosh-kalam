@@ -46,6 +46,11 @@
   // ── word assembly ─────────────────────────────────────────────────────
   function allWords() {
     const words = [...SEED_MANUAL];
+    // call-and-response pairs join the same deck as their own card type
+    words.push(...SEED_RESPONSES.map((r) => ({
+      id: r.id, ar: r.call, tr: r.callTr, en: r.en, reg: "pair", topic: r.topic,
+      ex: `«${r.call}» — «${r.resp}»`, note: r.note, resp: r.resp, respTr: r.respTr,
+    })));
     for (const pack of SEED_PACKS)
       if (store.packs.includes(pack.key)) words.push(...pack.words);
     for (const v of SEED_VERIFY)
@@ -81,7 +86,16 @@
       .sort((a, b) => store.progress[a.id].due - store.progress[b.id].due);
 
     const newBudget = Math.max(0, store.settings.newPerDay - log().intro);
-    const fresh = words.filter((w) => !store.progress[w.id]).slice(0, newBudget);
+    // thread new cards from both pools so pairs surface early instead of
+    // waiting behind the whole vocabulary list: every 4th new card is a pair
+    const freshAll = words.filter((w) => !store.progress[w.id]);
+    const freshPairs = freshAll.filter((w) => w.reg === "pair");
+    const freshRest = freshAll.filter((w) => w.reg !== "pair");
+    const fresh = [];
+    for (let pi = 0, ri = 0, k = 0; fresh.length < newBudget && (pi < freshPairs.length || ri < freshRest.length); k++) {
+      if ((k % 4 === 3 && pi < freshPairs.length) || ri >= freshRest.length) fresh.push(freshPairs[pi++]);
+      else fresh.push(freshRest[ri++]);
+    }
 
     // interleave: shuffle due reviews, then thread new cards in evenly
     const queue = shuffle(due.map((w) => w.id));
@@ -97,6 +111,7 @@
      - young (stability < 7d) → "recall": AR shown, retrieve meaning
      - mature → alternate "produce" (EN → AR) and "cloze" (fill the blank) */
   function exerciseFor(word, card) {
+    if (word.reg === "pair") return !card || card.reps === 0 ? "learn" : "respond";
     if (!card || card.reps === 0) return "learn";
     if (card.stability < 7) return "recall";
     const cloze = makeCloze(word);
@@ -195,7 +210,7 @@
   let showAddForm = false;
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const REG_LABEL = { kw: "كويتي", msa: "فصحى بالحچي", phrase: "عبارة", tip: "ملاحظة", idiom: "مثل" };
+  const REG_LABEL = { kw: "كويتي", msa: "فصحى بالحچي", phrase: "عبارة", pair: "نداء ورد", tip: "ملاحظة", idiom: "مثل" };
   const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_LABEL[reg] || esc(reg)}</span>`;
 
   function render() {
@@ -270,10 +285,21 @@
     const cloze = mode === "cloze" ? makeCloze(w) : null;
     const pct = Math.round((session.done / session.total) * 100);
 
-    const MODES = { learn: "كلمة يديدة — تعرّف عليها", recall: "شنو معناها؟", produce: "شلون تقولها بالعربي؟", cloze: "كمّل الفراغ" };
+    const MODES = { learn: "كلمة يديدة — تعرّف عليها", recall: "شنو معناها؟", produce: "شلون تقولها بالعربي؟", cloze: "كمّل الفراغ", respond: "شنو الرد؟" };
+    if (w.reg === "pair" && mode === "learn") MODES.learn = "نداء ورد — تعرّف عليهم";
 
     let front = "";
-    if (mode === "learn" || session.flipped) {
+    if (w.reg === "pair" && (mode === "learn" || session.flipped)) {
+      front = `
+        <div class="card-ar" style="font-size:1.5rem; color:var(--ink-dim)">${esc(w.ar)}</div>
+        <div class="microlabel">↓ الرد</div>
+        <div class="card-ar">${esc(w.resp)}</div>
+        ${w.respTr ? `<div class="card-tr">${esc(w.respTr)}</div>` : ""}
+        <div class="card-en" style="font-size:0.95rem">${esc(w.en)}</div>
+        ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}`;
+    } else if (mode === "respond") {
+      front = `<div class="card-ar">${esc(w.ar)}</div><div class="microlabel" style="margin-top:0.4rem">قالوها لك — رد عليهم بصوتك قبل لا تقلب</div>`;
+    } else if (mode === "learn" || session.flipped) {
       front = `
         <div class="card-ar">${esc(w.ar)}</div>
         ${w.tr ? `<div class="card-tr">${esc(w.tr)}</div>` : ""}
@@ -555,7 +581,7 @@
       <div class="panel">
         <div class="microlabel">التوزيع</div>
         <div class="note-info" style="margin-top:0.4rem">
-          ${kw} كويتي صرف · ${words.filter((w) => w.reg === "msa").length} فصحى بالحچي · ${words.filter((w) => w.reg === "phrase").length} عبارات
+          ${kw} كويتي صرف · ${words.filter((w) => w.reg === "msa").length} فصحى بالحچي · ${words.filter((w) => w.reg === "phrase").length} عبارات · ${words.filter((w) => w.reg === "pair").length} نداء ورد
           ${retention !== null && retention < 80 ? "<br>💡 نسبة التذكر تحت ٨٠٪ — قلل الكلمات اليديدة باليوم شوي، والجودة قبل الكمية." : ""}
           ${retention !== null && retention > 95 && active.length > 30 ? "<br>💡 نسبة تذكرك عالية وايد — تقدر تزيد الكلمات اليديدة باليوم." : ""}
         </div>

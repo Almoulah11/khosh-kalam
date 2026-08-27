@@ -95,6 +95,7 @@ h2 { font-size: 1.05rem; font-weight: 700; }
 .tag-kw { color: var(--green); border-color: rgb(47 191 113 / 0.45); }
 .tag-msa { color: var(--blue); border-color: rgb(92 168 232 / 0.45); }
 .tag-phrase { color: var(--gold); border-color: rgb(227 180 92 / 0.45); }
+.tag-pair { color: #b598e8; border-color: rgb(181 152 232 / 0.45); }
 .tag-tip { color: var(--ink-dim); }
 .tag-bad { color: var(--red); border-color: rgb(229 84 94 / 0.45); }
 

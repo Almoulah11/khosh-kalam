@@ -1,8 +1,8 @@
 /* Cache-first service worker so خوش كلام opens instantly and works offline. */
-const CACHE = "khosh-kalam-v1";
+const CACHE = "khosh-kalam-v2";
 const ASSETS = [
   ".", "index.html", "css/styles.css",
-  "js/fsrs.js", "js/seed-manual.js", "js/seed-packs.js", "js/seed-verify.js", "js/app.js",
+  "js/fsrs.js", "js/seed-manual.js", "js/seed-packs.js", "js/seed-verify.js", "js/seed-responses.js", "js/app.js",
   "manifest.webmanifest", "icon.svg",
 ];
 

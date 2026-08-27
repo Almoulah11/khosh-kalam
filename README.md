@@ -54,6 +54,11 @@ Cards are tagged so the Kuwaiti emphasis never blurs:
   (most of the discussion/economy vocabulary — that mixed register *is* how
   serious talk sounds in Kuwait)
 - **عبارة** — ready-made phrases and their replies
+- **نداء ورد** — fixed call-and-response exchanges (السلام عليكم → وعليكم
+  السلام, عساك على القوة → الله يقويك, عظم الله أجركم → أجرنا وأجركم).
+  These drill one-directionally: the app gives the call, you produce the
+  response until it's automatic. New pairs are threaded in as every 4th
+  new card so they interleave with vocabulary
 
 A few of your originally captured items were ambiguous (اسواف، مناج،
 طب طبة، لعوزكم) — they're kept with a ⚠ note stating the best reading and
@@ -68,6 +73,7 @@ js/fsrs.js            FSRS-4.5 scheduler (self-contained)
 js/seed-manual.js     your captured list, curated (196 cards)
 js/seed-packs.js      expansion packs (60 cards)
 js/seed-verify.js     audited AI lists with verdicts (103 items)
+js/seed-responses.js  call-and-response pairs (32 exchanges)
 js/app.js             session engine, cloze builder, stats, storage
 sw.js                 offline cache
 ```
