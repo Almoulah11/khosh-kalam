@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>خوش كلام — تدريب اللهجة الكويتية</title>
+  <meta name="description" content="مدرّب مفردات اللهجة الكويتية — تكرار متباعد واسترجاع نشط" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">خوش كلام</span>
+      <span class="brand-sub">تدريب اللهجة الكويتية</span>
+    </div>
+    <div class="streak" id="streakBadge" title="أيام متتالية">🔥 <span id="streakCount">0</span></div>
+  </header>
+
+  <main id="stage"><!-- rendered by app.js --></main>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="today" class="tab active"><span class="tab-ico">◉</span>اليوم</button>
+    <button data-view="words" class="tab"><span class="tab-ico">☰</span>الكلمات</button>
+    <button data-view="verify" class="tab"><span class="tab-ico">؟</span>التحقق<span class="pill" id="verifyPill"></span></button>
+    <button data-view="packs" class="tab"><span class="tab-ico">◫</span>الحزم</button>
+    <button data-view="stats" class="tab"><span class="tab-ico">↗</span>إحصائيات</button>
+  </nav>
+
+  <script src="js/fsrs.js"></script>
+  <script src="js/seed-manual.js"></script>
+  <script src="js/seed-packs.js"></script>
+  <script src="js/seed-verify.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
