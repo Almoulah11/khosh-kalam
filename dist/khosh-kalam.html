@@ -1,0 +1,1436 @@
+<title>خوش كلام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* خوش كلام — dark, calm, Arabic-first. */
+:root {
+  --bg: #0d1117;
+  --bg-raised: #161c26;
+  --bg-card: #1a2230;
+  --hairline: rgb(231 236 242 / 0.09);
+  --hairline-strong: rgb(231 236 242 / 0.2);
+  --ink: #e9edf3;
+  --ink-dim: rgb(233 237 243 / 0.64);
+  --ink-faint: rgb(233 237 243 / 0.4);
+  --green: #2fbf71;   /* Kuwait green, brightened for dark bg */
+  --red: #e5545e;
+  --gold: #e3b45c;
+  --blue: #5ca8e8;
+  --radius: 16px;
+  --radius-chip: 10px;
+  --font-ui: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --font-ar: "Amiri", "Traditional Arabic", "Times New Roman", serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  min-height: 100dvh;
+  padding-bottom: calc(4.6rem + env(safe-area-inset-bottom));
+  background-image: radial-gradient(1200px 500px at 50% -10%, rgb(47 191 113 / 0.07), transparent 60%);
+}
+button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+input, select, textarea {
+  font-family: inherit; color: var(--ink);
+  background: var(--bg-raised);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-chip);
+  padding: 0.55rem 0.7rem; font-size: 1rem; width: 100%;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid rgb(47 191 113 / 0.5); }
+
+/* ── chrome ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(0.8rem + env(safe-area-inset-top)) 1.1rem 0.8rem;
+  max-width: 640px; margin: 0 auto;
+}
+.brand-mark { font-family: var(--font-ar); font-size: 1.5rem; font-weight: 700; color: var(--green); }
+.brand-sub { display: block; font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.02em; }
+.streak { font-size: 0.95rem; color: var(--gold); font-weight: 500; }
+
+main { max-width: 640px; margin: 0 auto; padding: 0.3rem 1.1rem 2rem; }
+
+.tabs {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 10;
+  display: flex; justify-content: space-around;
+  background: rgb(13 17 23 / 0.92); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--hairline);
+  padding: 0.4rem 0.3rem calc(0.4rem + env(safe-area-inset-bottom));
+}
+.tab {
+  flex: 1; text-align: center; font-size: 0.78rem; color: var(--ink-faint);
+  padding: 0.25rem 0; border-radius: var(--radius-chip); position: relative;
+}
+.tab .tab-ico { display: block; font-size: 1.05rem; margin-bottom: 0.1rem; }
+.tab.active { color: var(--green); }
+.pill {
+  position: absolute; top: -2px; inset-inline-start: 50%; margin-inline-start: 0.9rem;
+  background: var(--red); color: #fff; font-size: 0.62rem; font-weight: 700;
+  border-radius: 99px; padding: 0.05rem 0.35rem; min-width: 1.1rem;
+}
+.pill:empty { display: none; }
+
+/* ── shared ── */
+.panel {
+  background: var(--bg-card); border: 1px solid var(--hairline);
+  border-radius: var(--radius); padding: 1.1rem; margin-bottom: 0.9rem;
+}
+.microlabel { font-size: 0.68rem; letter-spacing: 0.06em; color: var(--ink-faint); }
+.h-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin: 1rem 0 0.6rem; }
+h2 { font-size: 1.05rem; font-weight: 700; }
+.btn {
+  display: inline-block; border-radius: var(--radius-chip);
+  padding: 0.6rem 1.1rem; font-size: 0.95rem; font-weight: 500;
+  border: 1px solid var(--hairline-strong); background: var(--bg-raised);
+  transition: transform 0.06s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--green); border-color: var(--green); color: #06130c; font-weight: 700; }
+.btn-ghost { border-color: transparent; color: var(--ink-dim); }
+.btn-danger { color: var(--red); border-color: rgb(229 84 94 / 0.4); }
+.btn-sm { padding: 0.35rem 0.7rem; font-size: 0.82rem; }
+.tag {
+  display: inline-block; font-size: 0.68rem; border-radius: 99px;
+  padding: 0.12rem 0.55rem; border: 1px solid var(--hairline-strong); color: var(--ink-dim);
+}
+.tag-kw { color: var(--green); border-color: rgb(47 191 113 / 0.45); }
+.tag-msa { color: var(--blue); border-color: rgb(92 168 232 / 0.45); }
+.tag-phrase { color: var(--gold); border-color: rgb(227 180 92 / 0.45); }
+.tag-pair { color: #b598e8; border-color: rgb(181 152 232 / 0.45); }
+.tag-tip { color: var(--ink-dim); }
+.tag-bad { color: var(--red); border-color: rgb(229 84 94 / 0.45); }
+
+/* ── today / session ── */
+.day-summary { display: flex; gap: 0.9rem; }
+.day-summary .cell { flex: 1; text-align: center; padding: 0.7rem 0.2rem; background: var(--bg-raised); border-radius: var(--radius-chip); }
+.cell b { display: block; font-size: 1.4rem; }
+.cell span { font-size: 0.72rem; color: var(--ink-faint); }
+.progressbar { height: 6px; background: var(--bg-raised); border-radius: 99px; overflow: hidden; margin: 0.9rem 0; }
+.progressbar > div { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.25s ease; }
+
+.card-face { text-align: center; padding: 1.6rem 0.6rem 1.2rem; min-height: 15rem; display: flex; flex-direction: column; justify-content: center; gap: 0.7rem; }
+.card-mode { font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.05em; }
+.card-ar { font-family: var(--font-ar); font-size: 2.3rem; line-height: 1.5; }
+.card-ar.cloze { font-size: 1.55rem; color: var(--ink); }
+.card-ar .blank { color: var(--gold); letter-spacing: 0.05em; }
+.card-en { font-size: 1.15rem; color: var(--ink-dim); direction: ltr; }
+.card-tr { font-size: 0.95rem; color: var(--ink-faint); direction: ltr; font-style: italic; }
+.card-ex { font-family: var(--font-ar); font-size: 1.2rem; color: var(--ink-dim); line-height: 1.9; border-top: 1px dashed var(--hairline-strong); padding-top: 0.8rem; margin-top: 0.4rem; }
+.card-note { font-size: 0.82rem; color: var(--gold); line-height: 1.7; }
+.grade-row { display: flex; gap: 0.5rem; margin-top: 0.9rem; }
+.grade-row .btn { flex: 1; text-align: center; padding: 0.8rem 0.2rem; }
+.g1 { color: var(--red); border-color: rgb(229 84 94 / 0.5); }
+.g2 { color: var(--gold); border-color: rgb(227 180 92 / 0.5); }
+.g3 { color: var(--green); border-color: rgb(47 191 113 / 0.5); }
+.g4 { color: var(--blue); border-color: rgb(92 168 232 / 0.5); }
+.grade-sub { display: block; font-size: 0.62rem; color: var(--ink-faint); margin-top: 0.15rem; }
+.flip-hint { text-align: center; color: var(--ink-faint); font-size: 0.75rem; margin-top: 0.5rem; }
+
+.challenge li { list-style: none; display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px dashed var(--hairline); }
+.challenge li:last-child { border-bottom: none; }
+.challenge input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--green); flex: none; }
+.challenge .w-ar { font-family: var(--font-ar); font-size: 1.15rem; }
+.challenge .done .w-ar { color: var(--green); }
+
+/* ── words list ── */
+.toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+.toolbar input[type="search"] { flex: 1; min-width: 10rem; }
+.toolbar select { width: auto; }
+.word-row { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.75rem 0.2rem; border-bottom: 1px solid var(--hairline); }
+.word-row .w-main { flex: 1; min-width: 0; }
+.word-row .w-ar { font-family: var(--font-ar); font-size: 1.3rem; }
+.word-row .w-en { font-size: 0.85rem; color: var(--ink-dim); direction: ltr; text-align: end; }
+.word-row .w-meta { font-size: 0.7rem; color: var(--ink-faint); margin-top: 0.15rem; }
+.word-detail { background: var(--bg-raised); border-radius: var(--radius-chip); padding: 0.8rem; margin: 0.4rem 0 0.6rem; font-size: 0.9rem; line-height: 1.9; }
+.word-detail .card-ex { font-size: 1.05rem; border: none; padding: 0.3rem 0 0; margin: 0; }
+.form-grid { display: grid; gap: 0.6rem; }
+label.f { font-size: 0.75rem; color: var(--ink-faint); display: block; }
+label.f > * { margin-top: 0.25rem; }
+
+/* ── verify ── */
+.verdict { font-size: 0.85rem; line-height: 1.8; color: var(--ink-dim); margin: 0.5rem 0; }
+.v-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+
+/* ── stats ── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.forecast { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-top: 0.8rem; }
+.forecast .bar { flex: 1; background: rgb(47 191 113 / 0.55); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
+.forecast .bar span { position: absolute; top: -1.2rem; right: 0; left: 0; text-align: center; font-size: 0.62rem; color: var(--ink-faint); }
+.forecast .bar em { position: absolute; bottom: -1.3rem; right: 0; left: 0; text-align: center; font-size: 0.6rem; color: var(--ink-faint); font-style: normal; }
+
+.empty { text-align: center; color: var(--ink-faint); padding: 2.5rem 1rem; line-height: 2; }
+.empty .big { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
+a { color: var(--blue); }
+.note-info { font-size: 0.8rem; color: var(--ink-faint); line-height: 1.9; }
+</style>
+<script>
+  document.documentElement.setAttribute("dir", "rtl");
+  document.documentElement.setAttribute("lang", "ar");
+</script>
+<header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">خوش كلام</span>
+      <span class="brand-sub">تدريب اللهجة الكويتية</span>
+    </div>
+    <div class="streak" id="streakBadge" title="أيام متتالية">🔥 <span id="streakCount">0</span></div>
+  </header>
+
+  <main id="stage"><!-- rendered by app.js --></main>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="today" class="tab active"><span class="tab-ico">◉</span>اليوم</button>
+    <button data-view="words" class="tab"><span class="tab-ico">☰</span>الكلمات</button>
+    <button data-view="verify" class="tab"><span class="tab-ico">؟</span>التحقق<span class="pill" id="verifyPill"></span></button>
+    <button data-view="packs" class="tab"><span class="tab-ico">◫</span>الحزم</button>
+    <button data-view="stats" class="tab"><span class="tab-ico">↗</span>إحصائيات</button>
+  </nav>
+<script>
+/*
+ * FSRS (Free Spaced Repetition Scheduler), v4.5 default parameters.
+ * The best openly published scheduling algorithm (Ye et al.), successor to
+ * SM-2. Each card carries {difficulty, stability, due, last, reps, lapses,
+ * state}. Grades: 1 = نسيت (Again), 2 = صعبة (Hard), 3 = زين (Good),
+ * 4 = سهلة (Easy).
+ */
+const FSRS = (() => {
+  const W = [
+    0.4872, 1.4003, 3.7145, 13.8206, 5.1618, 1.2298, 0.8975, 0.031, 1.6474,
+    0.1367, 1.0461, 2.1072, 0.0793, 0.3246, 1.587, 0.2272, 2.8755,
+  ];
+  const DECAY = -0.5;
+  const FACTOR = 19 / 81; // so R(t=S) = 0.9
+  const REQUEST_RETENTION = 0.9;
+  const MAX_INTERVAL = 365;
+  const DAY = 24 * 60 * 60 * 1000;
+
+  const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+
+  function retrievability(elapsedDays, stability) {
+    if (stability <= 0) return 0;
+    return Math.pow(1 + (FACTOR * elapsedDays) / stability, DECAY);
+  }
+
+  function initDifficulty(grade) {
+    return clamp(W[4] - (grade - 3) * W[5], 1, 10);
+  }
+
+  function initStability(grade) {
+    return Math.max(W[grade - 1], 0.1);
+  }
+
+  function nextDifficulty(d, grade) {
+    const next = d - W[6] * (grade - 3);
+    // mean-revert toward the "Easy" starting difficulty
+    return clamp(W[7] * initDifficulty(4) + (1 - W[7]) * next, 1, 10);
+  }
+
+  function stabilityAfterRecall(d, s, r, grade) {
+    const hardPenalty = grade === 2 ? W[15] : 1;
+    const easyBonus = grade === 4 ? W[16] : 1;
+    return (
+      s *
+      (1 +
+        Math.exp(W[8]) *
+          (11 - d) *
+          Math.pow(s, -W[9]) *
+          (Math.exp(W[10] * (1 - r)) - 1) *
+          hardPenalty *
+          easyBonus)
+    );
+  }
+
+  function stabilityAfterForget(d, s, r) {
+    const sf =
+      W[11] *
+      Math.pow(d, -W[12]) *
+      (Math.pow(s + 1, W[13]) - 1) *
+      Math.exp(W[14] * (1 - r));
+    return Math.min(sf, s);
+  }
+
+  function intervalDays(stability) {
+    const days =
+      (stability / FACTOR) * (Math.pow(REQUEST_RETENTION, 1 / DECAY) - 1);
+    return clamp(Math.round(days), 1, MAX_INTERVAL);
+  }
+
+  function emptyCard() {
+    return {
+      difficulty: 0,
+      stability: 0,
+      due: 0, // 0 = new, never studied
+      last: 0,
+      reps: 0,
+      lapses: 0,
+      state: "new", // new | learning | review
+    };
+  }
+
+  /** Apply a grade to a card. Returns a NEW card object. */
+  function grade(card, g, now = Date.now()) {
+    const c = { ...card };
+    if (c.state === "new" || c.reps === 0) {
+      c.difficulty = initDifficulty(g);
+      c.stability = initStability(g);
+      c.state = g === 1 ? "learning" : "review";
+    } else {
+      const elapsed = Math.max(0, (now - c.last) / DAY);
+      const r = retrievability(elapsed, c.stability);
+      if (g === 1) {
+        c.lapses += 1;
+        c.stability = stabilityAfterForget(c.difficulty, c.stability, r);
+        c.state = "learning";
+      } else {
+        c.stability = stabilityAfterRecall(c.difficulty, c.stability, r, g);
+        c.state = "review";
+      }
+      c.difficulty = nextDifficulty(c.difficulty, g);
+    }
+    c.reps += 1;
+    c.last = now;
+    // Again re-queues within the session (handled by the app); its persisted
+    // due date is tomorrow so a missed session still resurfaces it first.
+    const days = g === 1 ? 1 : intervalDays(c.stability);
+    c.due = now + days * DAY;
+    return c;
+  }
+
+  return { emptyCard, grade, retrievability, intervalDays, DAY };
+})();
+</script>
+<script>
+/*
+ * SEED_MANUAL — Bader's own captured vocabulary, curated.
+ *
+ * reg:  "kw"     = كويتي صرف (pure dialect)
+ *       "msa"    = فصحى مستخدمة بالحچي الراقي (MSA used in elevated Kuwaiti speech)
+ *       "phrase" = عبارة / تعبير جاهز
+ *       "tip"    = ملاحظة استخدام (register upgrade)
+ * Items flagged with a note beginning ⚠ were captured ambiguously in the
+ * original list and carry the best reading plus what to confirm.
+ */
+const SEED_MANUAL = [
+  { id: "m001", ar: "يتجاوز", tr: "yitjāwaz", en: "to exceed, go beyond", reg: "msa", topic: "نقاش", ex: "المصروف هالشهر تجاوز الميزانية اللي حاطينها." },
+  { id: "m002", ar: "جودة", tr: "jōda", en: "quality", reg: "msa", topic: "شغل", ex: "الفرق واضح بين المطعمين — الجودة عندهم أهم من الكمية." },
+  { id: "m003", ar: "ينطبق على", tr: "yinṭabiq ʿala", en: "applies to", reg: "msa", topic: "نقاش", ex: "القانون اليديد ما ينطبق على اللي سجلوا قبل ٢٠٢٠." },
+  { id: "m004", ar: "على سبيل المثال", tr: "ʿala sabīl il-mithāl", en: "for example", reg: "phrase", topic: "نقاش", ex: "أكو حلول وايد — على سبيل المثال، نقدر نبدأ بالتدريب قبل التوظيف." },
+  { id: "m005", ar: "شريحة من الناس", tr: "sharīḥa min in-nās", en: "a segment of people", reg: "phrase", topic: "مجتمع", ex: "هالقرار بيأثر على شريحة كبيرة من الناس، مو بس فئة وحدة." },
+  { id: "m006", ar: "منتج / منتجة", tr: "muntij / muntija", en: "productive", reg: "msa", topic: "شغل", ex: "أبي أكون منتج أكثر بدوامي، مو بس مشغول." },
+  { id: "m007", ar: "إصلاح", tr: "iṣlāḥ", en: "reform; repair", reg: "msa", topic: "سياسة", ex: "الإصلاح الاقتصادي يحتاج قرارات صعبة، مو بس تصريحات." },
+  { id: "m008", ar: "إشكالية", tr: "ishkāliyya", en: "problematic issue", reg: "msa", topic: "نقاش", ex: "الإشكالية مو بالفكرة نفسها — الإشكالية بالتطبيق." },
+  { id: "m009", ar: "افترض", tr: "iftaraḍ", en: "to assume, suppose", reg: "msa", topic: "نقاش", ex: "لا نفترض إن كل شي بيمشي زين، خلنا نحط خطة بديلة." },
+  { id: "m010", ar: "قطاع خاص", tr: "qiṭāʿ khāṣ", en: "private sector", reg: "msa", topic: "اقتصاد", ex: "وايد شباب الحين يفضلون القطاع الخاص عقب التخرج." },
+  { id: "m011", ar: "قطاع حكومي", tr: "qiṭāʿ ḥukūmi", en: "public / government sector", reg: "msa", topic: "اقتصاد", ex: "الرواتب بالقطاع الحكومي ثابتة، بس التطور فيه أبطأ." },
+  { id: "m012", ar: "مجتمع", tr: "mujtamaʿ", en: "society, community", reg: "msa", topic: "مجتمع", ex: "التغيير الحقيقي يبدأ من المجتمع نفسه، مو من فوق." },
+  { id: "m013", ar: "وافد", tr: "wāfid", en: "expatriate resident", reg: "msa", topic: "مجتمع", ex: "نسبة الوافدين بالكويت أعلى بوايد من نسبة المواطنين." },
+  { id: "m014", ar: "مواطن", tr: "muwāṭin", en: "citizen", reg: "msa", topic: "مجتمع", ex: "المواطن والوافد، كلهم يستفيدون إذا تحسنت الخدمات." },
+  { id: "m015", ar: "المخرجات التعليمية", tr: "il-mukhrajāt it-taʿlīmiyya", en: "educational outcomes", reg: "msa", topic: "تعليم", ex: "المخرجات التعليمية عندنا ما تواكب متطلبات سوق العمل." },
+  { id: "m016", ar: "يستخدم", tr: "yistakhdim", en: "to use, utilize", reg: "msa", topic: "يومي", ex: "أغلب الناس يستخدمون التطبيق يوميًا بس ما يعرفون نص مزاياه." },
+  { id: "m017", ar: "كفاءة", tr: "kafāʾa", en: "efficiency, competence", reg: "msa", topic: "شغل", ex: "المشكلة مو بعدد الموظفين — المشكلة بالكفاءة.", note: "الإملاء الصحيح: كفاءة (مو كفائة)" },
+  { id: "m018", ar: "شخّص", tr: "shakhkhaṣ", en: "to diagnose (a problem)", reg: "msa", topic: "نقاش", ex: "قبل لا نحكم على الحل، لازم نشخّص المشكلة صح." },
+  { id: "m019", ar: "مجازي", tr: "majāzi", en: "figurative, metaphorical", reg: "msa", topic: "ثقافة", ex: "لا تاخذ كلامي حرفي — قصدي مجازي." },
+  { id: "m020", ar: "واضح", tr: "wāḍiḥ", en: "clear, evident", reg: "msa", topic: "نقاش", ex: "خل نكون واضحين من البداية عشان ماكو سوء فهم عقب." },
+  { id: "m021", ar: "محاورة", tr: "muḥāwara", en: "dialogue, structured debate", reg: "msa", topic: "نقاش", ex: "الفرق بين الجدال والمحاورة إنك تسمع قبل لا ترد." },
+  { id: "m022", ar: "معيار", tr: "miʿyār", en: "standard, criterion", reg: "msa", topic: "نقاش", ex: "شنو المعيار اللي نقيس فيه النجاح؟ الفلوس بروحها مو كافية.", note: "⚠ مسجلة عندك «معيارz see» — الأغلب قصدك معيار/معايير" },
+  { id: "m023", ar: "فنّش", tr: "fannash", en: "to lay off, fire (from work)", reg: "kw", topic: "شغل", ex: "الشركة فنّشت نص الموظفين بسبة الأزمة.", note: "كويتية أصيلة من الإنجليزية finish — «فنشوه» يعني أنهوا خدماته" },
+  { id: "m024", ar: "استقلالية", tr: "istiqlāliyya", en: "independence, autonomy", reg: "msa", topic: "مجتمع", ex: "أهم شي بالتربية إنك تعطي اليهال شوية استقلالية." },
+  { id: "m025", ar: "طموح", tr: "ṭumūḥ", en: "ambition", reg: "msa", topic: "شغل", ex: "الطموح زين، بس بدون خطة يظل حلم." },
+  { id: "m026", ar: "اقتصاد", tr: "iqtiṣād", en: "economy", reg: "msa", topic: "اقتصاد", ex: "اقتصادنا كله مربوط بالنفط، وهني بالضبط المشكلة." },
+  { id: "m027", ar: "مهارات", tr: "mahārāt", en: "skills", reg: "msa", topic: "تعليم", ex: "الشهادة تفتح لك الباب، بس المهارات هي اللي تخليك داخل." },
+  { id: "m028", ar: "عشوائي", tr: "ʿashwāʾi", en: "random, haphazard", reg: "msa", topic: "نقاش", ex: "القرارات عندهم عشوائية — ماكو تخطيط واضح." },
+  { id: "m029", ar: "نسبة", tr: "nisba", en: "percentage, ratio", reg: "msa", topic: "اقتصاد", ex: "نسبة النجاح ارتفعت، بس الأرقام ما تقول كل شي." },
+  { id: "m030", ar: "تصوّر", tr: "taṣawwur", en: "conception, mental picture", reg: "msa", topic: "نقاش", ex: "عطني تصوّر عام عن المشروع قبل لا ندش بالتفاصيل." },
+  { id: "m031", ar: "استمر / استمرينا", tr: "istamarr / istamarrēna", en: "to continue / we kept going", reg: "msa", topic: "شغل", ex: "تعبنا أول سنة بس استمرينا، والحين قاعدين نشوف النتيجة." },
+  { id: "m032", ar: "ما زلنا", tr: "mā zilnā", en: "we still, we remain", reg: "msa", topic: "نقاش", ex: "ما زلنا في بداية الطريق — الشغل الصعب بعده ياي." },
+  { id: "m033", ar: "عساك على القوة", tr: "ʿasāk ʿa l-guwwa", en: "may you stay strong (greeting to someone at work)", reg: "kw", topic: "مجاملات", ex: "تدخل على أحد قاعد يشتغل: «عساك على القوة!» — والرد: «الله يقويك».", note: "من أجمل التحايا الكويتية لأهل الشغل" },
+  { id: "m034", ar: "سوّف / تسويف", tr: "sawwaf / taswīf", en: "to procrastinate / procrastination", reg: "msa", topic: "يومي", ex: "لا تسوّف — اللي تقدر تخلصه اليوم لا تأجله لباچر.", note: "⚠ مسجلة عندك «اسواف حق ___» — أقرب قراءة: أسوّف. أكّدها من السياق اللي سمعتها فيه" },
+  { id: "m035", ar: "مكونات ثقافية", tr: "mukawwināt thaqāfiyya", en: "cultural components", reg: "msa", topic: "ثقافة", ex: "هويتنا الكويتية فيها مكونات ثقافية بحرية وبدوية وحضرية." },
+  { id: "m036", ar: "يتضمن", tr: "yataḍamman", en: "to include, entail", reg: "msa", topic: "شغل", ex: "العرض يتضمن التدريب والدعم الفني، كله بسعر واحد." },
+  { id: "m037", ar: "رداءة", tr: "radāʾa", en: "poor quality, shoddiness", reg: "msa", topic: "نقاش", ex: "رداءة التنفيذ خربت فكرة كانت ممتازة على الورق." },
+  { id: "m038", ar: "سلوكيات", tr: "sulūkiyyāt", en: "behaviors", reg: "msa", topic: "مجتمع", ex: "التغيير الحقيقي يبدأ من سلوكيات صغيرة تتكرر كل يوم." },
+  { id: "m039", ar: "منهج", tr: "manhaj", en: "curriculum; method", reg: "msa", topic: "تعليم", ex: "المنهج الدراسي محتاج تحديث يواكب العصر.", note: "⚠ مسجلة عندك «مناج» — الأغلب منهج (ومناخ موجودة ببطاقة ثانية)" },
+  { id: "m040", ar: "أعتقد / نعتقد", tr: "aʿtaqid / naʿtaqid", en: "I believe / we believe", reg: "msa", topic: "نقاش", ex: "أعتقد الموضوع يحتاج وقت أكثر من اللي نتوقعه — وهذا طبيعي." },
+  { id: "m041", ar: "أفقي", tr: "ufuqi", en: "horizontal; big-picture (talk)", reg: "msa", topic: "نقاش", ex: "قاعد أتكلم بشكل أفقي — يعني عن الصورة العامة، مو التفاصيل." },
+  { id: "m042", ar: "ينظّم", tr: "yunaẓẓim", en: "to organize, regulate", reg: "msa", topic: "سياسة", ex: "القانون اليديد ينظّم العلاقة بين المؤجر والمستأجر." },
+  { id: "m043", ar: "يتفوق", tr: "yitfawwaq", en: "to excel, outperform", reg: "msa", topic: "تعليم", ex: "ولدهم يتفوق على ربعه بكل شي، ما شاء الله عليه." },
+  { id: "m044", ar: "استثنائي", tr: "istithnāʾi", en: "exceptional", reg: "msa", topic: "نقاش", ex: "الظروف استثنائية، فالقرارات بعد لازم تكون استثنائية." },
+  { id: "m045", ar: "متحضر", tr: "mitḥaḍḍir", en: "civilized", reg: "msa", topic: "مجتمع", ex: "النقاش المتحضر ما يحتاج صوت عالي." },
+  { id: "m046", ar: "قرارات", tr: "qarārāt", en: "decisions", reg: "msa", topic: "شغل", ex: "القرارات الصعبة اليوم أهون من الندم باچر." },
+  { id: "m047", ar: "الواعي", tr: "il-wāʿi", en: "the aware, conscious (one)", reg: "msa", topic: "مجتمع", ex: "المستهلك الواعي يقارن ويسأل قبل لا يشتري." },
+  { id: "m048", ar: "أعبّر", tr: "aʿabbir", en: "I express", reg: "msa", topic: "نقاش", ex: "أحيان أعرف شنو أحس، بس ما أعرف أعبّر عنه بكلمات." },
+  { id: "m049", ar: "فجوة", tr: "fajwa", en: "gap", reg: "msa", topic: "تعليم", ex: "أكو فجوة كبيرة بين مخرجات التعليم ومتطلبات السوق." },
+  { id: "m050", ar: "أوصف", tr: "awṣif", en: "I describe", reg: "msa", topic: "نقاش", ex: "خلني أوصف لك الوضع بمثال بسيط." },
+  { id: "m051", ar: "ملمّ بـ", tr: "mulimm bi", en: "well-versed in", reg: "msa", topic: "شغل", ex: "نحتاج ناس ملمّين بالتقنية وبالسوق المحلي بنفس الوقت." },
+  { id: "m052", ar: "ممتلئ", tr: "mumtaliʾ", en: "full, filled up", reg: "msa", topic: "يومي", ex: "جدولي ممتلئ هالأسبوع — خل نأجلها للأسبوع الياي." },
+  { id: "m053", ar: "تعاطي", tr: "taʿāṭi", en: "handling / dealing with; (drug) use", reg: "msa", topic: "مجتمع", ex: "طريقة تعاطي الإعلام مع الموضوع زادت الطين بلة." },
+  { id: "m054", ar: "مستقر", tr: "mustaqirr", en: "stable, settled", reg: "msa", topic: "اقتصاد", ex: "أبي وضع مالي مستقر قبل لا أفكر بمشروع يديد." },
+  { id: "m055", ar: "تجسير", tr: "tajsīr", en: "bridging (a gap)", reg: "msa", topic: "تعليم", ex: "دورات التجسير تساعد على سد الفجوة بين التخصصات." },
+  { id: "m056", ar: "تسيّب", tr: "tasayyub", en: "laxity, negligence", reg: "msa", topic: "شغل", ex: "التسيّب الإداري هو اللي موصّلنا لهالمرحلة." },
+  { id: "m057", ar: "ممارسات", tr: "mumārasāt", en: "practices", reg: "msa", topic: "شغل", ex: "ناخذ أفضل الممارسات العالمية ونكيّفها على سوقنا.", note: "الإملاء: ممارسات (مسجلة عندك «ممارسلت»)" },
+  { id: "m058", ar: "ممتاز", tr: "mumtāz", en: "excellent", reg: "msa", topic: "يومي", ex: "شغلك ممتاز — بس عندي ملاحظتين بسيطات." },
+  { id: "m059", ar: "أنكر", tr: "ankar", en: "to deny", reg: "msa", topic: "نقاش", ex: "ما أقدر أنكر إن الفكرة نجحت أكثر من توقعي." },
+  { id: "m060", ar: "أبذل مجهود", tr: "abdhil majhūd", en: "to put in effort", reg: "phrase", topic: "شغل", ex: "إذا ما تبذل مجهود حقيقي، لا تنتظر نتيجة مختلفة." },
+  { id: "m061", ar: "مصطلحات", tr: "muṣṭalaḥāt", en: "terminology", reg: "msa", topic: "تعليم", ex: "كل مجال له مصطلحاته، وأول خطوة للاحتراف إنك تتقنها." },
+  { id: "m062", ar: "قبل فترة", tr: "gabil fatra", en: "a while ago", reg: "phrase", topic: "يومي", ex: "قبل فترة قريت عن نفس الموضوع — خل أدور لك المقال." },
+  { id: "m063", ar: "هامشية", tr: "hāmishiyya", en: "marginal, of little impact", reg: "msa", topic: "نقاش", ex: "هذي نقطة هامشية — لا نضيّع وقت النقاش عليها." },
+  { id: "m064", ar: "نايس", tr: "nāys", en: "nice (casual borrowing)", reg: "kw", topic: "يومي", ex: "المكان نايس بس الأسعار شوي غالية.", note: "دارجة بين الشباب — للجلسات غير الرسمية، مو للنقاش الجاد" },
+  { id: "m065", ar: "هيكل", tr: "haykal", en: "structure (organizational)", reg: "msa", topic: "شغل", ex: "قبل ما نوظف أحد، لازم نرتب الهيكل التنظيمي للشركة." },
+  { id: "m066", ar: "من جد / من صج", tr: "min jidd / min ṣij", en: "seriously, for real", reg: "kw", topic: "يومي", ex: "من صج؟ ما توقعت هالخبر أبد!", note: "⚠ مسجلة عندك «جد جديد» — الأقرب «من جد». والأصيل الكويتي: «صج / من صج»" },
+  { id: "m067", ar: "لبّى / لبّيت", tr: "labba / labbēt", en: "to answer a call or invitation", reg: "msa", topic: "مجاملات", ex: "عزموني على العشاء ولبّيت — ما يصير أردهم." },
+  { id: "m068", ar: "عدة مواد", tr: "ʿiddat mawādd", en: "several subjects / clauses", reg: "msa", topic: "تعليم", ex: "الدورة تغطي عدة مواد، من المالية إلى التسويق." },
+  { id: "m069", ar: "كادر", tr: "kādir", en: "cadre; pay scale for a profession", reg: "msa", topic: "شغل", ex: "أقروا كادر يديد للمهندسين برواتب أحسن." },
+  { id: "m070", ar: "يعزز سلوك معين", tr: "yuʿazziz sulūk muʿayyan", en: "reinforces a certain behavior", reg: "phrase", topic: "تعليم", ex: "المكافأة الفورية تعزز السلوك اللي تبيه يتكرر." },
+  { id: "m071", ar: "ما في إشكال", tr: "mā fī ishkāl", en: "no objection, no problem (formal)", reg: "phrase", topic: "مجاملات", ex: "إذا تبون نأجل الاجتماع، ما في إشكال عندي.", note: "بالكويتي الصرف: «ماكو إشكال»" },
+  { id: "m072", ar: "خصوصية", tr: "khuṣūṣiyya", en: "privacy", reg: "msa", topic: "مجتمع", ex: "احترام الخصوصية أساس، حتى بين أقرب الأهل." },
+  { id: "m073", ar: "إحساس بالملكية", tr: "iḥsās bil-milkiyya", en: "sense of ownership", reg: "phrase", topic: "شغل", ex: "إذا الموظف عنده إحساس بالملكية، يشتغل كأن المشروع ماله." },
+  { id: "m074", ar: "النهضة", tr: "in-nahḍa", en: "renaissance, awakening", reg: "msa", topic: "ثقافة", ex: "نهضة أي دولة تبدأ من التعليم قبل العمران.", note: "معناها الدقيق: نهوض وازدهار (مو uprising بمعنى ثورة — الثورة شي ثاني)" },
+  { id: "m075", ar: "احتكاك", tr: "iḥtikāk", en: "friction; exposure to people", reg: "msa", topic: "مجتمع", ex: "الاحتكاك بناس من خلفيات مختلفة يوسّع أفقك." },
+  { id: "m076", ar: "بالمقابل", tr: "bil-muqābil", en: "in return; on the other hand", reg: "msa", topic: "نقاش", ex: "بالمقابل، لازم نعترف إن للقرار تكاليفه." },
+  { id: "m077", ar: "استغلال", tr: "istighlāl", en: "exploitation; making use of", reg: "msa", topic: "نقاش", ex: "استغلال الوقت مهارة — والفرق بينه وبين الاستغلالية كبير." },
+  { id: "m078", ar: "عقبات", tr: "ʿaqabāt", en: "obstacles", reg: "msa", topic: "شغل", ex: "أي مشروع بتطلع له عقبات — المهم شلون تتعامل وياها." },
+  { id: "m079", ar: "نمط", tr: "namaṭ", en: "pattern, style", reg: "msa", topic: "نقاش", ex: "لاحظت نمط يتكرر عندنا: نتحمس، نبدأ، وما نكمل." },
+  { id: "m080", ar: "أؤيد", tr: "uʾayyid", en: "I support, I second", reg: "msa", topic: "نقاش", ex: "أؤيد الاقتراح، بس بشرط نحدد ميزانية واضحة." },
+  { id: "m081", ar: "العلاقات البيئية", tr: "il-ʿalāqāt il-bīʾiyya", en: "ecological relations", reg: "msa", topic: "عمران", ex: "التخطيط الزين يراعي العلاقات البيئية بالمنطقة قبل البناء." },
+  { id: "m082", ar: "عازل", tr: "ʿāzil", en: "insulator, isolator", reg: "msa", topic: "علوم", ex: "حطوا عازل حراري فوق السطح — فرقت الفاتورة وايد." },
+  { id: "m083", ar: "استوعبت", tr: "istawʿabt", en: "I grasped, absorbed (an idea)", reg: "msa", topic: "تعليم", ex: "أول مرة ما فهمت، بس عقب ما انعاد الشرح استوعبت." },
+  { id: "m084", ar: "مقترحات", tr: "muqtaraḥāt", en: "proposals, suggestions", reg: "msa", topic: "شغل", ex: "حطوا مقترحاتكم بالجدول وبنناقشها وحدة وحدة." },
+  { id: "m085", ar: "نباتات", tr: "nabātāt", en: "plants, vegetation", reg: "msa", topic: "علوم", ex: "زرعنا نباتات محلية تتحمل حرارة صيفنا." },
+  { id: "m086", ar: "نسبيًا", tr: "nisbiyyan", en: "relatively", reg: "msa", topic: "نقاش", ex: "الأسعار نسبيًا معقولة إذا قارناها بالسنة اللي طافت.", note: "نسبيًا = relatively، أما «نسبة» فهي رقم محدد" },
+  { id: "m087", ar: "التخطيط العمراني", tr: "it-takhṭīṭ il-ʿumrāni", en: "urban planning", reg: "msa", topic: "عمران", ex: "التخطيط العمراني عندنا يحتاج نظرة أبعد من عشر سنين." },
+  { id: "m088", ar: "مثل ما تفضلت", tr: "mithil ma tfaḍḍalt", en: "as you kindly said", reg: "phrase", topic: "مجاملات", ex: "مثل ما تفضلت، الموضوع يحتاج دراسة أعمق.", note: "أرقى من «مثل ما قلت» — ترفع مستوى النقاش وتكرم محاورك" },
+  { id: "m089", ar: "جذور", tr: "judhūr", en: "roots (lit. & fig.)", reg: "msa", topic: "ثقافة", ex: "المشكلة جذورها قديمة — ما طلعت فجأة." },
+  { id: "m090", ar: "مسودة", tr: "musawwada", en: "draft", reg: "msa", topic: "شغل", ex: "جهزت مسودة أولية — عطني رأيك قبل لا نرسلها." },
+  { id: "m091", ar: "إطار", tr: "iṭār", en: "frame, framework, lens", reg: "msa", topic: "نقاش", ex: "خل نتفق على إطار عام للنقاش قبل لا ندش بالتفاصيل.", note: "الإملاء: إطار (مو ايطار)" },
+  { id: "m092", ar: "كفاءات", tr: "kafāʾāt", en: "qualified people, competencies", reg: "msa", topic: "شغل", ex: "الكويت فيها كفاءات، بس تحتاج بيئة تحتضنها." },
+  { id: "m093", ar: "حافز", tr: "ḥāfiz", en: "incentive, motive", reg: "msa", topic: "شغل", ex: "بدون حوافز واضحة، لا تتوقع أداء استثنائي." },
+  { id: "m094", ar: "استجواب", tr: "istijwāb", en: "interrogation; parliamentary grilling", reg: "msa", topic: "سياسة", ex: "الاستجواب أداة دستورية بمجلس الأمة، مو وسيلة ضغط شخصية." },
+  { id: "m095", ar: "هدر المال", tr: "hadr il-māl", en: "waste of money", reg: "msa", topic: "اقتصاد", ex: "المشاريع المتعطلة سنين هي عين الهدر للمال العام." },
+  { id: "m096", ar: "تكدس", tr: "takaddus", en: "piling up, overcrowding", reg: "msa", topic: "مجتمع", ex: "التكدس بالمستشفيات دليل خلل بالتوزيع، مو بس نقص أسرّة." },
+  { id: "m097", ar: "علة", tr: "ʿilla", en: "deep flaw, root ailment", reg: "msa", topic: "نقاش", ex: "هذي مو مشكلة سطحية — هذي علة بالنظام نفسه." },
+  { id: "m098", ar: "توزيع الثروة", tr: "tawzīʿ ith-tharwa", en: "wealth distribution", reg: "msa", topic: "اقتصاد", ex: "النقاش الحقيقي عن عدالة توزيع الثروة، مو عن حجمها." },
+  { id: "m099", ar: "مقارنة", tr: "muqārana", en: "comparison", reg: "msa", topic: "نقاش", ex: "المقارنة العادلة تكون بين ظروف متشابهة." },
+  { id: "m100", ar: "ثقافة استهلاكية", tr: "thaqāfa istihlākiyya", en: "consumerist culture", reg: "msa", topic: "مجتمع", ex: "الثقافة الاستهلاكية خلتنا نقيس قيمة الشي بسعره." },
+  { id: "m101", ar: "اختلال", tr: "ikhtilāl", en: "imbalance", reg: "msa", topic: "مجتمع", ex: "اختلال التركيبة السكانية موضوع يتردد بكل ديوانية." },
+  { id: "m102", ar: "التركيبة السكانية", tr: "it-tarkība is-sukkāniyya", en: "demographic makeup", reg: "msa", topic: "مجتمع", ex: "تعديل التركيبة السكانية شعار قديم — بس وين الخطة؟" },
+  { id: "m103", ar: "التركيب الاقتصادي", tr: "it-tarkīb il-iqtiṣādi", en: "economic structure", reg: "msa", topic: "اقتصاد", ex: "التركيب الاقتصادي عندنا ريعي بالدرجة الأولى." },
+  { id: "m104", ar: "يتلاشى", tr: "yatalāsha", en: "to fade away, dissolve", reg: "msa", topic: "نقاش", ex: "الحماس يتلاشى بسرعة إذا ماكو نظام يثبته." },
+  { id: "m105", ar: "صراعات", tr: "ṣirāʿāt", en: "conflicts, struggles", reg: "msa", topic: "سياسة", ex: "الصراعات الداخلية تستهلك الفريق أكثر من المنافسين." },
+  { id: "m106", ar: "بشاعة", tr: "bashāʿa", en: "ugliness, atrocity", reg: "msa", topic: "نقاش", ex: "ما نقدر نتجاهل بشاعة اللي صار، مهما كانت المبررات." },
+  { id: "m107", ar: "جدوى", tr: "jadwa", en: "feasibility, worth", reg: "msa", topic: "اقتصاد", ex: "سوّوا دراسة جدوى قبل لا تحطون فلوسكم بالمشروع.", note: "الإملاء: جدوى (مسجلة عندك «جدوة»)" },
+  { id: "m108", ar: "بعين الاعتبار", tr: "b-ʿēn il-iʿtibār", en: "into consideration", reg: "phrase", topic: "نقاش", ex: "خذ بعين الاعتبار إن الصيف عندنا يبطّئ المبيعات." },
+  { id: "m109", ar: "بصفة عامة", tr: "bi-ṣifa ʿāmma", en: "generally speaking", reg: "phrase", topic: "نقاش", ex: "بصفة عامة، التجربة نجحت رغم الملاحظات." },
+  { id: "m110", ar: "طماشة", tr: "ṭamāsha", en: "a spectacle, something fun to watch", reg: "kw", topic: "يومي", ex: "الجلسة أمس كانت طماشة — ضحك من البداية للنهاية.", note: "كويتية أصيلة — الشي المسلي اللي يتفرج عليه الناس" },
+  { id: "m111", ar: "ينفرز", tr: "yinfiriz", en: "gets sorted out, separates", reg: "msa", topic: "نقاش", ex: "وقت الأزمات ينفرز الناس — تعرف منو الصديق الصج." },
+  { id: "m112", ar: "شرس", tr: "sharis", en: "fierce, aggressive", reg: "msa", topic: "اقتصاد", ex: "المنافسة بالسوق شرسة — الدخول بدون تميز انتحار." },
+  { id: "m113", ar: "الغيرة والحسد", tr: "il-ghīra wil-ḥasad", en: "jealousy and envy", reg: "msa", topic: "مجتمع", ex: "الغيرة ممكن تدفعك تتطور، أما الحسد فياكل صاحبه." },
+  { id: "m114", ar: "إدمان", tr: "idmān", en: "addiction", reg: "msa", topic: "مجتمع", ex: "إدمان الأجهزة صار مشكلة حقيقية عند اليهال." },
+  { id: "m115", ar: "لعوزكم", tr: "—", en: "(captured — meaning to confirm)", reg: "kw", topic: "يومي", ex: "—", note: "⚠ مسجلة مثل ما سمعتها. يحتمل لها علاقة بجذر «عوز» (الحاجة). اسأل اللي قالها أو كبار العائلة وحدّث البطاقة" },
+  { id: "m116", ar: "لو يرجع فيني الزمن", tr: "law yirjaʿ fīni z-ziman", en: "if I could turn back time", reg: "phrase", topic: "يومي", ex: "لو يرجع فيني الزمن، چان بديت أستثمر من أول راتب." },
+  { id: "m117", ar: "جوّز عن", tr: "jawwaz ʿan (yōz)", en: "drop it, quit, stop doing", reg: "kw", topic: "يومي", ex: "جوّز عن هالسالفة — ما بتوصلنا لمكان.", note: "كويتية أصيلة، وتنسمع «يوز» بنطق الياء" },
+  { id: "m118", ar: "استهدف", tr: "istahdaf", en: "to target, aim at", reg: "msa", topic: "شغل", ex: "الحملة تستهدف شريحة الشباب من ١٨ إلى ٣٠." },
+  { id: "m119", ar: "ميزانية", tr: "mīzāniyya", en: "budget", reg: "msa", topic: "اقتصاد", ex: "حط ميزانية لكل شي — حتى للترفيه." },
+  { id: "m120", ar: "غموض", tr: "ghumūḍ", en: "ambiguity, vagueness", reg: "msa", topic: "نقاش", ex: "الغموض بالعقد يفتح باب المشاكل — وضّح كل بند." },
+  { id: "m121", ar: "ثروة", tr: "tharwa", en: "wealth, fortune", reg: "msa", topic: "اقتصاد", ex: "الثروة الحقيقية للبلد عقول أهلها، مو بس النفط." },
+  { id: "m122", ar: "مبادر", tr: "mubādir", en: "one who takes initiative", reg: "msa", topic: "شغل", ex: "كن مبادر — لا تنتظر أحد يعطيك الضوء الأخضر." },
+  { id: "m123", ar: "نمو", tr: "numuww", en: "growth", reg: "msa", topic: "اقتصاد", ex: "النمو بدون تخطيط يخلق مشاكل أكبر من اللي يحلها." },
+  { id: "m124", ar: "يبادرون", tr: "yubādirūn", en: "they take the initiative", reg: "msa", topic: "شغل", ex: "أحب الفرق اللي يبادرون قبل لا أحد يطلب منهم." },
+  { id: "m125", ar: "مناسبة", tr: "munāsaba", en: "occasion; suitable (f.)", reg: "msa", topic: "يومي", ex: "بالمناسبة — عندنا مناسبة عائلية الخميس، لا تنسون." },
+  { id: "m126", ar: "عائد", tr: "ʿāʾid", en: "(financial) return", reg: "msa", topic: "اقتصاد", ex: "العائد على العقار أقل، بس المخاطرة بعد أقل." },
+  { id: "m127", ar: "أنا كدولة", tr: "ana ka-dawla", en: "\"I, as a state...\" (framing device)", reg: "phrase", topic: "نقاش", ex: "أنا كدولة، وين أحط أولوياتي: التعليم لو البنية التحتية؟", note: "أسلوب نقاش تتقمص فيه دور جهة عشان توضح وجهة نظرها" },
+  { id: "m128", ar: "قطاع", tr: "qiṭāʿ", en: "sector", reg: "msa", topic: "اقتصاد", ex: "كل قطاع له تحدياته، بس التعليم أساس الباقي كله." },
+  { id: "m129", ar: "مبادرة", tr: "mubādara", en: "initiative", reg: "msa", topic: "شغل", ex: "المبادرة الحلوة تموت إذا ماكو متابعة عقبها." },
+  { id: "m130", ar: "فقدنا", tr: "faqadna", en: "we lost", reg: "msa", topic: "نقاش", ex: "فقدنا وايد وقت ونحن نعيد نفس النقطة." },
+  { id: "m131", ar: "دولة ريعية", tr: "dawla rayʿiyya", en: "rentier state", reg: "msa", topic: "اقتصاد", ex: "الدولة الريعية تعيش على مورد واحد — وهذا بحد ذاته خطر." },
+  { id: "m132", ar: "تضخم", tr: "taḍakhkhum", en: "inflation", reg: "msa", topic: "اقتصاد", ex: "التضخم ياكل من راتبك حتى لو ما حسيت فيه." },
+  { id: "m133", ar: "افتراضي", tr: "iftirāḍi", en: "virtual; hypothetical", reg: "msa", topic: "علوم", ex: "الاجتماع بيكون افتراضي — الرابط بالمجموعة." },
+  { id: "m134", ar: "طالما", tr: "ṭālama", en: "as long as", reg: "msa", topic: "نقاش", ex: "طالما النتائج زينة، ما عندي مشكلة بالطريقة." },
+  { id: "m135", ar: "التبس", tr: "iltabas", en: "became confused / ambiguous", reg: "msa", topic: "نقاش", ex: "التبس علي الموضوع — فهمت العكس تمامًا.", note: "⚠ مسجلة عندك «اتلبس» — الأقرب: التبس عليه الأمر" },
+  { id: "m136", ar: "شئنا أم أبينا", tr: "shiʾna am abēna", en: "whether we like it or not", reg: "phrase", topic: "نقاش", ex: "شئنا أم أبينا، الذكاء الاصطناعي بيغير طريقة شغلنا." },
+  { id: "m137", ar: "إحباط", tr: "iḥbāṭ", en: "frustration, dejection", reg: "msa", topic: "يومي", ex: "الإحباط عقب الرفض طبيعي — بس لا تخليه يوقفك.", note: "⚠ مسجلة عندك «اهباط» — الأغلب إحباط (وإذا قصدك النزول فهي هبوط)" },
+  { id: "m138", ar: "أضطر", tr: "aḍṭarr", en: "I am forced to", reg: "msa", topic: "يومي", ex: "إذا ما تحسن الوضع، بضطر أدور بديل." },
+  { id: "m139", ar: "بوابين", tr: "bawwābīn", en: "doormen; gatekeepers (fig.)", reg: "msa", topic: "مجتمع", ex: "بكل مجال أكو «بوابين» يقررون منو يدخل ومنو لا — افهمهم قبل لا تحاربهم." },
+  { id: "m140", ar: "ساحل", tr: "sāḥil", en: "coast, shoreline", reg: "msa", topic: "عمران", ex: "إحنا مدينة ساحلية — بس وين الاستغلال الصحيح للساحل؟" },
+  { id: "m141", ar: "مقابل / بمقابل", tr: "muqābil", en: "in exchange for", reg: "msa", topic: "اقتصاد", ex: "ماكو شي ببلاش — كل ميزة لها مقابل." },
+  { id: "m142", ar: "تستوعب", tr: "tistawʿib", en: "accommodates, absorbs", reg: "msa", topic: "تعليم", ex: "المدارس الحكومية ما عادت تستوعب الأعداد اليديدة." },
+  { id: "m143", ar: "مؤرخ", tr: "muʾarrikh", en: "historian", reg: "msa", topic: "ثقافة", ex: "سولفت ويا مؤرخ كويتي عن الفرجان القديمة — سوالف ما تنمل." },
+  { id: "m144", ar: "هذا رقم واحد...", tr: "hādha raqam wāḥid", en: "\"that's number one...\" (enumerating)", reg: "phrase", topic: "نقاش", ex: "هذا رقم واحد. ورقم اثنين: التكلفة أقل بالنص." },
+  { id: "m145", ar: "تشويه", tr: "tashwīh", en: "distortion, defacing", reg: "msa", topic: "نقاش", ex: "اللي صار تشويه للفكرة الأصلية، مو تطوير لها." },
+  { id: "m146", ar: "بحت", tr: "baḥt", en: "pure, sheer (e.g. purely commercial)", reg: "msa", topic: "نقاش", ex: "قراري كان تجاري بحت — ماكو فيه شي شخصي.", note: "مسجلة عندك «بحتي» — تنقال: علمي بحت، تجاري بحت" },
+  { id: "m147", ar: "أبسط / بسيط", tr: "absaṭ / basīṭ", en: "simpler / simple", reg: "msa", topic: "نقاش", ex: "نبدأ بأبسط حل ممكن، وعقب نطوره إذا احتجنا." },
+  { id: "m148", ar: "تشطيب", tr: "tashṭīb", en: "finishing (construction)", reg: "msa", topic: "عمران", ex: "البيت خلص عظم — باقي التشطيب، وهذا اللي ياكل الميزانية." },
+  { id: "m149", ar: "غيّر النظرة", tr: "ghayyar in-naẓra", en: "changed the perception", reg: "phrase", topic: "مجتمع", ex: "شغلك ويا ناس من ثقافات ثانية يغيّر نظرتك للأمور." },
+  { id: "m150", ar: "لكن (بدال «بس»)", tr: "lākin", en: "but (elevated register)", reg: "tip", topic: "نقاش", ex: "«الفكرة زينة، لكن تنفيذها يحتاج وقت» — بالنقاش الجاد، «لكن» ترفع مستوى كلامك عن «بس»." },
+  { id: "m151", ar: "فكرة ثورية", tr: "fikra thawriyya", en: "revolutionary idea", reg: "msa", topic: "شغل", ex: "مو كل فكرة ثورية تنجح — السوق له كلمته." },
+  { id: "m152", ar: "اندثرت", tr: "indatharat", en: "died out, vanished", reg: "msa", topic: "ثقافة", ex: "حِرف قديمة وايد اندثرت، بس أسماؤها باقية بذاكرة كبار السن." },
+  { id: "m153", ar: "رعاية", tr: "riʿāya", en: "care; sponsorship", reg: "msa", topic: "شغل", ex: "الفعالية هالسنة تحت رعاية القطاع الخاص." },
+  { id: "m154", ar: "ألقاب التخاطب", tr: "astādh / ḥaḍirtak / maʿālīk / sumūk", en: "honorifics: ustādh, ḥaḍirtak, maʿālīk, sumūk", reg: "phrase", topic: "مجاملات", ex: "«أستاذ» للمحترف، «حضرتك» للرسمي، «معاليك» للوزير، «سموك» للشيوخ — اختيار اللقب الصح نص الأدب." },
+  { id: "m155", ar: "قارة", tr: "qārra", en: "continent", reg: "msa", topic: "علوم", ex: "أفريقيا قارة الفرص الياية — واللي فاهم دش من الحين." },
+  { id: "m156", ar: "متوسط", tr: "mutawassiṭ", en: "average, mean", reg: "msa", topic: "اقتصاد", ex: "الدخل فوق المتوسط، بس التوزيع مو عادل." },
+  { id: "m157", ar: "تصدير", tr: "taṣdīr", en: "export", reg: "msa", topic: "اقتصاد", ex: "ليش ما نفكر بتصدير الخدمات بدال ما نعتمد على النفط بس؟" },
+  { id: "m158", ar: "إجمالي", tr: "ijmāli", en: "total, gross", reg: "msa", topic: "اقتصاد", ex: "الإجمالي شكله زين — بس التفاصيل تقول شي ثاني." },
+  { id: "m159", ar: "قمة", tr: "qimma", en: "summit (meeting or peak)", reg: "msa", topic: "سياسة", ex: "القمة الخليجية طلعت ببيان أقوى من المتوقع." },
+  { id: "m160", ar: "تنويع مصادر الدخل", tr: "tanwīʿ maṣādir id-dakhl", en: "diversifying income sources", reg: "msa", topic: "اقتصاد", ex: "تنويع مصادر الدخل مو رفاهية — ضرورة للفرد وللدولة." },
+  { id: "m161", ar: "خصوصًا", tr: "khuṣūṣan", en: "especially", reg: "msa", topic: "نقاش", ex: "الحر يأثر على المبيعات، خصوصًا بيوليو وأغسطس." },
+  { id: "m162", ar: "تغلّفه", tr: "tughallifah", en: "you wrap / coat it", reg: "msa", topic: "نقاش", ex: "النقد يوصل أحسن إذا تغلّفه بكلمة طيبة." },
+  { id: "m163", ar: "الطاقة الشمسية", tr: "iṭ-ṭāqa ish-shamsiyya", en: "solar energy", reg: "msa", topic: "علوم", ex: "الشمس عندنا طول السنة، والطاقة الشمسية بعدها بأولها." },
+  { id: "m164", ar: "طاقة الرياح", tr: "ṭāqat ir-riyāḥ", en: "wind energy", reg: "msa", topic: "علوم", ex: "طاقة الرياح تنفع بمناطق معينة — تبي دراسة قبل." },
+  { id: "m165", ar: "الطاقة الأحفورية", tr: "iṭ-ṭāqa il-uḥfūriyya", en: "fossil energy", reg: "msa", topic: "علوم", ex: "العالم قاعد يتحول عن الطاقة الأحفورية — وإحنا شنو خطتنا؟" },
+  { id: "m166", ar: "ماذا لو / يا ريت", tr: "mādha law / yā rēt", en: "what if / if only", reg: "phrase", topic: "نقاش", ex: "ماذا لو جربنا نموذج مختلف؟ يا ريت نفتح هالباب." },
+  { id: "m167", ar: "هذي مو السالفة", tr: "hādhi mū is-sālfa", en: "that's not the point", reg: "kw", topic: "نقاش", ex: "التكلفة مهمة، بس هذي مو السالفة — السالفة بالجودة.", note: "«السالفة» من أكثر الكلمات الكويتية تعبيرًا — الموضوع/القصة" },
+  { id: "m168", ar: "دارت الأيام", tr: "dārat il-ayyām", en: "time went by; the tables turned", reg: "phrase", topic: "يومي", ex: "دارت الأيام، واللي كان يتعلم مني صرت أتعلم منه." },
+  { id: "m169", ar: "التحقوا", tr: "iltaḥaqaw", en: "they joined, enrolled", reg: "msa", topic: "شغل", ex: "أغلب ربعي التحقوا بالحكومة — وأنا اخترت الخاص." },
+  { id: "m170", ar: "توازن", tr: "tawāzun", en: "balance", reg: "msa", topic: "يومي", ex: "التوازن بين الشغل والبيت مهارة تتعلمها، ما تنولد فيها." },
+  { id: "m171", ar: "يوجد فرضيات", tr: "yūjad faraḍiyyāt", en: "there are hypotheses", reg: "msa", topic: "علوم", ex: "يوجد فرضيات متعددة، بس ماكو دليل قاطع لحد الحين." },
+  { id: "m172", ar: "إطار نظري", tr: "iṭār naẓari", en: "theoretical framework", reg: "msa", topic: "تعليم", ex: "أي بحث محترم يبدأ بإطار نظري واضح." },
+  { id: "m173", ar: "القصور الذاتي", tr: "il-quṣūr idh-dhāti", en: "inertia", reg: "msa", topic: "علوم", ex: "القصور الذاتي مو بس بالفيزياء — المؤسسات بعد تقاوم الحركة." },
+  { id: "m174", ar: "الاحتمالات", tr: "il-iḥtimālāt", en: "the probabilities, possibilities", reg: "msa", topic: "علوم", ex: "نرتب الاحتمالات من الأقرب للأبعد، ونخطط على أساسها." },
+  { id: "m175", ar: "تعصب", tr: "taʿaṣṣub", en: "bigotry, fanaticism", reg: "msa", topic: "مجتمع", ex: "التعصب يقفل باب النقاش قبل لا يبدأ." },
+  { id: "m176", ar: "مجاورة", tr: "mujāwara", en: "adjacent, neighboring", reg: "msa", topic: "عمران", ex: "المناطق المجاورة للمشروع أول اللي ترتفع أسعارها." },
+  { id: "m177", ar: "ضمير", tr: "ḍamīr", en: "conscience", reg: "msa", topic: "مجتمع", ex: "بالآخر، ضميرك هو الرقيب اللي ما ينام." },
+  { id: "m178", ar: "تعويض / تعويضات", tr: "taʿwīḍ / taʿwīḍāt", en: "compensation", reg: "msa", topic: "اقتصاد", ex: "تعويضات ما بعد الغزو قصة طويلة بتاريخ الكويت." },
+  { id: "m179", ar: "وثيقة", tr: "wathīqa", en: "document, deed", reg: "msa", topic: "شغل", ex: "لا توقع أي وثيقة قبل لا تقراها كلمة كلمة." },
+  { id: "m180", ar: "معاونة", tr: "muʿāwana", en: "assistance, aid", reg: "msa", topic: "مجاملات", ex: "قدموا لنا معاونة كبيرة أول ما بدينا — هالشي ما ينتسى." },
+  { id: "m181", ar: "ممتص الصدمات", tr: "mumtaṣṣ iṣ-ṣadamāt", en: "shock absorber (lit. & fig.)", reg: "phrase", topic: "شغل", ex: "المدير الزين ممتص صدمات — يحمي فريقه من الضغط اللي فوقه." },
+  { id: "m182", ar: "لِيومك هذا", tr: "li-yōmik hādha", en: "to this very day", reg: "phrase", topic: "يومي", ex: "نصحني قبل عشر سنين، ولِيومك هذا أطبق كلامه.", note: "⚠ مسجلة عندك «لي يومك» — أكد الصيغة اللي سمعتها" },
+  { id: "m183", ar: "الأدب", tr: "al-adab", en: "literature; manners", reg: "msa", topic: "ثقافة", ex: "الأدب الكويتي فيه أسماء تستاهل تنقرا أكثر." },
+  { id: "m184", ar: "نطق", tr: "nuṭq", en: "pronunciation, utterance", reg: "msa", topic: "تعليم", ex: "النطق السليم للمصطلح نص هيبته." },
+  { id: "m185", ar: "خثاق", tr: "khaththāg", en: "cuttlefish", reg: "kw", topic: "بحر وتراث", ex: "يوم رحنا الحداق، أغلب اللي طلع لنا خثاق مو هامور.", note: "من مفردات البحر الكويتية — والحبر ماله يستخدم بالطبخ" },
+  { id: "m186", ar: "اصطلاحات", tr: "iṣṭilāḥāt", en: "conventions, idioms of a group", reg: "msa", topic: "ثقافة", ex: "لكل ديوانية اصطلاحاتها اللي ما يفهمها إلا أهلها." },
+  { id: "m187", ar: "آمون عليه", tr: "āmūn ʿalēh", en: "I can count on him / impose on him freely", reg: "kw", topic: "مجاملات", ex: "خالد آمون عليه — أطلبه أي وقت وما يردني.", note: "كويتية — من الأمانة والثقة: الشخص اللي تطلبه بلا تردد" },
+  { id: "m188", ar: "بهرجة", tr: "bahraja", en: "flashiness, glitz", reg: "msa", topic: "مجتمع", ex: "العرس كله بهرجة، بس المضمون بسيط." },
+  { id: "m189", ar: "مهجورة", tr: "mahjūra", en: "abandoned, deserted", reg: "msa", topic: "عمران", ex: "بيوت الفريج القديم مهجورة، وكل بيت وراه قصة." },
+  { id: "m190", ar: "نطاق", tr: "niṭāq", en: "range, scope, spectrum", reg: "msa", topic: "نقاش", ex: "هالموضوع خارج نطاق الاجتماع — نفتح له جلسة ثانية.", note: "الإملاء: نطاق (مسجلة عندك «نيطاق»)" },
+  { id: "m191", ar: "مناخ", tr: "munākh", en: "climate (weather & fig.)", reg: "msa", topic: "علوم", ex: "مناخنا قاسي بالصيف — والتخطيط لازم يحترم هالحقيقة." },
+  { id: "m192", ar: "جاف", tr: "jāff", en: "dry (climate; tone)", reg: "msa", topic: "يومي", ex: "رده كان جاف شوي — حسيت إنه مو مرتاح للفكرة." },
+  { id: "m193", ar: "طب / طبة", tr: "ṭabb / ṭabba", en: "(captured — meaning to confirm)", reg: "kw", topic: "يومي", ex: "—", note: "⚠ مسجلة «طب طبة». «طبّ» بالكويتي = دش أو نط فجأة (طبّ البحر، طبّ علينا بالديوانية). أكد المعنى من السياق اللي سمعته فيه" },
+  { id: "m194", ar: "مياديف", tr: "mayādīf", en: "oars (sg. مِيداف)", reg: "kw", topic: "بحر وتراث", ex: "قبل المكاين، البحّارة ما لهم إلا المياديف والشراع.", note: "من التراث البحري الكويتي" },
+  { id: "m195", ar: "ما تنأخذ بالذراع", tr: "mā tinʾakhadh bidh-dhirāʿ", en: "it can't be forced (by strength)", reg: "phrase", topic: "نقاش", ex: "هالسالفة ما تنأخذ بالذراع — تبي لها صبر وحكمة.", note: "⚠ مسجلة عندك «تأخذها بذراعك» — تنقال غالبًا بالنفي" },
+  { id: "m196", ar: "مؤيد ومعارض", tr: "muʾayyid u-muʿāriḍ", en: "for and against (sides of a debate)", reg: "msa", topic: "نقاش", ex: "كل قضية لها مؤيد ومعارض — المهم مستوى الحجة، مو علو الصوت." },
+];
+</script>
+<script>
+/*
+ * SEED_PACKS — curated expansion packs. Words are NOT active until the pack
+ * is added from the الحزم screen, so the deck grows when Bader chooses,
+ * never by surprise. Same card shape as SEED_MANUAL.
+ */
+const SEED_PACKS = [
+  {
+    key: "connectors",
+    name: "روابط النقاش",
+    desc: "أدوات الربط اللي ترفع مستوى كلامك بالمجالس الجادة — من «بس» و«يعني» إلى لغة المحاور المتمكن.",
+    words: [
+      { id: "p101", ar: "بالتالي", tr: "bit-tāli", en: "therefore, consequently", reg: "msa", topic: "نقاش", ex: "الميزانية محدودة، وبالتالي لازم نرتب الأولويات." },
+      { id: "p102", ar: "علاوة على ذلك", tr: "ʿilāwatan ʿala dhālik", en: "moreover", reg: "phrase", topic: "نقاش", ex: "المشروع مكلف، وعلاوة على ذلك السوق مو جاهز له." },
+      { id: "p103", ar: "بغض النظر عن", tr: "bi-ghaḍḍ in-naẓar ʿan", en: "regardless of", reg: "phrase", topic: "نقاش", ex: "بغض النظر عن النتيجة، التجربة نفسها مكسب." },
+      { id: "p104", ar: "من جهة... ومن جهة أخرى", tr: "min jiha... u-min jiha ukhra", en: "on one hand... on the other", reg: "phrase", topic: "نقاش", ex: "من جهة التكلفة أقل، ومن جهة أخرى الجودة أضعف." },
+      { id: "p105", ar: "من منطلق", tr: "min munṭalaq", en: "from the standpoint of", reg: "phrase", topic: "نقاش", ex: "أتكلم من منطلق تجربة، مو من منطلق نظرية." },
+      { id: "p106", ar: "بناءً على", tr: "bināʾan ʿala", en: "based on", reg: "phrase", topic: "نقاش", ex: "بناءً على الأرقام اللي قدامنا، القرار واضح." },
+      { id: "p107", ar: "في نهاية المطاف", tr: "fi nihāyat il-maṭāf", en: "at the end of the day", reg: "phrase", topic: "نقاش", ex: "في نهاية المطاف، السوق هو اللي يحكم." },
+      { id: "p108", ar: "لا سيما", tr: "lā siyyama", en: "especially, particularly", reg: "msa", topic: "نقاش", ex: "القراءة تفيد الكل، لا سيما اللي يكتبون." },
+      { id: "p109", ar: "بمعنى آخر", tr: "bi-maʿna ākhar", en: "in other words", reg: "phrase", topic: "نقاش", ex: "بمعنى آخر: اللي ما يتطور، يتأخر." },
+      { id: "p110", ar: "على أرض الواقع", tr: "ʿala arḍ il-wāqiʿ", en: "on the ground, in reality", reg: "phrase", topic: "نقاش", ex: "الخطة حلوة على الورق، بس على أرض الواقع أكو تحديات." },
+      { id: "p111", ar: "جوهر الموضوع", tr: "jawhar il-mawḍūʿ", en: "the essence of the matter", reg: "phrase", topic: "نقاش", ex: "خلنا نرجع لجوهر الموضوع ولا نتشتت بالفروع." },
+      { id: "p112", ar: "أتفق معك في... وأختلف في...", tr: "attafiq maʿāk fi...", en: "I agree on X, differ on Y (polite disagreement)", reg: "phrase", topic: "نقاش", ex: "أتفق وياك بالتشخيص، وأختلف وياك بالحل.", note: "أرقى صيغة اعتراض — تثبت إنك سامع قبل ما ترد" },
+      { id: "p113", ar: "لا نستبق الأحداث", tr: "lā nastabiq il-aḥdāth", en: "let's not get ahead of ourselves", reg: "phrase", topic: "نقاش", ex: "لا نستبق الأحداث — خل نشوف نتائج أول شهر." },
+      { id: "p114", ar: "إن صح التعبير", tr: "in ṣaḥḥ it-taʿbīr", en: "if the expression fits, so to speak", reg: "phrase", topic: "نقاش", ex: "هذا انتحار تجاري، إن صح التعبير." },
+      { id: "p115", ar: "يترتب على", tr: "yatarattab ʿala", en: "results from, follows from", reg: "msa", topic: "نقاش", ex: "لازم نفهم شنو يترتب على القرار قبل لا نمضيه." },
+      { id: "p116", ar: "حجر الأساس", tr: "ḥajar il-asās", en: "the cornerstone", reg: "phrase", topic: "نقاش", ex: "الثقة حجر الأساس بأي شراكة." },
+    ],
+  },
+  {
+    key: "social",
+    name: "مجاملات ومناسبات كويتية",
+    desc: "العبارات اللي تخليك حاضر البديهة بكل موقف اجتماعي — تحية، شكر، تهنئة، وردودها الصحيحة.",
+    words: [
+      { id: "p201", ar: "عساكم من عواده", tr: "ʿasākum min ʿuwwāda", en: "Eid greeting: may you live to see it return", reg: "kw", topic: "مجاملات", ex: "تنقال بالعيد: «عساكم من عواده» — والرد: «وأنتم من عايدينه» أو «أيامكم سعيدة»." },
+      { id: "p202", ar: "ما قصرت", tr: "mā gaṣṣart", en: "you did great / thank you (lit. you fell not short)", reg: "kw", topic: "مجاملات", ex: "«خلصت لك المعاملة» — «ما قصرت والله!» والرد: «هذا واجبي»." },
+      { id: "p203", ar: "تدلل", tr: "tdallal", en: "at your service, by all means", reg: "kw", topic: "مجاملات", ex: "«تقدر توصلني المطار؟» — «تدلل، خمس دقايق وأنا عندك»." },
+      { id: "p204", ar: "عسى ما شر", tr: "ʿasa mā sharr", en: "I hope nothing's wrong?", reg: "kw", topic: "مجاملات", ex: "«شفت اتصالاتك — عسى ما شر؟» والرد: «شر ما ييك، كله خير»." },
+      { id: "p205", ar: "تستاهل", tr: "tistāhil", en: "you deserve it", reg: "kw", topic: "مجاملات", ex: "مبروك الترقية — تستاهل كل خير!" },
+      { id: "p206", ar: "عقبالك", tr: "ʿugbālik", en: "may you be next (returning a congratulation)", reg: "kw", topic: "مجاملات", ex: "«مبروك التخرج» — «الله يبارك فيك، عقبالك!»" },
+      { id: "p207", ar: "حياك الله", tr: "ḥayyāk aḷḷa", en: "welcome (lit. may God greet you)", reg: "kw", topic: "مجاملات", ex: "«حياك الله، البيت بيتك» — والرد: «الله يحييك»." },
+      { id: "p208", ar: "يعطيك العافية", tr: "yaʿṭīk il-ʿāfya", en: "thanks for your effort (lit. may God give you health)", reg: "kw", topic: "مجاملات", ex: "«يعطيك العافية عالشغل اليوم» — والرد: «الله يعافيك»." },
+      { id: "p209", ar: "من طرفك", tr: "min ṭarfik", en: "thanks to you, through your help", reg: "kw", topic: "مجاملات", ex: "من طرفك مشت الأمور كلها — ما ننسى لك هالطيب." },
+      { id: "p210", ar: "قدها وقدود", tr: "gadha u-gudūd", en: "fully capable, more than up to it", reg: "kw", topic: "مجاملات", ex: "لا تشيل هم المشروع — هي قدها وقدود." },
+      { id: "p211", ar: "طال عمرك", tr: "ṭāl ʿumrik", en: "respectful address (lit. may your life be long)", reg: "kw", topic: "مجاملات", ex: "شرايك طال عمرك نأجلها لباچر؟" },
+      { id: "p212", ar: "أبشر", tr: "abshir", en: "consider it done", reg: "kw", topic: "مجاملات", ex: "«محتاجين التقرير اليوم» — «أبشر، يوصلك قبل المغرب»." },
+      { id: "p213", ar: "على راسي", tr: "ʿala rāsi", en: "with pleasure and honor", reg: "kw", topic: "مجاملات", ex: "طلبك على راسي — تم." },
+      { id: "p214", ar: "خوش", tr: "khōsh", en: "good, fine (before a noun)", reg: "kw", topic: "يومي", ex: "خوش فكرة! منو يتبناها؟", note: "خوش كلام، خوش ريال، خوش شغل — تسبق الاسم دايمًا" },
+      { id: "p215", ar: "يا هلا والله", tr: "yā hala waḷḷa", en: "warm welcome greeting", reg: "kw", topic: "مجاملات", ex: "يا هلا والله! زمان عنك — وينك مختفي؟" },
+      { id: "p216", ar: "استانست", tr: "istānast", en: "I had a great time, I was delighted", reg: "kw", topic: "مجاملات", ex: "استانست بشوفتك اليوم — لا تقطعنا.", note: "من الونسة — كلمة كويتية دافئة للفرح بالصحبة" },
+      { id: "p217", ar: "لا هنت", tr: "lā hint", en: "thank you (lit. may you not be belittled)", reg: "kw", topic: "مجاملات", ex: "«وصلتك الأوراق» — «لا هنت»." },
+      { id: "p218", ar: "بالعافية", tr: "bil-ʿāfya", en: "bon appétit", reg: "kw", topic: "مجاملات", ex: "تنقال للي ياكل: «بالعافية» — والرد: «الله يعافيك»." },
+    ],
+  },
+  {
+    key: "proverbs",
+    name: "أمثال متداولة بالكويت",
+    desc: "أمثال حية بالمجالس الكويتية والخليجية — المثل بمكانه الصح يختصر خطبة كاملة. أفضل مصدر للتأكد: كبار العائلة.",
+    words: [
+      { id: "p301", ar: "اللي ما يعرف الصقر يشويه", tr: "illi mā yaʿrif iṣ-ṣagir yishwīh", en: "who doesn't know the falcon's worth grills it", reg: "kw", topic: "أمثال", ex: "عرضوا فكرته ورفضوها — قلت له: اللي ما يعرف الصقر يشويه.", note: "يُضرب لمن يستهين بشي ثمين جهلًا بقيمته" },
+      { id: "p302", ar: "الطول طول نخلة والعقل عقل صخلة", tr: "iṭ-ṭūl ṭūl nakhla wil-ʿagil ʿagil ṣakhla", en: "tall as a palm, mind of a goat kid", reg: "kw", topic: "أمثال", ex: "شكله يهيّب بس تصرفاته…‏ الطول طول نخلة والعقل عقل صخلة.", note: "للمظهر بلا عقل — تنقال مزحًا بين الربع" },
+      { id: "p303", ar: "من طلع من داره قل مقداره", tr: "min ṭalaʿ min dāra gall migdāra", en: "who leaves his home loses his standing", reg: "kw", topic: "أمثال", ex: "بديرتك لك وزنك وناسك — من طلع من داره قل مقداره." },
+      { id: "p304", ar: "يا ما تحت السواهي دواهي", tr: "yā mā taḥt is-sawāhi dawāhi", en: "beneath the quiet ones lie cunning depths", reg: "kw", topic: "أمثال", ex: "لا يغرك هدوءه — يا ما تحت السواهي دواهي." },
+      { id: "p305", ar: "اللي ما له أول ما له تالي", tr: "illi mā la awwal mā la tāli", en: "what has no beginning has no end", reg: "kw", topic: "أمثال", ex: "أساس المشروع لازم يكون صح — اللي ما له أول ما له تالي." },
+      { id: "p306", ar: "الجود من الموجود", tr: "il-jūd min il-mawjūd", en: "generosity is from what one has", reg: "kw", topic: "أمثال", ex: "ما عندنا إلا هذا، والجود من الموجود." },
+      { id: "p307", ar: "اللي يبي الدح ما يقول أح", tr: "illi yabi id-daḥḥ mā ygūl aḥḥ", en: "who wants the prize doesn't cry ouch", reg: "kw", topic: "أمثال", ex: "تبي النتيجة؟ اصبر على التعب — اللي يبي الدح ما يقول أح." },
+      { id: "p308", ar: "كل تأخيرة فيها خيرة", tr: "kill taʾkhīra fīha khīra", en: "every delay carries a blessing", reg: "kw", topic: "أمثال", ex: "طارت عليك الفرصة؟ كل تأخيرة فيها خيرة." },
+      { id: "p309", ar: "ضربتين بالراس توجع", tr: "ḍarbitēn bir-rās tōjaʿ", en: "two blows to the head hurt (don't repeat a mistake)", reg: "kw", topic: "أمثال", ex: "جربناها قبل وخسرنا — ضربتين بالراس توجع." },
+      { id: "p310", ar: "اللي استحوا ماتوا", tr: "illi istaḥaw mātaw", en: "the overly shy perished (speak up)", reg: "kw", topic: "أمثال", ex: "اسأل ولا تحاتي — اللي استحوا ماتوا." },
+    ],
+  },
+  {
+    key: "corrections",
+    name: "مصطلحات مصححة (إنتاج وفضاء واقتصاد)",
+    desc: "المصطلحات الصحيحة لمجالاتك — بدال الترجمات المختلقة اللي كانت بقوائم الذكاء الاصطناعي القديمة.",
+    words: [
+      { id: "p401", ar: "الزبدة", tr: "iz-zibda", en: "the bottom line, the gist", reg: "kw", topic: "نقاش", ex: "طولنا بالشرح — الزبدة: المشروع مربح والتوقيت مناسب." },
+      { id: "p402", ar: "مؤثرات خاصة", tr: "muʾaththirāt khāṣṣa", en: "special effects / VFX", reg: "msa", topic: "إنتاج", ex: "شغلنا بالإنتاج أغلبه مؤثرات خاصة وتصحيح ألوان.", note: "التصحيح: مو «معجزات» مثل ما قالت القائمة القديمة" },
+      { id: "p403", ar: "تصحيح الألوان", tr: "taṣḥīḥ il-alwān", en: "color grading", reg: "msa", topic: "إنتاج", ex: "اللقطة تتغير شخصيتها كليًا عقب تصحيح الألوان." },
+      { id: "p404", ar: "مونتاج", tr: "montāj", en: "editing (film)", reg: "msa", topic: "إنتاج", ex: "الفيلم ينولد مرتين: مرة بالتصوير ومرة بالمونتاج." },
+      { id: "p405", ar: "زاوية الكاميرا", tr: "zāwiyat il-kāmera", en: "camera angle", reg: "msa", topic: "إنتاج", ex: "غيرنا زاوية الكاميرا وتغير إحساس المشهد كله." },
+      { id: "p406", ar: "تصوير بطيء", tr: "taṣwīr baṭīʾ", en: "slow motion", reg: "msa", topic: "إنتاج", ex: "لقطة النهاية بالتصوير البطيء عطت المشهد رهبة." },
+      { id: "p407", ar: "الجاذبية", tr: "il-jādhibiyya", en: "gravity", reg: "msa", topic: "علوم", ex: "بدون الجاذبية، أبسط حركة تصير تحدي — اسأل رواد الفضاء.", note: "التصحيح: الجاذبية (القائمة القديمة قالت «قدم» — والقدم هي الرجل!)" },
+      { id: "p408", ar: "الزمكان", tr: "iz-zamakān", en: "spacetime", reg: "msa", topic: "علوم", ex: "الكتلة الكبيرة تحني الزمكان — هذا جوهر النسبية العامة." },
+      { id: "p409", ar: "مجرة / مجرات", tr: "majarra / majarrāt", en: "galaxy / galaxies", reg: "msa", topic: "علوم", ex: "درب التبانة مجرتنا، وجيرانها ملايين المجرات." },
+      { id: "p410", ar: "مركبة فضائية", tr: "markaba faḍāʾiyya", en: "spacecraft", reg: "msa", topic: "علوم", ex: "حلم أي رائد فضاء: مقعد على متن مركبة فضائية." },
+      { id: "p411", ar: "رائد فضاء", tr: "rāʾid faḍāʾ", en: "astronaut", reg: "msa", topic: "علوم", ex: "ليش لا يكون أول رائد فضاء كويتي من هالجيل؟" },
+      { id: "p412", ar: "ضرائب", tr: "ḍarāʾib", en: "taxes", reg: "msa", topic: "اقتصاد", ex: "النقاش عن الضرائب بالخليج كله حساسية.", note: "التصحيح: ضرائب (مو «خراج» — هذاك مصطلح تاريخي قديم)" },
+      { id: "p413", ar: "استقطاب المواهب", tr: "istiqṭāb il-mawāhib", en: "talent recruitment", reg: "msa", topic: "شغل", ex: "الشركات الكبيرة تتنافس على استقطاب المواهب قبل التخرج.", note: "التصحيح: مو «تشجير» — التشجير هو زراعة الأشجار!" },
+      { id: "p414", ar: "رأي عام", tr: "raʾy ʿāmm", en: "public opinion", reg: "msa", topic: "سياسة", ex: "الرأي العام قوة — واللي يفهمه يسبق غيره." },
+      { id: "p415", ar: "مفاوضات", tr: "mufāwaḍāt", en: "negotiations", reg: "msa", topic: "سياسة", ex: "المفاوضات الناجحة يطلع منها الطرفين كسبانين." },
+      { id: "p416", ar: "حقيبة وزارية", tr: "ḥaqība wizāriyya", en: "ministerial portfolio", reg: "msa", topic: "سياسة", ex: "أهم سؤال عقب التشكيل: منو أخذ الحقيبة الوزارية الفلانية؟" },
+    ],
+  },
+];
+</script>
+<script>
+/*
+ * SEED_VERIFY — the AI-supplied lists Bader collected earlier, now audited.
+ * Each item carries a verdict:
+ *   "ok-msa"     سليمة (فصحى صحيحة، تنفع بالحچي الراقي)
+ *   "ok-kw"      سليمة (كويتية / خليجية أصيلة)
+ *   "wrong-gloss" الكلمة موجودة بس الترجمة المعطاة غلط
+ *   "misspelled"  الإملاء غلط
+ *   "not-kuwaiti" كلمة حقيقية بس من لهجة ثانية (شامية/عراقية/مصرية)
+ *   "fabricated"  مختلقة — لا تستخدمها
+ *   "doubtful"    مشكوك فيها — تحتاج تأكيد من أهل اللغة
+ * Approving an item adds it to the deck with the CORRECTED gloss (en).
+ */
+const SEED_VERIFY = [
+  // ── القائمة الأولى: «كلمات كويتية» (وهي بالحقيقة فصحى) ──
+  { id: "v001", ar: "طبعًا", tr: "ṭabʿan", aiGloss: "Of course", verdict: "ok-msa", en: "of course", reg: "msa", topic: "يومي", fix: "سليمة ومستخدمة، بس هي عربية عامة — مو «كويتية» مثل ما ادعت القائمة." },
+  { id: "v002", ar: "تشجيع", tr: "tashjīʿ", aiGloss: "Encouragement", verdict: "ok-msa", en: "encouragement", reg: "msa", topic: "مجتمع", fix: "فصحى سليمة." },
+  { id: "v003", ar: "عفوًا", tr: "ʿafwan", aiGloss: "Excuse me", verdict: "ok-msa", en: "excuse me; you're welcome", reg: "msa", topic: "مجاملات", fix: "سليمة — وبالكويتي اليومي تسمع «سامحني» أو «لو سمحت» أكثر." },
+  { id: "v004", ar: "تشاور", tr: "tashāwur", aiGloss: "To consult", verdict: "ok-msa", en: "mutual consultation", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v005", ar: "متقدم", tr: "mutaqaddim", aiGloss: "Advanced", verdict: "ok-msa", en: "advanced", reg: "msa", topic: "تعليم", fix: "سليمة." },
+  { id: "v006", ar: "مجهول", tr: "majhūl", aiGloss: "Unknown", verdict: "ok-msa", en: "unknown", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v007", ar: "وجهة", tr: "wijha", aiGloss: "Perspective", verdict: "wrong-gloss", en: "destination", reg: "msa", topic: "يومي", fix: "وجهة = destination (وجهتنا لندن). أما perspective فهي «وجهة نظر» كاملة." },
+  { id: "v008", ar: "تحديات", tr: "taḥaddiyāt", aiGloss: "Challenges", verdict: "ok-msa", en: "challenges", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v009", ar: "إيمان", tr: "īmān", aiGloss: "Faith", verdict: "ok-msa", en: "faith, belief", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v010", ar: "متأخر", tr: "mitʾakhkhir", aiGloss: "Late", verdict: "ok-msa", en: "late", reg: "msa", topic: "يومي", fix: "سليمة." },
+
+  // ── قائمة «الفصحى» ──
+  { id: "v011", ar: "تعارف", tr: "taʿāruf", aiGloss: "Acquaintance", verdict: "ok-msa", en: "getting acquainted", reg: "msa", topic: "مجتمع", fix: "سليمة." },
+  { id: "v012", ar: "مواطنة", tr: "muwāṭana", aiGloss: "Citizenship", verdict: "ok-msa", en: "citizenship (as a value)", reg: "msa", topic: "مجتمع", fix: "سليمة — والجنسية كوثيقة رسمية تسمى «جنسية»." },
+  { id: "v013", ar: "تحقيقات", tr: "taḥqīqāt", aiGloss: "Investigations", verdict: "ok-msa", en: "investigations", reg: "msa", topic: "سياسة", fix: "سليمة." },
+  { id: "v014", ar: "استقدام", tr: "istiqdām", aiGloss: "Recruitment", verdict: "ok-msa", en: "bringing in (foreign) labor", reg: "msa", topic: "اقتصاد", fix: "سليمة — بمعنى استقدام العمالة تحديدًا، مو التوظيف عمومًا." },
+  { id: "v015", ar: "مستقبل", tr: "mustaqbal", aiGloss: "Future", verdict: "ok-msa", en: "future", reg: "msa", topic: "يومي", fix: "سليمة." },
+  { id: "v016", ar: "هوية", tr: "hawiyya", aiGloss: "Identity", verdict: "ok-msa", en: "identity", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v017", ar: "مقاصد", tr: "maqāṣid", aiGloss: "Purposes", verdict: "ok-msa", en: "aims, intents", reg: "msa", topic: "نقاش", fix: "سليمة — لفظة راقية فعلًا." },
+  { id: "v018", ar: "تكوين", tr: "takwīn", aiGloss: "Formation", verdict: "ok-msa", en: "formation, composition", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v019", ar: "اهتمام", tr: "ihtimām", aiGloss: "Concern/Care", verdict: "ok-msa", en: "interest, care", reg: "msa", topic: "يومي", fix: "سليمة." },
+  { id: "v020", ar: "تفاهم", tr: "tafāhum", aiGloss: "Understanding", verdict: "ok-msa", en: "mutual understanding", reg: "msa", topic: "مجتمع", fix: "سليمة." },
+
+  // ── القائمة «المختلطة» ──
+  { id: "v021", ar: "جدال", tr: "jidāl", aiGloss: "Argument", verdict: "ok-msa", en: "argument, dispute", reg: "msa", topic: "نقاش", fix: "سليمة — وقارنها بـ«محاورة» اللي عندك بالقائمة." },
+  { id: "v022", ar: "ثقافة", tr: "thaqāfa", aiGloss: "Culture", verdict: "ok-msa", en: "culture", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v023", ar: "إثبات", tr: "ithbāt", aiGloss: "Proof", verdict: "ok-msa", en: "proof, evidence", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v024", ar: "تجديد", tr: "tajdīd", aiGloss: "Renewal", verdict: "ok-msa", en: "renewal", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v025", ar: "حواس", tr: "ḥawāss", aiGloss: "Senses", verdict: "ok-msa", en: "the senses", reg: "msa", topic: "علوم", fix: "سليمة." },
+  { id: "v026", ar: "تصوير", tr: "taṣwīr", aiGloss: "Imaging", verdict: "ok-msa", en: "filming, photography", reg: "msa", topic: "إنتاج", fix: "سليمة — وهي كلمة مجالك." },
+  { id: "v027", ar: "ذهنية", tr: "dhihniyya", aiGloss: "Mentality", verdict: "ok-msa", en: "mentality, mindset", reg: "msa", topic: "مجتمع", fix: "سليمة." },
+  { id: "v028", ar: "فكر", tr: "fikr", aiGloss: "Thought/Idea", verdict: "ok-msa", en: "thought (as a school of thinking)", reg: "msa", topic: "ثقافة", fix: "سليمة — «فكر» = مدرسة فكرية، أما الفكرة الواحدة فهي «فكرة»." },
+  { id: "v029", ar: "وصل", tr: "waṣl", aiGloss: "Connection", verdict: "wrong-gloss", en: "receipt (paper)", reg: "msa", topic: "شغل", fix: "«وصل» بالاستخدام اليومي = إيصال استلام. الاتصال بين الناس = «تواصل»." },
+  { id: "v030", ar: "منهج", tr: "manhaj", aiGloss: "Method", verdict: "ok-msa", en: "method; curriculum", reg: "msa", topic: "تعليم", fix: "سليمة — وهي موجودة عندك بالقائمة اليدوية بعد." },
+  { id: "v031", ar: "نظام", tr: "niẓām", aiGloss: "System", verdict: "ok-msa", en: "system, order", reg: "msa", topic: "سياسة", fix: "سليمة." },
+  { id: "v032", ar: "رأي", tr: "raʾy", aiGloss: "Opinion", verdict: "ok-msa", en: "opinion", reg: "msa", topic: "نقاش", fix: "سليمة — وبالكويتي: «شرايك؟»" },
+  { id: "v033", ar: "تفاصيل", tr: "tafāṣīl", aiGloss: "Details", verdict: "ok-msa", en: "details", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v034", ar: "إبداع", tr: "ibdāʿ", aiGloss: "Creativity", verdict: "ok-msa", en: "creativity", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v035", ar: "خصوصي", tr: "khuṣūṣi", aiGloss: "Private", verdict: "wrong-gloss", en: "private (tutor/driver)", reg: "msa", topic: "يومي", fix: "بالخليج «خصوصي» تنقال للمدرس الخصوصي والسواق. الشي الخاص عمومًا = «خاص»." },
+  { id: "v036", ar: "تغيير", tr: "taghyīr", aiGloss: "Change", verdict: "ok-msa", en: "change", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v037", ar: "فن", tr: "fann", aiGloss: "Art", verdict: "ok-msa", en: "art", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v038", ar: "واقع", tr: "wāqiʿ", aiGloss: "Reality", verdict: "ok-msa", en: "reality", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v039", ar: "مثالي", tr: "mithāli", aiGloss: "Ideal", verdict: "ok-msa", en: "ideal", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v040", ar: "حكمة", tr: "ḥikma", aiGloss: "Wisdom", verdict: "ok-msa", en: "wisdom", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+  { id: "v041", ar: "سهم", tr: "sahm", aiGloss: "Share/Stock", verdict: "ok-msa", en: "share, stock; arrow", reg: "msa", topic: "اقتصاد", fix: "سليمة." },
+  { id: "v042", ar: "تجارة", tr: "tijāra", aiGloss: "Commerce", verdict: "ok-msa", en: "commerce, trade", reg: "msa", topic: "اقتصاد", fix: "سليمة." },
+  { id: "v043", ar: "تربية", tr: "tarbiya", aiGloss: "Education", verdict: "wrong-gloss", en: "upbringing, raising", reg: "msa", topic: "مجتمع", fix: "تربية = التنشئة والأخلاق. أما التعليم المدرسي فهو «تعليم». (وزارة التربية تجمعهم عمدًا)." },
+  { id: "v044", ar: "عقيدة", tr: "ʿaqīda", aiGloss: "Belief", verdict: "ok-msa", en: "creed, doctrine", reg: "msa", topic: "ثقافة", fix: "سليمة — بس هي أثقل من belief العادية: عقيدة دينية أو مبدأ راسخ." },
+  { id: "v045", ar: "سياسة", tr: "siyāsa", aiGloss: "Policy/Politics", verdict: "ok-msa", en: "politics; policy", reg: "msa", topic: "سياسة", fix: "سليمة." },
+
+  // ── قائمة «كويتية» ثانية — وهنا المصايب ──
+  { id: "v046", ar: "دقيق", tr: "dagīg", aiGloss: "Minute (time)", verdict: "wrong-gloss", en: "precise; flour", reg: "msa", topic: "يومي", fix: "دقيق = precise (أو الطحين!). الدقيقة الزمنية = «دقيقة»، وجمعها بالكويتي «دقايق»." },
+  { id: "v047", ar: "خلج", tr: "—", aiGloss: "Confused", verdict: "fabricated", fix: "ما لها وجود بهالمعنى — لا بالكويتي ولا بالفصحى. المرتبك بالكويتي: «محتار» أو «متلخبط»." },
+  { id: "v048", ar: "مصاري", tr: "maṣāri", aiGloss: "Money", verdict: "not-kuwaiti", fix: "شامية/عراقية. الكويتي يقول «فلوس» — وقول «مصاري» بالكويت ينكشف على طول." },
+  { id: "v049", ar: "يمكن", tr: "yimkin", aiGloss: "Maybe", verdict: "ok-kw", en: "maybe, perhaps", reg: "kw", topic: "يومي", fix: "سليمة ومستخدمة بالكويتي فعلًا." },
+  { id: "v050", ar: "حق", tr: "ḥagg", aiGloss: "Right (rights)", verdict: "wrong-gloss", en: "for, belonging to (dialect)", reg: "kw", topic: "يومي", fix: "الاستخدام الكويتي المميز: «هذا حق منو؟» = لمن هذا. أما الحقوق فمعنى فصيح مشترك." },
+  { id: "v051", ar: "زلمة", tr: "zalama", aiGloss: "Guys/People", verdict: "not-kuwaiti", fix: "شامية/عراقية. الكويتي: «ريّال» للرجل و«ربع» للجماعة — «يا زلمة» تكشف المتكلم فورًا." },
+  { id: "v052", ar: "سفر", tr: "safar", aiGloss: "Travel", verdict: "ok-msa", en: "travel", reg: "msa", topic: "يومي", fix: "سليمة." },
+  { id: "v053", ar: "سبب", tr: "sabab", aiGloss: "Reason", verdict: "ok-msa", en: "reason, cause", reg: "msa", topic: "نقاش", fix: "سليمة." },
+  { id: "v054", ar: "زبدة", tr: "zibda", aiGloss: "Essence/Main point", verdict: "ok-kw", en: "the gist, bottom line", reg: "kw", topic: "نقاش", fix: "صحيحة وخليجية أصيلة — «الزبدة؟» = خلاصة الكلام. (موجودة بحزمة التصحيحات بعد)." },
+  { id: "v055", ar: "تاريخ", tr: "tārīkh", aiGloss: "Date/History", verdict: "ok-msa", en: "history; date", reg: "msa", topic: "ثقافة", fix: "سليمة." },
+
+  // ── بقية «المختلطة» — الملاحظ فقط، والسليم مجموع ──
+  { id: "v056", ar: "تأريف", tr: "—", aiGloss: "Introduction", verdict: "fabricated", fix: "ما لها وجود. التقديم = «تعريف» أو «مقدمة»." },
+  { id: "v057", ar: "تغدير", tr: "—", aiGloss: "Sabotage", verdict: "fabricated", fix: "مختلقة. التخريب المتعمد = «تخريب»، والخيانة = «غدر»." },
+  { id: "v058", ar: "إنعايه", tr: "—", aiGloss: "Care/Attention", verdict: "misspelled", en: "care, attention", reg: "msa", topic: "مجتمع", fix: "الصح: «عناية»." },
+  { id: "v059", ar: "تدوين", tr: "tadwīn", aiGloss: "Documentation", verdict: "wrong-gloss", en: "writing down; blogging", reg: "msa", topic: "ثقافة", fix: "تدوين = الكتابة والتسجيل (ومنها المدونات). التوثيق الرسمي = «توثيق». ولاحظ: نفس القائمة ترجمتها مرة ثانية «cinematography» — وهذا اختلاق صريح." },
+  { id: "v060", ar: "تصديق", tr: "taṣdīq", aiGloss: "Verification", verdict: "wrong-gloss", en: "believing; official ratification", reg: "msa", topic: "شغل", fix: "تصديق = التصديق على معاملة أو تصديق الكلام. أما التحقق = «تحقق»." },
+  { id: "v061", ar: "انقلاب", tr: "inqilāb", aiGloss: "Revolution", verdict: "wrong-gloss", en: "coup d'état", reg: "msa", topic: "سياسة", fix: "انقلاب = coup. الثورة الشعبية = «ثورة». فرق جوهري بالسياسة!" },
+  { id: "v062", ar: "ركيز", tr: "—", aiGloss: "Core", verdict: "misspelled", en: "pillar, cornerstone", reg: "msa", topic: "نقاش", fix: "الصح: «ركيزة» — ركيزة أساسية. والجوهر = «جوهر»." },
+  { id: "v063", ar: "انهيتاط", tr: "—", aiGloss: "Decline", verdict: "misspelled", en: "decadence, decline", reg: "msa", topic: "ثقافة", fix: "الصح: «انحطاط»." },
+  { id: "v064", ar: "إقدام", tr: "iqdām", aiGloss: "Initiative", verdict: "wrong-gloss", en: "boldness, daring", reg: "msa", topic: "نقاش", fix: "إقدام = الجرأة والشجاعة على الفعل. المبادرة = «مبادرة» (وهي عندك بالقائمة)." },
+  { id: "v065", ar: "تطوير / تطور", tr: "taṭwīr / taṭawwur", aiGloss: "Development", verdict: "ok-msa", en: "developing (s.th.) / evolving", reg: "msa", topic: "نقاش", fix: "الاثنتين سليمات — تطوير: أنت تطور شي، تطور: الشي يتطور بروحه." },
+  { id: "v066", ar: "بقية المختلطة (٥٠ كلمة)", tr: "—", aiGloss: "—", verdict: "ok-msa", fix: "الباقي فصحى سليمة بمجملها: تحليل، صداقة، مستند، استشارات، علم، تكامل، مشاركة، حرية، وسائل، حلم، رسالة، تصميم، آفاق، حقيقة، تدبر، أمل، مفاهيم، دعوة، تفكير، تواصل، فهم، إجراء، تثقيف، موقف، تكريم، تفويض، استخدام، شركاء، قدرة، تفاعل، سعادة، مراجعة، معارضة، مدنية، ثبات، تقدير، وضع، مفهوم. استخدمها بثقة — بس هي فصحى عامة، مو لهجة كويتية." },
+
+  // ── قوائم السينما والفضاء والفيزياء — تحذير عام + أبرز الاختلاقات ──
+  { id: "v067", ar: "قوائم السينما/الفضاء/الفيزياء", tr: "—", aiGloss: "—", verdict: "doubtful", fix: "هالقوائم فيها نسبة اختلاق عالية جدًا — لا تعتمد عليها. المصطلحات الصحيحة لمجالاتك جاهزة بحزمة «مصطلحات مصححة». أبرز الأغلاط تحتها 👇" },
+  { id: "v068", ar: "معجزات", tr: "muʿjizāt", aiGloss: "Special Effects", verdict: "wrong-gloss", fix: "معجزات = miracles! المؤثرات الخاصة = «مؤثرات خاصة»." },
+  { id: "v069", ar: "الخليج", tr: "il-khalīj", aiGloss: "Frame (in framing a shot)", verdict: "fabricated", fix: "الخليج = the Gulf طبعًا. كادر اللقطة = «كادر» أو «إطار»." },
+  { id: "v070", ar: "صيدلة", tr: "ṣaydala", aiGloss: "Astrochemistry", verdict: "wrong-gloss", fix: "صيدلة = pharmacy! الكيمياء الفلكية = «كيمياء فلكية»." },
+  { id: "v071", ar: "قدم", tr: "qadam", aiGloss: "Gravity", verdict: "wrong-gloss", fix: "قدم = foot أو القِدَم (المعنى الزمني). الجاذبية = «جاذبية»." },
+  { id: "v072", ar: "برق", tr: "barq", aiGloss: "Electricity", verdict: "wrong-gloss", fix: "برق = lightning. الكهرباء = «كهرباء»." },
+  { id: "v073", ar: "تفقيم", tr: "—", aiGloss: "Spacetime", verdict: "fabricated", fix: "ما لها وجود. الزمكان = «زمكان»." },
+  { id: "v074", ar: "تكايان", tr: "—", aiGloss: "Quanta", verdict: "fabricated", fix: "ما لها وجود. الكم = «كمّ / كوانتم»." },
+  { id: "v075", ar: "ركب فضائي", tr: "—", aiGloss: "Spacecraft", verdict: "fabricated", fix: "التركيب غلط. المركبة الفضائية = «مركبة فضائية»." },
+  { id: "v076", ar: "حذاء فوتونية", tr: "—", aiGloss: "Photon Boot", verdict: "fabricated", fix: "هذي أصلًا مو مصطلح بأي لغة — اختلاق كامل." },
+
+  // ── قائمة السياسة ──
+  { id: "v077", ar: "قائمة السياسة (٨٥ كلمة)", tr: "—", aiGloss: "—", verdict: "ok-msa", fix: "أغلبها فصحى صحيحة وتنفع: سيادة النقاش السياسي بالكويت أصلًا بالفصحى المخففة. المفيد الصافي منها انتقيته بحزمة التصحيحات. احذر من: «تشجير = recruitment» (غلط، معناها زراعة أشجار)، «خراج = taxes» (مصطلح تاريخي، الصح ضرائب)، «رداء = diplomatic cloak» (اختلاق)، «تنشيج» (اختلاق — الصح: تعبئة أو حشد)." },
+  { id: "v078", ar: "تصفية", tr: "taṣfiya", aiGloss: "Clearance", verdict: "wrong-gloss", en: "liquidation; settling scores", reg: "msa", topic: "سياسة", fix: "تصفية = تصفية شركة أو تصفية حسابات — كلمة ثقيلة، انتبه لسياقها." },
+
+  // ── الأمثال والعبارات — الفرز الدقيق ──
+  { id: "v079", ar: "تقدر تشرب من إيدي؟", tr: "—", aiGloss: "Expression of trust", verdict: "fabricated", fix: "مو مثل كويتي معروف — لا تستخدمه." },
+  { id: "v080", ar: "كبّر راسك", tr: "—", aiGloss: "Be proud", verdict: "doubtful", fix: "مو التعبير الكويتي المتعارف. اللي ينقال: «ارفع راسك» — وهي عربية عامة مفهومة." },
+  { id: "v081", ar: "حذاء عليه الحيلة", tr: "—", aiGloss: "He's not fooling anyone", verdict: "fabricated", fix: "ما لها وجود." },
+  { id: "v082", ar: "أبيض من وجهك", tr: "—", aiGloss: "Something obvious", verdict: "fabricated", fix: "مشوهة. الصحيح المستخدم: «بيّض الله وجهك» = أحسنت وشرّفت." },
+  { id: "v083", ar: "ماكو داعي", tr: "māku dāʿi", aiGloss: "There's no need", verdict: "ok-kw", en: "there's no need", reg: "kw", topic: "يومي", fix: "صحيحة وكويتية ١٠٠٪ — «ماكو» من أوضح بصمات الكويتي." },
+  { id: "v084", ar: "غصب عني", tr: "ghaṣb ʿanni", aiGloss: "Against my will", verdict: "ok-kw", en: "against my will", reg: "kw", topic: "يومي", fix: "صحيحة — والصيغة الكويتية «غصب عني/عنك»، مو «غصب عن عيني»." },
+  { id: "v085", ar: "ما يجيمك غير عرايك", tr: "—", aiGloss: "You reap what you sow", verdict: "fabricated", fix: "مشوهة بلا معنى. المثل الحقيقي بهالمعنى: «ما يحك جلدك مثل ظفرك» — وهو متداول فعلًا." },
+  { id: "v086", ar: "هذا شينو يابا؟", tr: "—", aiGloss: "What is this, Dad?", verdict: "misspelled", en: "expression of surprise", reg: "kw", topic: "يومي", fix: "الصيغة الكويتية: «شنو هذا يبه؟» — شنو (مو شينو)، يبه (مو يابا)." },
+  { id: "v087", ar: "لا يحكم عليك الشطي في البحر", tr: "—", aiGloss: "Don't let the unqualified judge you", verdict: "fabricated", fix: "ما لها وجود — و«الشطي» أصلًا مو كلمة كويتية." },
+  { id: "v088", ar: "يهني راسك", tr: "—", aiGloss: "Congratulatory", verdict: "fabricated", fix: "مو تعبير معروف. للتهنئة: «مبروك»، «تستاهل»، «عقبالك» — كلها بحزمة المجاملات." },
+  { id: "v089", ar: "زهق شبدك", tr: "—", aiGloss: "Your luck has run out", verdict: "fabricated", fix: "خلط مشوه. «چبد» (الكبد) موجودة بتعابير كويتية حقيقية مثل «يا چبدي» للعزيز — بس هالتركيب مختلق." },
+  { id: "v090", ar: "ماكو فايدة", tr: "māku fāyda", aiGloss: "There's no use", verdict: "ok-kw", en: "it's no use", reg: "kw", topic: "يومي", fix: "صحيحة وكويتية." },
+  { id: "v091", ar: "على كيفك", tr: "ʿala kēfik", aiGloss: "As you like", verdict: "ok-kw", en: "as you like; take it easy", reg: "kw", topic: "يومي", fix: "صحيحة — وتنقال بعد بمعنى «على مهلك»." },
+  { id: "v092", ar: "شنو هذا يمعة؟", tr: "shinu hādha yamʿa", aiGloss: "Disbelief in a group", verdict: "ok-kw", en: "\"what is this, folks?\"", reg: "kw", topic: "يومي", fix: "مقبولة — «يمعة» نداء كويتي حقيقي بمعنى يا جماعة. بس إملاء القائمة كان مكسر." },
+  { id: "v093", ar: "ولا يهمك", tr: "wala yhimmik", aiGloss: "Don't worry about it", verdict: "ok-kw", en: "don't worry about it", reg: "kw", topic: "مجاملات", fix: "صحيحة." },
+  { id: "v094", ar: "شد حيلك", tr: "shidd ḥēlik", aiGloss: "Pull yourself together", verdict: "ok-kw", en: "toughen up, give it your all", reg: "kw", topic: "يومي", fix: "صحيحة وخليجية أصيلة." },
+  { id: "v095", ar: "ترا ما يسوى", tr: "tara mā yiswa", aiGloss: "It's not worth it", verdict: "misspelled", en: "mind you, it's not worth it", reg: "kw", topic: "يومي", fix: "القائمة كتبتها «طرة» — الصح: «ترا ما يسوى». و«ترا» أداة تنبيه كويتية جوهرية." },
+  { id: "v096", ar: "علم ترسك", tr: "—", aiGloss: "Your reputation precedes you", verdict: "fabricated", fix: "ما لها وجود." },
+  { id: "v097", ar: "لا زمان ولا زمن", tr: "—", aiGloss: "Never", verdict: "fabricated", fix: "مو تعبير متداول. «أبد» أو «ولا بحلم» يؤدون المعنى." },
+  { id: "v098", ar: "ليش تلعب بالنار؟", tr: "lēsh tilʿab bin-nār", aiGloss: "Why play with fire?", verdict: "ok-kw", en: "why are you playing with fire?", reg: "kw", topic: "يومي", fix: "سليمة — عربية عامة بصيغة كويتية (ليش)." },
+  { id: "v099", ar: "فضلك / فضلكي", tr: "—", aiGloss: "Please (M/F)", verdict: "not-kuwaiti", fix: "«من فضلك» مصرية الطابع، و«فضلكي» أصلًا تركيب غلط. الكويتي: «لو سمحت» — وللمؤنث «لو سمحتي» بالچاف: «لو سمحتِچ» ما تنقال؛ ببساطة «لو سمحتي»." },
+  { id: "v100", ar: "بالعافية / مع السلامة / جزاك الله خير / يرحمك الله / ما شاء الله", tr: "—", aiGloss: "(politeness set)", verdict: "ok-kw", fix: "هالمجموعة كلها صحيحة ومستخدمة، وردودها اللي ذكرتها القائمة سليمة بمجملها. الأهم منها دخل حزمة «مجاملات ومناسبات»." },
+  { id: "v101", ar: "كل عام وأنتم بخير", tr: "kill ʿām w-antum b-khēr", aiGloss: "Holiday greeting", verdict: "ok-msa", en: "holiday greeting", reg: "msa", topic: "مجاملات", fix: "صحيحة — بس الأصيل الكويتي بالعيد: «عساكم من عواده»." },
+  { id: "v102", ar: "شنو صاير؟", tr: "shinu ṣāyir", aiGloss: "What's happening?", verdict: "ok-kw", en: "what's going on?", reg: "kw", topic: "يومي", fix: "صحيحة — وتنسمع مدموجة: «شصاير؟»" },
+  { id: "v103", ar: "يا زلمة / شكو ماكو", tr: "—", aiGloss: "Oh man / What's up", verdict: "not-kuwaiti", fix: "«يا زلمة» شامية، و«شكو ماكو» كتحية عراقية بحتة. الكويتي يسأل: «شخبارك؟ شمسوي؟» — و«ماكو» بروحها كويتية، بس التركيبة التحية عراقية." },
+];
+</script>
+<script>
+/*
+ * SEED_RESPONSES — نداء ورد: fixed call-and-response exchanges.
+ * The drill: hear the call, produce the response automatically.
+ * en = the situation in English; note marks variants or looser customs.
+ */
+const SEED_RESPONSES = [
+  { id: "r001", call: "السلام عليكم", callTr: "is-salāmu ʿalēkum", resp: "وعليكم السلام ورحمة الله وبركاته", respTr: "wa ʿalēkum is-salām wa raḥmat aḷḷāh wa barakātuh", en: "the greeting of greetings — the fuller the reply, the finer the manners", topic: "تحية" },
+  { id: "r002", call: "صباح الخير", callTr: "ṣabāḥ il-khēr", resp: "صباح النور", respTr: "ṣabāḥ in-nūr", en: "morning greeting", topic: "تحية" },
+  { id: "r003", call: "مساء الخير", callTr: "masāʾ il-khēr", resp: "مساء النور", respTr: "masāʾ in-nūr", en: "evening greeting", topic: "تحية" },
+  { id: "r004", call: "الله بالخير", callTr: "aḷḷa bil-khēr", resp: "الله بالخير", respTr: "aḷḷa bil-khēr", en: "the diwaniya greeting on entering — the reply mirrors it", topic: "تحية", note: "تحية المجالس الكويتية الأصيلة — الرد نفس اللفظ" },
+  { id: "r005", call: "شلونك؟", callTr: "shlōnik?", resp: "زين الحمدلله — إنت شلونك؟", respTr: "zēn il-ḥamdilla — inta shlōnik?", en: "how are you? — answer and return the question", topic: "تحية" },
+  { id: "r006", call: "شخبارك؟", callTr: "shakhbārik?", resp: "أخبارك الطيبة، الحمدلله", respTr: "akhbārik iṭ-ṭayyba, il-ḥamdilla", en: "what's your news?", topic: "تحية" },
+  { id: "r007", call: "يا هلا والله!", callTr: "yā hala waḷḷa", resp: "هلا بيك، يا هلا ومرحبا", respTr: "hala bīk, yā hala u-marḥaba", en: "warm welcome — met with equal warmth", topic: "تحية" },
+  { id: "r008", call: "عساك على القوة", callTr: "ʿasāk ʿa l-guwwa", resp: "الله يقويك", respTr: "aḷḷa ygawwīk", en: "said to someone at work", topic: "مجاملات" },
+  { id: "r009", call: "بالعافية", callTr: "bil-ʿāfya", resp: "الله يعافيك", respTr: "aḷḷa yʿāfīk", en: "said to someone eating or drinking", topic: "ضيافة" },
+  { id: "r010", call: "يعطيك العافية", callTr: "yaʿṭīk il-ʿāfya", resp: "الله يعافيك", respTr: "aḷḷa yʿāfīk", en: "thanks for effort or service", topic: "مجاملات" },
+  { id: "r011", call: "تسلم / تسلم إيدك", callTr: "tislam / tislam īdik", resp: "الله يسلمك", respTr: "aḷḷa ysallmik", en: "praise for a job or a dish", topic: "مجاملات" },
+  { id: "r012", call: "مشكور", callTr: "mashkūr", resp: "العفو، ولا يهمك", respTr: "il-ʿafu, wala yhimmik", en: "thanks — brushed off graciously", topic: "مجاملات" },
+  { id: "r013", call: "ما قصرت", callTr: "mā gaṣṣart", resp: "هذا واجبي", respTr: "hādha wājbi", en: "\"you came through\" — deflect the credit", topic: "مجاملات" },
+  { id: "r014", call: "حياك الله", callTr: "ḥayyāk aḷḷa", resp: "الله يحييك", respTr: "aḷḷa yḥayyīk", en: "welcome (to a guest)", topic: "ضيافة" },
+  { id: "r015", call: "عسى ما شر؟", callTr: "ʿasa mā sharr?", resp: "شر ما ييك — كله خير", respTr: "sharr mā yīk — killa khēr", en: "\"I hope nothing's wrong?\" — reassure the asker", topic: "مجاملات" },
+  { id: "r016", call: "مبروك!", callTr: "mabrūk", resp: "الله يبارك فيك — عقبالك", respTr: "aḷḷa ybārik fīk — ʿugbālik", en: "congratulations — bless back, wish them the same", topic: "مناسبات" },
+  { id: "r017", call: "عساكم من عواده", callTr: "ʿasākum min ʿuwwāda", resp: "وأنتم من عايدينه — أيامكم سعيدة", respTr: "w-antum min ʿāydīna — ayyāmkum saʿīda", en: "Eid greeting", topic: "مناسبات" },
+  { id: "r018", call: "مبارك عليكم الشهر", callTr: "mbārak ʿalēkum ish-shahar", resp: "علينا وعليكم — عساكم من عواده", respTr: "ʿalēna u-ʿalēkum", en: "start of Ramadan", topic: "مناسبات" },
+  { id: "r019", call: "تقبل الله طاعتكم", callTr: "taqabbal aḷḷa ṭāʿatkum", resp: "منا ومنكم صالح الأعمال", respTr: "minna u-minkum ṣāliḥ il-aʿmāl", en: "late Ramadan / after worship", topic: "مناسبات" },
+  { id: "r020", call: "كل عام وأنتم بخير", callTr: "kill ʿām w-antum b-khēr", resp: "وأنت بخير وصحة وسلامة", respTr: "w-inta b-khēr u-ṣiḥḥa u-salāma", en: "any annual occasion", topic: "مناسبات" },
+  { id: "r021", call: "مبروك ما ياكم", callTr: "mabrūk mā yākum", resp: "الله يبارك فيك", respTr: "aḷḷa ybārik fīk", en: "congratulations on a newborn", topic: "مناسبات", note: "التهنئة الكويتية بالمولود اليديد" },
+  { id: "r022", call: "الحمدلله على السلامة", callTr: "il-ḥamdilla ʿas-salāma", resp: "الله يسلمك", respTr: "aḷḷa ysallmik", en: "to a returning traveler or someone recovered", topic: "مجاملات" },
+  { id: "r023", call: "يرحمك الله (عقب العطسة)", callTr: "yarḥamuk aḷḷa", resp: "يهديكم الله ويصلح بالكم", respTr: "yahdīkum aḷḷa wa yuṣliḥ bālakum", en: "you sneezed, said الحمدلله, they blessed you — complete the chain", topic: "مجاملات" },
+  { id: "r024", call: "عظم الله أجركم", callTr: "ʿaẓẓam aḷḷa ajrakum", resp: "أجرنا وأجركم — شكر الله سعيكم", respTr: "ajirna u-ajirkum — shakar aḷḷa saʿyakum", en: "condolences at a عزاء — the reply every adult must know", topic: "عزاء" },
+  { id: "r025", call: "جزاك الله خير", callTr: "jazāk aḷḷa khēr", resp: "وإياك", respTr: "w-iyyāk", en: "may God reward you", topic: "مجاملات" },
+  { id: "r026", call: "نعيمًا", callTr: "naʿīman", resp: "الله ينعم عليك", respTr: "aḷḷa yinʿim ʿalēk", en: "after a haircut or shower", topic: "مجاملات" },
+  { id: "r027", call: "في أمان الله", callTr: "fi amān iḷḷa", resp: "في أمان الكريم", respTr: "fi amān il-karīm", en: "parting words", topic: "تحية" },
+  { id: "r028", call: "مع السلامة", callTr: "maʿ is-salāma", resp: "الله يسلمك", respTr: "aḷḷa ysallmik", en: "goodbye", topic: "تحية" },
+  { id: "r029", call: "قرّب!", callTr: "garrib!", resp: "بالعافية عليكم", respTr: "bil-ʿāfya ʿalēkum", en: "someone eating invites you to join — decline politely, bless the meal", topic: "ضيافة", note: "الرد الشائع إذا ما كنت بتنضم — وإذا قربت فـ«بسم الله»" },
+  { id: "r030", call: "شرفتونا", callTr: "sharraftūna", resp: "الشرف لنا", respTr: "ish-sharaf ilna", en: "\"you honored us\" — return the honor", topic: "ضيافة" },
+  { id: "r031", call: "تقدر تسوي لي هالطلب؟", callTr: "tigdar tsawwī li...", resp: "أبشر — تدلل، على راسي", respTr: "abshir — tdallal, ʿala rāsi", en: "a request from someone dear — the generous yes", topic: "مجاملات", note: "ثلاث صيغ كلها تنفع: أبشر، تدلل، على راسي" },
+  { id: "r032", call: "وين هالغيبة؟", callTr: "wēn hal-ghēba?", resp: "والله مشاغل — بس ما ننسى الطيبين", respTr: "waḷḷa mashāghil — bas mā nansa iṭ-ṭaybīn", en: "\"where have you been?\" — a warm excuse", topic: "تحية", note: "الرد مو ثابت حرفيًا — المهم الاعتذار الدافئ" },
+];
+</script>
+<script>
+/*
+ * خوش كلام — app logic.
+ * Everything lives in localStorage under one key; export/import moves it
+ * between devices. Learning design: FSRS spacing + retrieval practice with
+ * escalating difficulty (recognition → production → cloze) + a daily
+ * real-world usage challenge (generation & transfer).
+ */
+(() => {
+  const LS_KEY = "khosh-kalam-v1";
+  const DAY = FSRS.DAY;
+
+  // ── store ─────────────────────────────────────────────────────────────
+  const defaults = () => ({
+    version: 1,
+    progress: {}, // id -> FSRS card
+    overrides: {}, // id -> partial word fields
+    custom: [], // user-added words
+    removed: [], // archived word ids
+    verify: {}, // verify id -> "approved" | "rejected"
+    packs: [], // added pack keys
+    settings: { newPerDay: 8 },
+    log: {}, // "YYYY-MM-DD" -> {reviews, correct, intro}
+    challenges: {}, // date -> {ids: [], done: []}
+  });
+
+  let store = defaults();
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) store = Object.assign(defaults(), JSON.parse(raw));
+  } catch (e) {
+    /* corrupted or unavailable storage — start fresh in memory */
+  }
+  const save = () => {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(store));
+    } catch (e) {
+      /* storage full/blocked — session continues in memory */
+    }
+  };
+
+  const todayKey = (d = new Date()) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  const log = () => (store.log[todayKey()] ||= { reviews: 0, correct: 0, intro: 0 });
+
+  // ── word assembly ─────────────────────────────────────────────────────
+  function allWords() {
+    const words = [...SEED_MANUAL];
+    // call-and-response pairs join the same deck as their own card type
+    words.push(...SEED_RESPONSES.map((r) => ({
+      id: r.id, ar: r.call, tr: r.callTr, en: r.en, reg: "pair", topic: r.topic,
+      ex: `«${r.call}» — «${r.resp}»`, note: r.note, resp: r.resp, respTr: r.respTr,
+    })));
+    for (const pack of SEED_PACKS)
+      if (store.packs.includes(pack.key)) words.push(...pack.words);
+    for (const v of SEED_VERIFY)
+      if (store.verify[v.id] === "approved" && v.en)
+        words.push({
+          id: v.id, ar: v.ar, tr: v.tr === "—" ? "" : v.tr, en: v.en,
+          reg: v.reg || "msa", topic: v.topic || "يومي", ex: "", note: v.fix,
+        });
+    words.push(...store.custom);
+    return words
+      .filter((w) => !store.removed.includes(w.id))
+      .map((w) => (store.overrides[w.id] ? { ...w, ...store.overrides[w.id] } : w));
+  }
+
+  const isStudyable = (w) => w.reg !== "tip" && w.ex !== "—";
+  const cardOf = (w) => store.progress[w.id] || FSRS.emptyCard();
+
+  // ── session ───────────────────────────────────────────────────────────
+  let session = null; // {queue: [wordId,...], total, done, current, flipped}
+
+  function buildSession() {
+    const words = allWords().filter(isStudyable);
+    const byId = Object.fromEntries(words.map((w) => [w.id, w]));
+    const now = Date.now();
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const due = words
+      .filter((w) => {
+        const c = store.progress[w.id];
+        return c && c.reps > 0 && c.due <= endOfDay.getTime();
+      })
+      .sort((a, b) => store.progress[a.id].due - store.progress[b.id].due);
+
+    const newBudget = Math.max(0, store.settings.newPerDay - log().intro);
+    // thread new cards from both pools so pairs surface early instead of
+    // waiting behind the whole vocabulary list: every 4th new card is a pair
+    const freshAll = words.filter((w) => !store.progress[w.id]);
+    const freshPairs = freshAll.filter((w) => w.reg === "pair");
+    const freshRest = freshAll.filter((w) => w.reg !== "pair");
+    const fresh = [];
+    for (let pi = 0, ri = 0, k = 0; fresh.length < newBudget && (pi < freshPairs.length || ri < freshRest.length); k++) {
+      if ((k % 4 === 3 && pi < freshPairs.length) || ri >= freshRest.length) fresh.push(freshPairs[pi++]);
+      else fresh.push(freshRest[ri++]);
+    }
+
+    // interleave: shuffle due reviews, then thread new cards in evenly
+    const queue = shuffle(due.map((w) => w.id));
+    if (fresh.length) {
+      const step = Math.max(1, Math.floor(queue.length / (fresh.length + 1)));
+      fresh.forEach((w, i) => queue.splice(Math.min(queue.length, (i + 1) * step + i), 0, w.id));
+    }
+    session = { queue, byId, total: queue.length, done: 0, flipped: false };
+  }
+
+  /* Exercise for a card:
+     - first sighting → "learn" (word + everything shown, then self-grade)
+     - young (stability < 7d) → "recall": AR shown, retrieve meaning
+     - mature → alternate "produce" (EN → AR) and "cloze" (fill the blank) */
+  function exerciseFor(word, card) {
+    if (word.reg === "pair") return !card || card.reps === 0 ? "learn" : "respond";
+    if (!card || card.reps === 0) return "learn";
+    if (card.stability < 7) return "recall";
+    const cloze = makeCloze(word);
+    if (card.reps % 2 === 0 && cloze) return "cloze";
+    return "produce";
+  }
+
+  function makeCloze(word) {
+    if (!word.ex || word.ex === "—") return null;
+    const head = word.ar.replace(/^ال/, "").split(/[\s/]+/)[0];
+    if (head.length < 3) return null;
+    const tokens = word.ex.split(" ");
+    let best = -1, bestLen = 2;
+    tokens.forEach((t, i) => {
+      const len = lcsLen(clean(t), clean(head));
+      if (len > bestLen) { bestLen = len; best = i; }
+    });
+    if (best < 0) return null;
+    const blanked = tokens.map((t, i) => (i === best ? "＿＿＿" : t)).join(" ");
+    return { blanked, answer: tokens[best] };
+  }
+  const clean = (s) => s.replace(/[،.؟!:—«»"()]/g, "");
+  function lcsLen(a, b) {
+    let max = 0;
+    for (let i = 0; i < a.length; i++)
+      for (let j = 0; j < b.length; j++) {
+        let k = 0;
+        while (a[i + k] && a[i + k] === b[j + k]) k++;
+        if (k > max) max = k;
+      }
+    return max;
+  }
+
+  function gradeCurrent(g) {
+    const id = session.queue[0];
+    const word = session.byId[id];
+    const wasNew = !store.progress[id];
+    store.progress[id] = FSRS.grade(cardOf(word), g);
+    const l = log();
+    l.reviews += 1;
+    if (g > 1) l.correct += 1;
+    if (wasNew) l.intro += 1;
+    session.queue.shift();
+    session.done += 1;
+    if (g === 1) {
+      // relearn later in the same session
+      session.queue.splice(Math.min(3, session.queue.length), 0, id);
+      session.total += 1;
+    }
+    session.flipped = false;
+    save();
+    render();
+  }
+
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ── streak & challenge ────────────────────────────────────────────────
+  function streak() {
+    let n = 0;
+    const d = new Date();
+    if (!store.log[todayKey(d)]?.reviews) d.setDate(d.getDate() - 1); // today not yet done
+    while (store.log[todayKey(d)]?.reviews) { n += 1; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+
+  function challenge() {
+    const key = todayKey();
+    // a challenge cached empty (before any reviews existed) may regenerate
+    if (store.challenges[key] && !store.challenges[key].ids.length) delete store.challenges[key];
+    if (!store.challenges[key]) {
+      // pick 3 recently-studied words worth activating in real conversation
+      const cands = allWords()
+        .filter((w) => isStudyable(w) && store.progress[w.id]?.reps > 0)
+        .sort((a, b) => (store.progress[b.id].last || 0) - (store.progress[a.id].last || 0))
+        .slice(0, 12);
+      store.challenges[key] = { ids: shuffle(cands).slice(0, 3).map((w) => w.id), done: [] };
+      // keep only the last 30 challenge days
+      const keys = Object.keys(store.challenges).sort();
+      keys.slice(0, -30).forEach((k) => delete store.challenges[k]);
+      save();
+    }
+    return store.challenges[key];
+  }
+
+  // ── rendering ─────────────────────────────────────────────────────────
+  const stage = document.getElementById("stage");
+  let view = "today";
+  let wordsFilter = { q: "", reg: "", topic: "" };
+  let openWordId = null;
+  let showAddForm = false;
+  let backupPanel = null; // null | "export" | "import"
+  /* Embedded viewers block file downloads and file pickers, so offer them
+     only when the app owns its own window; copy/paste is the path that
+     always works. */
+  const canDownload = (() => { try { return window.self === window.top; } catch { return false; } })();
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const REG_LABEL = { kw: "كويتي", msa: "فصحى بالحچي", phrase: "عبارة", pair: "نداء ورد", tip: "ملاحظة", idiom: "مثل" };
+  const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_LABEL[reg] || esc(reg)}</span>`;
+
+  function render() {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === view));
+    document.getElementById("streakCount").textContent = streak();
+    const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
+    document.getElementById("verifyPill").textContent = pending || "";
+    ({ today: renderToday, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
+  }
+
+  // ── today ──
+  function renderToday() {
+    if (session && session.queue.length) return renderCard();
+
+    const words = allWords().filter(isStudyable);
+    const now = Date.now();
+    const endOfDay = new Date(); endOfDay.setHours(23, 59, 59, 999);
+    const dueCount = words.filter((w) => { const c = store.progress[w.id]; return c && c.reps > 0 && c.due <= endOfDay.getTime(); }).length;
+    const newCount = Math.min(words.filter((w) => !store.progress[w.id]).length, Math.max(0, store.settings.newPerDay - log().intro));
+    const l = log();
+    const ch = challenge();
+    const chWords = ch.ids.map((id) => words.find((w) => w.id === id)).filter(Boolean);
+
+    const finished = session && !session.queue.length;
+    session = null;
+
+    stage.innerHTML = `
+      ${finished ? `<div class="panel" style="border-color: rgb(47 191 113 / 0.5)"><b>ما قصرت! 🎉</b><div class="note-info">خلصت جلسة اليوم — ${l.reviews} مراجعة. العقل يثبت المعلومة وقت الراحة، فالباقي على باچر.</div></div>` : ""}
+      <div class="panel">
+        <div class="day-summary">
+          <div class="cell"><b>${dueCount}</b><span>مستحقة اليوم</span></div>
+          <div class="cell"><b>${newCount}</b><span>كلمات يديدة</span></div>
+          <div class="cell"><b>${l.reviews}</b><span>راجعتها اليوم</span></div>
+        </div>
+        ${dueCount + newCount > 0
+          ? `<div style="margin-top:1rem; text-align:center"><button class="btn btn-primary" id="startBtn" style="width:100%; padding:0.9rem">ابدأ الجلسة (${dueCount + newCount})</button></div>`
+          : `<div class="empty" style="padding:1.2rem 0 0.4rem">✅ ماكو شي مستحق الحين — رجعلنا باچر، التباعد هو السر.</div>`}
+      </div>
+
+      <div class="panel challenge">
+        <div class="microlabel">تحدي اليوم — استخدمها بمحادثة حقيقية</div>
+        ${chWords.length ? `<ul style="margin-top:0.5rem">${chWords.map((w) => `
+          <li class="${ch.done.includes(w.id) ? "done" : ""}">
+            <input type="checkbox" data-ch="${esc(w.id)}" ${ch.done.includes(w.id) ? "checked" : ""} />
+            <div><span class="w-ar">${esc(w.ar)}</span> <span class="note-info">${esc(w.en)}</span></div>
+          </li>`).join("")}</ul>
+          <div class="note-info" style="margin-top:0.5rem">الاسترجاع بمحادثة صجية أقوى تثبيت للذاكرة — علّم على اللي استخدمتها.</div>`
+        : `<div class="note-info" style="margin-top:0.5rem">راجع كم كلمة أول، وبنطلع لك تحدي يومي منها.</div>`}
+      </div>
+
+      <div class="panel">
+        <div class="microlabel">صيد اليوم — سمعت كلمة يديدة؟</div>
+        <div class="note-info" style="margin:0.4rem 0 0.6rem">نفس عادتك اللي بنيت فيها القائمة: أي كلمة تصيدها من مجلس أو اجتماع، سجلها على طول قبل لا تنطير.</div>
+        <button class="btn" id="captureBtn" style="width:100%">＋ سجل كلمة صدتها</button>
+      </div>`;
+
+    document.getElementById("startBtn")?.addEventListener("click", () => { buildSession(); render(); });
+    document.getElementById("captureBtn").addEventListener("click", () => { view = "words"; showAddForm = true; render(); });
+    stage.querySelectorAll("[data-ch]").forEach((cb) =>
+      cb.addEventListener("change", () => {
+        const c = challenge();
+        c.done = cb.checked ? [...new Set([...c.done, cb.dataset.ch])] : c.done.filter((x) => x !== cb.dataset.ch);
+        save(); render();
+      }));
+  }
+
+  function renderCard() {
+    const id = session.queue[0];
+    const w = session.byId[id];
+    const card = store.progress[id];
+    const mode = exerciseFor(w, card);
+    const cloze = mode === "cloze" ? makeCloze(w) : null;
+    const pct = Math.round((session.done / session.total) * 100);
+
+    const MODES = { learn: "كلمة يديدة — تعرّف عليها", recall: "شنو معناها؟", produce: "شلون تقولها بالعربي؟", cloze: "كمّل الفراغ", respond: "شنو الرد؟" };
+    if (w.reg === "pair" && mode === "learn") MODES.learn = "نداء ورد — تعرّف عليهم";
+
+    let front = "";
+    if (w.reg === "pair" && (mode === "learn" || session.flipped)) {
+      front = `
+        <div class="card-ar" style="font-size:1.5rem; color:var(--ink-dim)">${esc(w.ar)}</div>
+        <div class="microlabel">↓ الرد</div>
+        <div class="card-ar">${esc(w.resp)}</div>
+        ${w.respTr ? `<div class="card-tr">${esc(w.respTr)}</div>` : ""}
+        <div class="card-en" style="font-size:0.95rem">${esc(w.en)}</div>
+        ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}`;
+    } else if (mode === "respond") {
+      front = `<div class="card-ar">${esc(w.ar)}</div><div class="microlabel" style="margin-top:0.4rem">قالوها لك — رد عليهم بصوتك قبل لا تقلب</div>`;
+    } else if (mode === "learn" || session.flipped) {
+      front = `
+        <div class="card-ar">${esc(w.ar)}</div>
+        ${w.tr ? `<div class="card-tr">${esc(w.tr)}</div>` : ""}
+        <div class="card-en">${esc(w.en)}</div>
+        ${w.ex && w.ex !== "—" ? `<div class="card-ex">${esc(w.ex)}</div>` : ""}
+        ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}`;
+    } else if (mode === "recall") {
+      front = `<div class="card-ar">${esc(w.ar)}</div>`;
+    } else if (mode === "produce") {
+      front = `<div class="card-en" style="font-size:1.4rem">${esc(w.en)}</div><div class="microlabel" style="margin-top:0.4rem">${esc(w.topic)} · قلها بصوتك قبل لا تقلب</div>`;
+    } else if (mode === "cloze") {
+      front = `<div class="card-ar cloze">${esc(cloze.blanked).replace("＿＿＿", '<span class="blank">＿＿＿</span>')}</div><div class="card-en">${esc(w.en)}</div>`;
+    }
+
+    const graded = mode === "learn" || session.flipped;
+    stage.innerHTML = `
+      <div class="progressbar"><div style="width:${pct}%"></div></div>
+      <div class="panel">
+        <div class="h-row" style="margin:0"><span class="card-mode">${MODES[mode]}</span>${regTag(w.reg)}</div>
+        <div class="card-face">${front}</div>
+        ${graded
+          ? `<div class="grade-row">
+              <button class="btn g1" data-g="1">نسيت<span class="grade-sub">أشوفها بعد شوي</span></button>
+              <button class="btn g2" data-g="2">صعبة<span class="grade-sub">طلعت بجهد</span></button>
+              <button class="btn g3" data-g="3">زين<span class="grade-sub">تذكرتها</span></button>
+              <button class="btn g4" data-g="4">سهلة<span class="grade-sub">من عيوني</span></button>
+            </div>`
+          : `<button class="btn" id="flipBtn" style="width:100%; padding:0.85rem">اقلب البطاقة</button>
+             <div class="flip-hint">جاوب بصوتك أو براسك قبل لا تقلب — الاسترجاع هو التمرين</div>`}
+      </div>
+      <button class="btn btn-ghost btn-sm" id="endBtn">إنهاء الجلسة</button>`;
+
+    document.getElementById("flipBtn")?.addEventListener("click", () => { session.flipped = true; render(); });
+    document.getElementById("endBtn").addEventListener("click", () => { session = null; render(); });
+    stage.querySelectorAll("[data-g]").forEach((b) => b.addEventListener("click", () => gradeCurrent(+b.dataset.g)));
+  }
+
+  // keyboard: space to flip, 1-4 to grade
+  document.addEventListener("keydown", (e) => {
+    if (view !== "today" || !session || !session.queue.length) return;
+    if (e.key === " ") { e.preventDefault(); if (!session.flipped) { session.flipped = true; render(); } }
+    if (["1", "2", "3", "4"].includes(e.key)) {
+      const id = session.queue[0];
+      const mode = exerciseFor(session.byId[id], store.progress[id]);
+      if (mode === "learn" || session.flipped) gradeCurrent(+e.key);
+    }
+  });
+
+  // ── words ──
+  function renderWords() {
+    const words = allWords();
+    const topics = [...new Set(words.map((w) => w.topic))];
+    const q = wordsFilter.q.trim();
+    const list = words.filter((w) =>
+      (!q || w.ar.includes(q) || (w.en || "").toLowerCase().includes(q.toLowerCase()) || (w.tr || "").toLowerCase().includes(q.toLowerCase())) &&
+      (!wordsFilter.reg || w.reg === wordsFilter.reg) &&
+      (!wordsFilter.topic || w.topic === wordsFilter.topic));
+
+    stage.innerHTML = `
+      <div class="h-row"><h2>الكلمات (${words.length})</h2>
+        <button class="btn btn-sm ${showAddForm ? "" : "btn-primary"}" id="addToggle">${showAddForm ? "إغلاق" : "＋ كلمة يديدة"}</button></div>
+      ${showAddForm ? addFormHTML() : ""}
+      <div class="toolbar">
+        <input type="search" id="q" placeholder="دور بالعربي أو الإنجليزي…" value="${esc(wordsFilter.q)}" />
+        <select id="fReg"><option value="">كل السجلات</option>
+          ${Object.entries(REG_LABEL).map(([k, v]) => `<option value="${k}" ${wordsFilter.reg === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+        <select id="fTopic"><option value="">كل المواضيع</option>
+          ${topics.map((t) => `<option ${wordsFilter.topic === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+      </div>
+      <div class="panel" style="padding:0.3rem 1.1rem">
+        ${list.length ? list.map(wordRowHTML).join("") : `<div class="empty">ماكو نتائج</div>`}
+      </div>
+      <div class="panel">
+        <div class="microlabel">النسخ الاحتياطي</div>
+        <div class="note-info" style="margin:0.4rem 0 0.6rem">تقدمك محفوظ بهالجهاز فقط — خذ نسخة بين فترة وفترة، أو انقل فيها تقدمك لجهاز ثاني.</div>
+        <div class="v-actions">
+          <button class="btn btn-sm" id="exportBtn">نسخة احتياطية</button>
+          <button class="btn btn-sm" id="importBtn">استعادة</button>
+          <label class="f" style="margin-inline-start:auto; display:flex; align-items:center; gap:0.4rem">يديدة باليوم
+            <input type="number" id="newPerDay" min="0" max="50" value="${store.settings.newPerDay}" style="width:4.2rem" /></label>
+        </div>
+        ${backupPanel === "export" ? `
+          <div class="word-detail" style="margin-top:0.7rem">
+            <div class="note-info">انسخ النص كله واحفظه بأي مكان أمين — أو نزّله كملف إذا جهازك يسمح.</div>
+            <textarea id="expText" rows="4" readonly style="margin-top:0.5rem; font-size:0.7rem" dir="ltr">${esc(JSON.stringify({ ...store, exportedAt: new Date().toISOString() }))}</textarea>
+            <div class="v-actions">
+              <button class="btn btn-sm btn-primary" id="copyBtn">نسخ</button>
+              ${canDownload ? `<button class="btn btn-sm" id="dlBtn">تنزيل ملف</button>` : ""}
+              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+            </div>
+          </div>` : ""}
+        ${backupPanel === "import" ? `
+          <div class="word-detail" style="margin-top:0.7rem">
+            <div class="note-info">الصق نص النسخة الاحتياطية هني، أو اختر الملف. ⚠ الاستعادة تستبدل تقدمك الحالي كله.</div>
+            <textarea id="impText" rows="4" placeholder="الصق النص هني…" style="margin-top:0.5rem; font-size:0.7rem" dir="ltr"></textarea>
+            <div class="v-actions">
+              <button class="btn btn-sm btn-primary" id="impPaste">استعادة من النص</button>
+              ${canDownload ? `<button class="btn btn-sm" id="importBtnFile">اختر ملف</button>
+              <input type="file" id="importFile" accept=".json,application/json" style="display:none" />` : ""}
+              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+            </div>
+          </div>` : ""}
+      </div>`;
+
+    document.getElementById("addToggle").addEventListener("click", () => { showAddForm = !showAddForm; render(); });
+    document.getElementById("q").addEventListener("input", (e) => { wordsFilter.q = e.target.value; render(); document.getElementById("q").focus(); const el = document.getElementById("q"); el.setSelectionRange(el.value.length, el.value.length); });
+    document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
+    document.getElementById("fTopic").addEventListener("change", (e) => { wordsFilter.topic = e.target.value; render(); });
+    document.getElementById("newPerDay").addEventListener("change", (e) => { store.settings.newPerDay = Math.max(0, +e.target.value || 0); save(); });
+    document.getElementById("exportBtn").addEventListener("click", () => { backupPanel = backupPanel === "export" ? null : "export"; render(); });
+    document.getElementById("importBtn").addEventListener("click", () => { backupPanel = backupPanel === "import" ? null : "import"; render(); });
+    stage.querySelectorAll("#closeBackup").forEach((b) => b.addEventListener("click", () => { backupPanel = null; render(); }));
+    document.getElementById("copyBtn")?.addEventListener("click", copyBackup);
+    document.getElementById("dlBtn")?.addEventListener("click", downloadJSON);
+    document.getElementById("impPaste")?.addEventListener("click", () => applyBackup(document.getElementById("impText").value));
+    document.getElementById("importBtnFile")?.addEventListener("click", () => document.getElementById("importFile").click());
+    document.getElementById("importFile")?.addEventListener("change", importJSON);
+    document.getElementById("expText")?.addEventListener("focus", (e) => e.target.select());
+    stage.querySelectorAll("[data-open]").forEach((r) => r.addEventListener("click", () => { openWordId = openWordId === r.dataset.open ? null : r.dataset.open; render(); }));
+    stage.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (confirm("تبي تأرشف هالكلمة؟ (تختفي من التدريب، وتقدر ترجعها من ملف التصدير)")) {
+        store.removed.push(b.dataset.del); save(); openWordId = null; render();
+      }
+    }));
+    if (showAddForm) wireAddForm();
+  }
+
+  function wordRowHTML(w) {
+    const c = store.progress[w.id];
+    const state = !c ? "يديدة" : c.stability >= 21 ? "راسخة" : c.stability >= 7 ? "قاعدة تثبت" : "طرية";
+    const open = openWordId === w.id;
+    return `
+      <div class="word-row" data-open="${esc(w.id)}" style="cursor:pointer">
+        <div class="w-main">
+          <span class="w-ar">${esc(w.ar)}</span>
+          <div class="w-meta">${regTag(w.reg)} · ${esc(w.topic)} · ${state}${c ? ` · التالية ${new Date(c.due).toLocaleDateString("ar-KW", { day: "numeric", month: "short" })}` : ""}</div>
+          ${open ? `<div class="word-detail" onclick="event.stopPropagation()">
+              ${w.tr ? `<div class="card-tr">${esc(w.tr)}</div>` : ""}
+              ${w.ex && w.ex !== "—" ? `<div class="card-ex">${esc(w.ex)}</div>` : ""}
+              ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}
+              <div class="v-actions"><button class="btn btn-sm btn-danger" data-del="${esc(w.id)}">أرشفة</button></div>
+            </div>` : ""}
+        </div>
+        <div class="w-en">${esc(w.en)}</div>
+      </div>`;
+  }
+
+  function addFormHTML() {
+    return `
+      <div class="panel form-grid" id="addForm">
+        <label class="f">الكلمة أو العبارة (عربي) <input id="aAr" required /></label>
+        <label class="f">المعنى (English) <input id="aEn" dir="ltr" /></label>
+        <label class="f">النطق (translit) <input id="aTr" dir="ltr" placeholder="optional" /></label>
+        <div style="display:flex; gap:0.6rem">
+          <label class="f" style="flex:1">السجل
+            <select id="aReg"><option value="kw">كويتي</option><option value="msa">فصحى بالحچي</option><option value="phrase">عبارة</option></select></label>
+          <label class="f" style="flex:1">الموضوع <input id="aTopic" value="يومي" /></label>
+        </div>
+        <label class="f">جملة مثال (كويتي) — وين سمعتها؟ <textarea id="aEx" rows="2"></textarea></label>
+        <label class="f">ملاحظة <input id="aNote" placeholder="optional" /></label>
+        <button class="btn btn-primary" id="aSave">حفظ الكلمة</button>
+      </div>`;
+  }
+
+  function wireAddForm() {
+    document.getElementById("aSave").addEventListener("click", () => {
+      const ar = document.getElementById("aAr").value.trim();
+      if (!ar) return alert("اكتب الكلمة أول");
+      store.custom.push({
+        id: "c" + Date.now(),
+        ar, tr: document.getElementById("aTr").value.trim(),
+        en: document.getElementById("aEn").value.trim(),
+        reg: document.getElementById("aReg").value,
+        topic: document.getElementById("aTopic").value.trim() || "يومي",
+        ex: document.getElementById("aEx").value.trim(),
+        note: document.getElementById("aNote").value.trim(),
+      });
+      save(); showAddForm = false; render();
+    });
+  }
+
+  /* Backups travel as text first: a file download is blocked in some
+     embedded viewers, but copy/paste works everywhere. */
+  function copyBackup() {
+    const ta = document.getElementById("expText");
+    ta.focus(); ta.select();
+    const done = () => { const b = document.getElementById("copyBtn"); b.textContent = "تم النسخ ✓"; setTimeout(() => (b.textContent = "نسخ"), 1800); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } });
+    else { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } }
+  }
+
+  function downloadJSON() {
+    try {
+      const blob = new Blob([JSON.stringify({ ...store, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `khosh-kalam-${todayKey()}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch { alert("التنزيل مو متاح هني — انسخ النص بدالها"); }
+  }
+
+  function applyBackup(text) {
+    try {
+      const data = JSON.parse(text);
+      if (!data || typeof data !== "object" || !data.progress) throw new Error("bad");
+      store = Object.assign(defaults(), data);
+      backupPanel = null;
+      save(); render();
+      alert("تمت الاستعادة ✅");
+    } catch { alert("النص مو صالح — تأكد إنك ناسخ النسخة كاملة"); }
+  }
+
+  function importJSON(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => applyBackup(reader.result);
+    reader.readAsText(f);
+  }
+
+  // ── verify ──
+  function renderVerify() {
+    const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]);
+    const doneCount = SEED_VERIFY.length - pending.length;
+    const V_LABEL = {
+      "ok-msa": ["سليمة — فصحى", "tag-msa"], "ok-kw": ["سليمة — كويتية", "tag-kw"],
+      "wrong-gloss": ["المعنى غلط", "tag-bad"], misspelled: ["إملاء غلط", "tag-bad"],
+      "not-kuwaiti": ["مو كويتية", "tag-bad"], fabricated: ["مختلقة", "tag-bad"],
+      doubtful: ["مشكوك فيها", "tag-phrase"],
+    };
+    stage.innerHTML = `
+      <div class="h-row"><h2>التحقق من قوائم الذكاء الاصطناعي</h2></div>
+      <div class="note-info" style="margin-bottom:0.8rem">راجعت كل القوائم اللي جمعتها من قبل، كلمة كلمة. الحكم مكتوب على كل وحدة — اللي تعتمدها تدخل التدريب بمعناها المصحح، واللي ترفضها تنحفظ بالأرشيف. (${doneCount}/${SEED_VERIFY.length} خلصت)</div>
+      ${pending.length ? pending.map((v) => {
+        const [label, cls] = V_LABEL[v.verdict] || [v.verdict, ""];
+        const approvable = !!v.en;
+        return `<div class="panel">
+          <div class="h-row" style="margin:0">
+            <span class="w-ar" style="font-family:var(--font-ar); font-size:1.3rem">${esc(v.ar)}</span>
+            <span class="tag ${cls}">${label}</span>
+          </div>
+          ${v.aiGloss && v.aiGloss !== "—" ? `<div class="note-info">ترجمة القائمة القديمة: "${esc(v.aiGloss)}"</div>` : ""}
+          <div class="verdict">${esc(v.fix)}</div>
+          <div class="v-actions">
+            ${approvable ? `<button class="btn btn-sm btn-primary" data-approve="${esc(v.id)}">✓ ضيفها للتدريب${v.verdict.startsWith("ok") ? "" : " (بالمعنى المصحح)"}</button>` : ""}
+            <button class="btn btn-sm" data-reject="${esc(v.id)}">أرشفها</button>
+          </div>
+        </div>`;
+      }).join("") : `<div class="empty"><span class="big">🧹</span>خلصت التحقق كله — القائمة صارت نظيفة.</div>`}`;
+    stage.querySelectorAll("[data-approve]").forEach((b) => b.addEventListener("click", () => { store.verify[b.dataset.approve] = "approved"; save(); render(); }));
+    stage.querySelectorAll("[data-reject]").forEach((b) => b.addEventListener("click", () => { store.verify[b.dataset.reject] = "rejected"; save(); render(); }));
+  }
+
+  // ── packs ──
+  function renderPacks() {
+    stage.innerHTML = `
+      <div class="h-row"><h2>حزم التوسع</h2></div>
+      <div class="note-info" style="margin-bottom:0.8rem">عشان التطبيق يكبر وياك: كل حزمة مجموعة مدروسة تنضاف للتدريب لما تقرر إنك جاهز لها — مو كلها مرة وحدة.</div>
+      ${SEED_PACKS.map((p) => {
+        const added = store.packs.includes(p.key);
+        return `<div class="panel">
+          <div class="h-row" style="margin:0"><h2>${esc(p.name)}</h2><span class="tag">${p.words.length} بطاقة</span></div>
+          <div class="note-info" style="margin:0.4rem 0 0.6rem">${esc(p.desc)}</div>
+          <div class="card-ex" style="border:none; padding:0; font-size:1rem">${p.words.slice(0, 3).map((w) => esc(w.ar)).join(" · ")} …</div>
+          <div class="v-actions">
+            ${added
+              ? `<span class="tag tag-kw">مضافة ✓</span>`
+              : `<button class="btn btn-sm btn-primary" data-pack="${esc(p.key)}">أضف الحزمة</button>`}
+          </div>
+        </div>`;
+      }).join("")}`;
+    stage.querySelectorAll("[data-pack]").forEach((b) => b.addEventListener("click", () => { store.packs.push(b.dataset.pack); save(); render(); }));
+  }
+
+  // ── stats ──
+  function renderStats() {
+    const words = allWords().filter(isStudyable);
+    const active = words.filter((w) => store.progress[w.id]?.reps > 0);
+    const mature = active.filter((w) => store.progress[w.id].stability >= 21);
+    const kw = words.filter((w) => w.reg === "kw").length;
+
+    let r30 = { reviews: 0, correct: 0 };
+    const d = new Date();
+    for (let i = 0; i < 30; i++) {
+      const l = store.log[todayKey(d)];
+      if (l) { r30.reviews += l.reviews; r30.correct += l.correct; }
+      d.setDate(d.getDate() - 1);
+    }
+    const retention = r30.reviews ? Math.round((r30.correct / r30.reviews) * 100) : null;
+
+    // 7-day due forecast
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() + i);
+      const end = new Date(start); end.setHours(23, 59, 59, 999);
+      const n = active.filter((w) => {
+        const due = store.progress[w.id].due;
+        return i === 0 ? due <= end.getTime() : due >= start.getTime() && due <= end.getTime();
+      }).length;
+      days.push({ label: i === 0 ? "اليوم" : start.toLocaleDateString("ar-KW", { weekday: "short" }), n });
+    }
+    const max = Math.max(1, ...days.map((x) => x.n));
+
+    stage.innerHTML = `
+      <div class="h-row"><h2>إحصائياتك</h2></div>
+      <div class="stat-grid">
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${active.length}</b><div class="microlabel">كلمة داخل التدريب (من ${words.length})</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${mature.length}</b><div class="microlabel">راسخة (ثبات ٣ أسابيع+)</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${retention === null ? "—" : retention + "٪"}</b><div class="microlabel">نسبة التذكر (٣٠ يوم)</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${streak()}</b><div class="microlabel">أيام متتالية 🔥</div></div>
+      </div>
+      <div class="panel" style="margin-top:0.9rem">
+        <div class="microlabel">المستحق خلال الأسبوع الياي</div>
+        <div class="forecast" style="margin-bottom:1.4rem">
+          ${days.map((x) => `<div class="bar" style="height:${(x.n / max) * 100}%"><span>${x.n || ""}</span><em>${esc(x.label)}</em></div>`).join("")}
+        </div>
+      </div>
+      <div class="panel">
+        <div class="microlabel">التوزيع</div>
+        <div class="note-info" style="margin-top:0.4rem">
+          ${kw} كويتي صرف · ${words.filter((w) => w.reg === "msa").length} فصحى بالحچي · ${words.filter((w) => w.reg === "phrase").length} عبارات · ${words.filter((w) => w.reg === "pair").length} نداء ورد
+          ${retention !== null && retention < 80 ? "<br>💡 نسبة التذكر تحت ٨٠٪ — قلل الكلمات اليديدة باليوم شوي، والجودة قبل الكمية." : ""}
+          ${retention !== null && retention > 95 && active.length > 30 ? "<br>💡 نسبة تذكرك عالية وايد — تقدر تزيد الكلمات اليديدة باليوم." : ""}
+        </div>
+      </div>
+      <div class="panel note-info">
+        <div class="microlabel" style="margin-bottom:0.4rem">ليش التطبيق مبني چذي؟</div>
+        الجدولة على خوارزمية FSRS للتكرار المتباعد — تراجع الكلمة قبل ما تنساها بشوي، وهذا أكفأ وقت للتثبيت.
+        كل مراجعة استرجاع نشط (تجاوب قبل ما تقلب) لأن الاختبار يثبت أقوى من إعادة القراءة،
+        والبطاقة تتدرج من التعرف إلى الإنتاج إلى إكمال الجملة لأن الصعوبة المدروسة تبني ذاكرة أمتن.
+        وتحدي الاستخدام اليومي ينقل الكلمة من التطبيق إلى لسانك.
+      </div>`;
+  }
+
+  // ── boot ──
+  document.querySelectorAll(".tab").forEach((t) =>
+    t.addEventListener("click", () => { view = t.dataset.view; session = null; render(); }));
+  render();
+})();
+</script>

@@ -7,16 +7,35 @@ speaker: the goal is register expansion, not learning Arabic.
 
 **No build step, no dependencies, no server.** Open `index.html` and start.
 
-## Running it
+## Where to run it
 
-- **Locally:** open `index.html` in any browser, or serve the folder
-  (`python3 -m http.server`) to get offline caching + install-to-homescreen.
-- **Hosted:** any static host works. For GitHub Pages: repo → Settings →
-  Pages → deploy from `main` branch root. On your phone, "Add to Home
-  Screen" makes it a full-screen daily app.
+Any of these work — pick by how much setup you want:
 
-Progress lives in the browser's `localStorage`. Use **الكلمات → تصدير JSON**
-regularly to back up, and **استيراد** to move progress between devices.
+| Option | Setup | Notes |
+|---|---|---|
+| **Open the file** | none | Double-click `index.html`. Works offline immediately; no install |
+| **Claude Artifact** | `node build.js`, publish `dist/khosh-kalam.html` | A private URL that opens on any device. Single-file build |
+| **GitHub Pages** | Settings → Pages → deploy from `main`, root | Free on public repos; paid for private. Best "add to home screen" experience |
+| **Netlify / Vercel** | drag the folder onto their dashboard | Free on private code, custom domain, one-minute setup |
+| **Local server** | `python3 -m http.server` | Enables the service worker, so offline caching and install-to-homescreen work |
+
+On a phone, whichever URL you use, "Add to Home Screen" turns it into a
+full-screen app that launches like any other.
+
+**Progress lives in that browser's `localStorage`** — it is per-device and per-URL,
+so moving hosts starts a fresh deck. Under **الكلمات → نسخة احتياطية** you can
+copy your whole state as text (or download it as a file where the browser
+allows), and **استعادة** takes it back in — that's how you carry a deck from
+laptop to phone, or across a move to a different host.
+
+## Building the single-file version
+
+```bash
+node build.js     # → dist/khosh-kalam.html, everything inlined
+```
+
+The multi-file version in the repo root is the source of truth. Always edit
+there and rebuild; never hand-edit `dist/`.
 
 ## The learning science it's built on
 

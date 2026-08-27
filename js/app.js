@@ -208,6 +208,11 @@
   let wordsFilter = { q: "", reg: "", topic: "" };
   let openWordId = null;
   let showAddForm = false;
+  let backupPanel = null; // null | "export" | "import"
+  /* Embedded viewers block file downloads and file pickers, so offer them
+     only when the app owns its own window; copy/paste is the path that
+     always works. */
+  const canDownload = (() => { try { return window.self === window.top; } catch { return false; } })();
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const REG_LABEL = { kw: "كويتي", msa: "فصحى بالحچي", phrase: "عبارة", pair: "نداء ورد", tip: "ملاحظة", idiom: "مثل" };
@@ -374,14 +379,34 @@
       </div>
       <div class="panel">
         <div class="microlabel">النسخ الاحتياطي</div>
-        <div class="note-info" style="margin:0.4rem 0 0.6rem">تقدمك محفوظ بهالجهاز فقط — صدّر نسخة بين فترة وفترة، أو انقل فيها تقدمك لجهاز ثاني.</div>
+        <div class="note-info" style="margin:0.4rem 0 0.6rem">تقدمك محفوظ بهالجهاز فقط — خذ نسخة بين فترة وفترة، أو انقل فيها تقدمك لجهاز ثاني.</div>
         <div class="v-actions">
-          <button class="btn btn-sm" id="exportBtn">تصدير JSON</button>
-          <button class="btn btn-sm" id="importBtn">استيراد</button>
-          <input type="file" id="importFile" accept=".json" style="display:none" />
+          <button class="btn btn-sm" id="exportBtn">نسخة احتياطية</button>
+          <button class="btn btn-sm" id="importBtn">استعادة</button>
           <label class="f" style="margin-inline-start:auto; display:flex; align-items:center; gap:0.4rem">يديدة باليوم
             <input type="number" id="newPerDay" min="0" max="50" value="${store.settings.newPerDay}" style="width:4.2rem" /></label>
         </div>
+        ${backupPanel === "export" ? `
+          <div class="word-detail" style="margin-top:0.7rem">
+            <div class="note-info">انسخ النص كله واحفظه بأي مكان أمين — أو نزّله كملف إذا جهازك يسمح.</div>
+            <textarea id="expText" rows="4" readonly style="margin-top:0.5rem; font-size:0.7rem" dir="ltr">${esc(JSON.stringify({ ...store, exportedAt: new Date().toISOString() }))}</textarea>
+            <div class="v-actions">
+              <button class="btn btn-sm btn-primary" id="copyBtn">نسخ</button>
+              ${canDownload ? `<button class="btn btn-sm" id="dlBtn">تنزيل ملف</button>` : ""}
+              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+            </div>
+          </div>` : ""}
+        ${backupPanel === "import" ? `
+          <div class="word-detail" style="margin-top:0.7rem">
+            <div class="note-info">الصق نص النسخة الاحتياطية هني، أو اختر الملف. ⚠ الاستعادة تستبدل تقدمك الحالي كله.</div>
+            <textarea id="impText" rows="4" placeholder="الصق النص هني…" style="margin-top:0.5rem; font-size:0.7rem" dir="ltr"></textarea>
+            <div class="v-actions">
+              <button class="btn btn-sm btn-primary" id="impPaste">استعادة من النص</button>
+              ${canDownload ? `<button class="btn btn-sm" id="importBtnFile">اختر ملف</button>
+              <input type="file" id="importFile" accept=".json,application/json" style="display:none" />` : ""}
+              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+            </div>
+          </div>` : ""}
       </div>`;
 
     document.getElementById("addToggle").addEventListener("click", () => { showAddForm = !showAddForm; render(); });
@@ -389,9 +414,15 @@
     document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
     document.getElementById("fTopic").addEventListener("change", (e) => { wordsFilter.topic = e.target.value; render(); });
     document.getElementById("newPerDay").addEventListener("change", (e) => { store.settings.newPerDay = Math.max(0, +e.target.value || 0); save(); });
-    document.getElementById("exportBtn").addEventListener("click", exportJSON);
-    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
-    document.getElementById("importFile").addEventListener("change", importJSON);
+    document.getElementById("exportBtn").addEventListener("click", () => { backupPanel = backupPanel === "export" ? null : "export"; render(); });
+    document.getElementById("importBtn").addEventListener("click", () => { backupPanel = backupPanel === "import" ? null : "import"; render(); });
+    stage.querySelectorAll("#closeBackup").forEach((b) => b.addEventListener("click", () => { backupPanel = null; render(); }));
+    document.getElementById("copyBtn")?.addEventListener("click", copyBackup);
+    document.getElementById("dlBtn")?.addEventListener("click", downloadJSON);
+    document.getElementById("impPaste")?.addEventListener("click", () => applyBackup(document.getElementById("impText").value));
+    document.getElementById("importBtnFile")?.addEventListener("click", () => document.getElementById("importFile").click());
+    document.getElementById("importFile")?.addEventListener("change", importJSON);
+    document.getElementById("expText")?.addEventListener("focus", (e) => e.target.select());
     stage.querySelectorAll("[data-open]").forEach((r) => r.addEventListener("click", () => { openWordId = openWordId === r.dataset.open ? null : r.dataset.open; render(); }));
     stage.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -456,28 +487,43 @@
     });
   }
 
-  function exportJSON() {
-    const blob = new Blob([JSON.stringify({ ...store, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `khosh-kalam-${todayKey()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+  /* Backups travel as text first: a file download is blocked in some
+     embedded viewers, but copy/paste works everywhere. */
+  function copyBackup() {
+    const ta = document.getElementById("expText");
+    ta.focus(); ta.select();
+    const done = () => { const b = document.getElementById("copyBtn"); b.textContent = "تم النسخ ✓"; setTimeout(() => (b.textContent = "نسخ"), 1800); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } });
+    else { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } }
+  }
+
+  function downloadJSON() {
+    try {
+      const blob = new Blob([JSON.stringify({ ...store, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `khosh-kalam-${todayKey()}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch { alert("التنزيل مو متاح هني — انسخ النص بدالها"); }
+  }
+
+  function applyBackup(text) {
+    try {
+      const data = JSON.parse(text);
+      if (!data || typeof data !== "object" || !data.progress) throw new Error("bad");
+      store = Object.assign(defaults(), data);
+      backupPanel = null;
+      save(); render();
+      alert("تمت الاستعادة ✅");
+    } catch { alert("النص مو صالح — تأكد إنك ناسخ النسخة كاملة"); }
   }
 
   function importJSON(e) {
     const f = e.target.files[0];
     if (!f) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (!data.progress) throw new Error("bad file");
-        store = Object.assign(defaults(), data);
-        save(); render();
-        alert("تم الاستيراد ✅");
-      } catch { alert("الملف مو صالح"); }
-    };
+    reader.onload = () => applyBackup(reader.result);
     reader.readAsText(f);
   }
 
