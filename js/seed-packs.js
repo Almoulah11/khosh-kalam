@@ -8,6 +8,8 @@ const SEED_PACKS = [
     key: "connectors",
     name: "روابط النقاش",
     desc: "أدوات الربط اللي ترفع مستوى كلامك بالمجالس الجادة — من «بس» و«يعني» إلى لغة المحاور المتمكن.",
+    nameEn: "Discussion connectors",
+    descEn: "The linking devices that lift your speech in serious majālis — from \"bas\" and \"yaʿni\" to the language of a fluent debater.",
     words: [
       { id: "p101", ar: "بالتالي", tr: "bit-tāli", en: "therefore, consequently", reg: "msa", topic: "نقاش", ex: "الميزانية محدودة، وبالتالي لازم نرتب الأولويات." },
       { id: "p102", ar: "علاوة على ذلك", tr: "ʿilāwatan ʿala dhālik", en: "moreover", reg: "phrase", topic: "نقاش", ex: "المشروع مكلف، وعلاوة على ذلك السوق مو جاهز له." },
@@ -31,6 +33,8 @@ const SEED_PACKS = [
     key: "social",
     name: "مجاملات ومناسبات كويتية",
     desc: "العبارات اللي تخليك حاضر البديهة بكل موقف اجتماعي — تحية، شكر، تهنئة، وردودها الصحيحة.",
+    nameEn: "Kuwaiti courtesies & occasions",
+    descEn: "The lines that keep you quick on your feet socially — greetings, thanks, congratulations, and their correct replies.",
     words: [
       { id: "p201", ar: "عساكم من عواده", tr: "ʿasākum min ʿuwwāda", en: "Eid greeting: may you live to see it return", reg: "kw", topic: "مجاملات", ex: "تنقال بالعيد: «عساكم من عواده» — والرد: «وأنتم من عايدينه» أو «أيامكم سعيدة»." },
       { id: "p202", ar: "ما قصرت", tr: "mā gaṣṣart", en: "you did great / thank you (lit. you fell not short)", reg: "kw", topic: "مجاملات", ex: "«خلصت لك المعاملة» — «ما قصرت والله!» والرد: «هذا واجبي»." },
@@ -56,6 +60,8 @@ const SEED_PACKS = [
     key: "proverbs",
     name: "أمثال متداولة بالكويت",
     desc: "أمثال حية بالمجالس الكويتية والخليجية — المثل بمكانه الصح يختصر خطبة كاملة. أفضل مصدر للتأكد: كبار العائلة.",
+    nameEn: "Proverbs in circulation",
+    descEn: "Proverbs alive in Kuwaiti and Gulf majālis — the right one, well placed, does the work of a whole speech. Best source for confirming them: your family elders.",
     words: [
       { id: "p301", ar: "اللي ما يعرف الصقر يشويه", tr: "illi mā yaʿrif iṣ-ṣagir yishwīh", en: "who doesn't know the falcon's worth grills it", reg: "kw", topic: "أمثال", ex: "عرضوا فكرته ورفضوها — قلت له: اللي ما يعرف الصقر يشويه.", note: "يُضرب لمن يستهين بشي ثمين جهلًا بقيمته" },
       { id: "p302", ar: "الطول طول نخلة والعقل عقل صخلة", tr: "iṭ-ṭūl ṭūl nakhla wil-ʿagil ʿagil ṣakhla", en: "tall as a palm, mind of a goat kid", reg: "kw", topic: "أمثال", ex: "شكله يهيّب بس تصرفاته…‏ الطول طول نخلة والعقل عقل صخلة.", note: "للمظهر بلا عقل — تنقال مزحًا بين الربع" },
@@ -73,6 +79,8 @@ const SEED_PACKS = [
     key: "corrections",
     name: "مصطلحات مصححة (إنتاج وفضاء واقتصاد)",
     desc: "المصطلحات الصحيحة لمجالاتك — بدال الترجمات المختلقة اللي كانت بقوائم الذكاء الاصطناعي القديمة.",
+    nameEn: "Corrected terminology (production, space, economics)",
+    descEn: "The correct terms for your fields — replacing the invented translations that were in the old AI lists.",
     words: [
       { id: "p401", ar: "الزبدة", tr: "iz-zibda", en: "the bottom line, the gist", reg: "kw", topic: "نقاش", ex: "طولنا بالشرح — الزبدة: المشروع مربح والتوقيت مناسب." },
       { id: "p402", ar: "مؤثرات خاصة", tr: "muʾaththirāt khāṣṣa", en: "special effects / VFX", reg: "msa", topic: "إنتاج", ex: "شغلنا بالإنتاج أغلبه مؤثرات خاصة وتصحيح ألوان.", note: "التصحيح: مو «معجزات» مثل ما قالت القائمة القديمة" },

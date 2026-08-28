@@ -161,3 +161,55 @@ label.f > * { margin-top: 0.25rem; }
 .empty .big { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
 a { color: var(--blue); }
 .note-info { font-size: 0.8rem; color: var(--ink-faint); line-height: 1.9; }
+
+/* ── bilingual layer ──
+   Arabic always leads; the English sits beneath it, quieter and smaller.
+   In Arabic-only mode the .ar-only body class removes the English entirely,
+   along with the transliterations and glosses on cards. */
+.bi { display: block; }
+.bi-ar { display: block; }
+.bi-en,
+.bi-inline {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  letter-spacing: 0;
+  direction: ltr;
+  unicode-bidi: isolate;
+  color: var(--ink-faint);
+}
+.bi-en { display: block; font-size: 0.74em; line-height: 1.4; margin-top: 0.1em; }
+.bi-inline { font-size: 0.86em; opacity: 0.75; }
+h2 .bi-en { font-size: 0.62em; }
+.note-info .bi-en,
+.verdict .bi-en { font-size: 0.92em; opacity: 0.85; }
+.tab .bi-en { font-size: 0.82em; margin-top: 0; }
+.grade-sub .bi-en { font-size: 0.9em; }
+.tag .bi-inline { font-size: 0.9em; }
+.ar-only .card-tr,
+.ar-only .card-en,
+.ar-only .w-en,
+.ar-only .en-only { display: none; }
+
+/* ── language toggle ── */
+.topbar-right { display: flex; align-items: center; gap: 0.6rem; }
+.langtoggle {
+  display: inline-flex;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.langtoggle button {
+  padding: 0.24rem 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  color: var(--ink-faint);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.langtoggle button.active { background: rgb(47 191 113 / 0.16); color: var(--green); }
+.langtoggle button:focus-visible,
+.tab:focus-visible,
+.btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

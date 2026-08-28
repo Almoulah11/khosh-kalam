@@ -18,7 +18,7 @@
     removed: [], // archived word ids
     verify: {}, // verify id -> "approved" | "rejected"
     packs: [], // added pack keys
-    settings: { newPerDay: 8 },
+    settings: { newPerDay: 8, lang: "bi" }, // lang: "bi" bilingual | "ar" Arabic only
     log: {}, // "YYYY-MM-DD" -> {reviews, correct, intro}
     challenges: {}, // date -> {ids: [], done: []}
   });
@@ -116,6 +116,8 @@
     if (card.stability < 7) return "recall";
     const cloze = makeCloze(word);
     if (card.reps % 2 === 0 && cloze) return "cloze";
+    // "produce" prompts with the English gloss, which Arabic-only mode hides
+    if (!bilingual()) return cloze ? "cloze" : "recall";
     return "produce";
   }
 
@@ -215,11 +217,53 @@
   const canDownload = (() => { try { return window.self === window.top; } catch { return false; } })();
 
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const REG_LABEL = { kw: "كويتي", msa: "فصحى بالحچي", phrase: "عبارة", pair: "نداء ورد", tip: "ملاحظة", idiom: "مثل" };
-  const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_LABEL[reg] || esc(reg)}</span>`;
+
+  /* ── language ──
+     bilingual() drives every label: Arabic leads, English sits under it.
+     In Arabic-only mode the English simply isn't rendered. */
+  const bilingual = () => (store.settings.lang || "bi") === "bi";
+  const dateLocale = () => (bilingual() ? "en-GB" : "ar-KW");
+  function S(k, ...a) {
+    const s = UI[k] || { ar: k, en: k };
+    return {
+      ar: typeof s.ar === "function" ? s.ar(...a) : s.ar,
+      en: typeof s.en === "function" ? s.en(...a) : s.en,
+    };
+  }
+  /** Label as HTML: Arabic, with the English stacked beneath when bilingual. */
+  function t(k, ...a) {
+    const s = S(k, ...a);
+    return bilingual()
+      ? `<span class="bi"><span class="bi-ar">${esc(s.ar)}</span><span class="bi-en">${esc(s.en)}</span></span>`
+      : esc(s.ar);
+  }
+  /** Same, but inline on one line — for tags and meta rows. */
+  function ti(k, ...a) {
+    const s = S(k, ...a);
+    return bilingual() ? `${esc(s.ar)} <span class="bi-inline">${esc(s.en)}</span>` : esc(s.ar);
+  }
+  /** Plain text, for alerts, titles and placeholders. */
+  function ts(k, ...a) {
+    const s = S(k, ...a);
+    return bilingual() ? `${s.ar}\n${s.en}` : s.ar;
+  }
+  const REG_KEY = { kw: "regKw", msa: "regMsa", phrase: "regPhrase", pair: "regPair", tip: "regTip", idiom: "regIdiom" };
+  const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_KEY[reg] ? ti(REG_KEY[reg]) : esc(reg)}</span>`;
+  const topicLabel = (tp) =>
+    bilingual() && TOPIC_EN[tp] ? `${esc(tp)} <span class="bi-inline">${esc(TOPIC_EN[tp])}</span>` : esc(tp);
 
   function render() {
-    document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === view));
+    document.body.classList.toggle("ar-only", !bilingual());
+    document.querySelectorAll(".tab").forEach((el) => {
+      el.classList.toggle("active", el.dataset.view === view);
+      el.querySelector(".tab-label").innerHTML = t(el.dataset.i18n);
+    });
+    document.querySelectorAll("[data-lang]").forEach((b) => {
+      b.classList.toggle("active", b.dataset.lang === (store.settings.lang || "bi"));
+      b.title = ts(b.dataset.lang === "ar" ? "langArTitle" : "langBiTitle");
+    });
+    document.querySelector(".brand-sub").innerHTML = t("brandSub");
+    document.getElementById("streakBadge").title = ts("streakTitle");
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
     document.getElementById("verifyPill").textContent = pending || "";
@@ -243,33 +287,33 @@
     session = null;
 
     stage.innerHTML = `
-      ${finished ? `<div class="panel" style="border-color: rgb(47 191 113 / 0.5)"><b>ما قصرت! 🎉</b><div class="note-info">خلصت جلسة اليوم — ${l.reviews} مراجعة. العقل يثبت المعلومة وقت الراحة، فالباقي على باچر.</div></div>` : ""}
+      ${finished ? `<div class="panel" style="border-color: rgb(47 191 113 / 0.5)"><b>${t("doneTitle")}</b><div class="note-info">${t("doneBody", l.reviews)}</div></div>` : ""}
       <div class="panel">
         <div class="day-summary">
-          <div class="cell"><b>${dueCount}</b><span>مستحقة اليوم</span></div>
-          <div class="cell"><b>${newCount}</b><span>كلمات يديدة</span></div>
-          <div class="cell"><b>${l.reviews}</b><span>راجعتها اليوم</span></div>
+          <div class="cell"><b>${dueCount}</b><span>${t("cellDue")}</span></div>
+          <div class="cell"><b>${newCount}</b><span>${t("cellNew")}</span></div>
+          <div class="cell"><b>${l.reviews}</b><span>${t("cellReviewed")}</span></div>
         </div>
         ${dueCount + newCount > 0
-          ? `<div style="margin-top:1rem; text-align:center"><button class="btn btn-primary" id="startBtn" style="width:100%; padding:0.9rem">ابدأ الجلسة (${dueCount + newCount})</button></div>`
-          : `<div class="empty" style="padding:1.2rem 0 0.4rem">✅ ماكو شي مستحق الحين — رجعلنا باچر، التباعد هو السر.</div>`}
+          ? `<div style="margin-top:1rem; text-align:center"><button class="btn btn-primary" id="startBtn" style="width:100%; padding:0.9rem">${t("startSession", dueCount + newCount)}</button></div>`
+          : `<div class="empty" style="padding:1.2rem 0 0.4rem">${t("nothingDue")}</div>`}
       </div>
 
       <div class="panel challenge">
-        <div class="microlabel">تحدي اليوم — استخدمها بمحادثة حقيقية</div>
+        <div class="microlabel">${t("challengeTitle")}</div>
         ${chWords.length ? `<ul style="margin-top:0.5rem">${chWords.map((w) => `
           <li class="${ch.done.includes(w.id) ? "done" : ""}">
             <input type="checkbox" data-ch="${esc(w.id)}" ${ch.done.includes(w.id) ? "checked" : ""} />
-            <div><span class="w-ar">${esc(w.ar)}</span> <span class="note-info">${esc(w.en)}</span></div>
+            <div><span class="w-ar">${esc(w.ar)}</span> <span class="note-info en-only">${esc(w.en)}</span></div>
           </li>`).join("")}</ul>
-          <div class="note-info" style="margin-top:0.5rem">الاسترجاع بمحادثة صجية أقوى تثبيت للذاكرة — علّم على اللي استخدمتها.</div>`
-        : `<div class="note-info" style="margin-top:0.5rem">راجع كم كلمة أول، وبنطلع لك تحدي يومي منها.</div>`}
+          <div class="note-info" style="margin-top:0.5rem">${t("challengeNote")}</div>`
+        : `<div class="note-info" style="margin-top:0.5rem">${t("challengeEmpty")}</div>`}
       </div>
 
       <div class="panel">
-        <div class="microlabel">صيد اليوم — سمعت كلمة يديدة؟</div>
-        <div class="note-info" style="margin:0.4rem 0 0.6rem">نفس عادتك اللي بنيت فيها القائمة: أي كلمة تصيدها من مجلس أو اجتماع، سجلها على طول قبل لا تنطير.</div>
-        <button class="btn" id="captureBtn" style="width:100%">＋ سجل كلمة صدتها</button>
+        <div class="microlabel">${t("captureTitle")}</div>
+        <div class="note-info" style="margin:0.4rem 0 0.6rem">${t("captureNote")}</div>
+        <button class="btn" id="captureBtn" style="width:100%">${t("captureBtn")}</button>
       </div>`;
 
     document.getElementById("startBtn")?.addEventListener("click", () => { buildSession(); render(); });
@@ -290,20 +334,20 @@
     const cloze = mode === "cloze" ? makeCloze(w) : null;
     const pct = Math.round((session.done / session.total) * 100);
 
-    const MODES = { learn: "كلمة يديدة — تعرّف عليها", recall: "شنو معناها؟", produce: "شلون تقولها بالعربي؟", cloze: "كمّل الفراغ", respond: "شنو الرد؟" };
-    if (w.reg === "pair" && mode === "learn") MODES.learn = "نداء ورد — تعرّف عليهم";
+    const MODES = { learn: "modeLearn", recall: "modeRecall", produce: "modeProduce", cloze: "modeCloze", respond: "modeRespond" };
+    const modeKey = w.reg === "pair" && mode === "learn" ? "modeLearnPair" : MODES[mode];
 
     let front = "";
     if (w.reg === "pair" && (mode === "learn" || session.flipped)) {
       front = `
         <div class="card-ar" style="font-size:1.5rem; color:var(--ink-dim)">${esc(w.ar)}</div>
-        <div class="microlabel">↓ الرد</div>
+        <div class="microlabel">${t("replyLabel")}</div>
         <div class="card-ar">${esc(w.resp)}</div>
         ${w.respTr ? `<div class="card-tr">${esc(w.respTr)}</div>` : ""}
         <div class="card-en" style="font-size:0.95rem">${esc(w.en)}</div>
         ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}`;
     } else if (mode === "respond") {
-      front = `<div class="card-ar">${esc(w.ar)}</div><div class="microlabel" style="margin-top:0.4rem">قالوها لك — رد عليهم بصوتك قبل لا تقلب</div>`;
+      front = `<div class="card-ar">${esc(w.ar)}</div><div class="microlabel" style="margin-top:0.4rem">${t("respondHint")}</div>`;
     } else if (mode === "learn" || session.flipped) {
       front = `
         <div class="card-ar">${esc(w.ar)}</div>
@@ -314,7 +358,7 @@
     } else if (mode === "recall") {
       front = `<div class="card-ar">${esc(w.ar)}</div>`;
     } else if (mode === "produce") {
-      front = `<div class="card-en" style="font-size:1.4rem">${esc(w.en)}</div><div class="microlabel" style="margin-top:0.4rem">${esc(w.topic)} · قلها بصوتك قبل لا تقلب</div>`;
+      front = `<div class="card-en" style="font-size:1.4rem">${esc(w.en)}</div><div class="microlabel" style="margin-top:0.4rem">${topicLabel(w.topic)} · ${t("produceHint")}</div>`;
     } else if (mode === "cloze") {
       front = `<div class="card-ar cloze">${esc(cloze.blanked).replace("＿＿＿", '<span class="blank">＿＿＿</span>')}</div><div class="card-en">${esc(w.en)}</div>`;
     }
@@ -323,19 +367,19 @@
     stage.innerHTML = `
       <div class="progressbar"><div style="width:${pct}%"></div></div>
       <div class="panel">
-        <div class="h-row" style="margin:0"><span class="card-mode">${MODES[mode]}</span>${regTag(w.reg)}</div>
+        <div class="h-row" style="margin:0"><span class="card-mode">${t(modeKey)}</span>${regTag(w.reg)}</div>
         <div class="card-face">${front}</div>
         ${graded
           ? `<div class="grade-row">
-              <button class="btn g1" data-g="1">نسيت<span class="grade-sub">أشوفها بعد شوي</span></button>
-              <button class="btn g2" data-g="2">صعبة<span class="grade-sub">طلعت بجهد</span></button>
-              <button class="btn g3" data-g="3">زين<span class="grade-sub">تذكرتها</span></button>
-              <button class="btn g4" data-g="4">سهلة<span class="grade-sub">من عيوني</span></button>
+              <button class="btn g1" data-g="1">${t("g1")}<span class="grade-sub">${t("g1sub")}</span></button>
+              <button class="btn g2" data-g="2">${t("g2")}<span class="grade-sub">${t("g2sub")}</span></button>
+              <button class="btn g3" data-g="3">${t("g3")}<span class="grade-sub">${t("g3sub")}</span></button>
+              <button class="btn g4" data-g="4">${t("g4")}<span class="grade-sub">${t("g4sub")}</span></button>
             </div>`
-          : `<button class="btn" id="flipBtn" style="width:100%; padding:0.85rem">اقلب البطاقة</button>
-             <div class="flip-hint">جاوب بصوتك أو براسك قبل لا تقلب — الاسترجاع هو التمرين</div>`}
+          : `<button class="btn" id="flipBtn" style="width:100%; padding:0.85rem">${t("flip")}</button>
+             <div class="flip-hint">${t("flipHint")}</div>`}
       </div>
-      <button class="btn btn-ghost btn-sm" id="endBtn">إنهاء الجلسة</button>`;
+      <button class="btn btn-ghost btn-sm" id="endBtn">${t("endSession")}</button>`;
 
     document.getElementById("flipBtn")?.addEventListener("click", () => { session.flipped = true; render(); });
     document.getElementById("endBtn").addEventListener("click", () => { session = null; render(); });
@@ -364,47 +408,47 @@
       (!wordsFilter.topic || w.topic === wordsFilter.topic));
 
     stage.innerHTML = `
-      <div class="h-row"><h2>الكلمات (${words.length})</h2>
-        <button class="btn btn-sm ${showAddForm ? "" : "btn-primary"}" id="addToggle">${showAddForm ? "إغلاق" : "＋ كلمة يديدة"}</button></div>
+      <div class="h-row"><h2>${t("wordsTitle", words.length)}</h2>
+        <button class="btn btn-sm ${showAddForm ? "" : "btn-primary"}" id="addToggle">${showAddForm ? t("close") : t("addNew")}</button></div>
       ${showAddForm ? addFormHTML() : ""}
       <div class="toolbar">
-        <input type="search" id="q" placeholder="دور بالعربي أو الإنجليزي…" value="${esc(wordsFilter.q)}" />
-        <select id="fReg"><option value="">كل السجلات</option>
-          ${Object.entries(REG_LABEL).map(([k, v]) => `<option value="${k}" ${wordsFilter.reg === k ? "selected" : ""}>${v}</option>`).join("")}</select>
-        <select id="fTopic"><option value="">كل المواضيع</option>
-          ${topics.map((t) => `<option ${wordsFilter.topic === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+        <input type="search" id="q" placeholder="${esc(S("searchPlaceholder").ar)}" value="${esc(wordsFilter.q)}" />
+        <select id="fReg"><option value="">${esc(S("allRegisters").ar)}</option>
+          ${Object.entries(REG_KEY).map(([k, key]) => `<option value="${k}" ${wordsFilter.reg === k ? "selected" : ""}>${esc(S(key).ar)}${bilingual() ? " · " + esc(S(key).en) : ""}</option>`).join("")}</select>
+        <select id="fTopic"><option value="">${esc(S("allTopics").ar)}</option>
+          ${topics.map((tp) => `<option value="${esc(tp)}" ${wordsFilter.topic === tp ? "selected" : ""}>${esc(tp)}${bilingual() && TOPIC_EN[tp] ? " · " + esc(TOPIC_EN[tp]) : ""}</option>`).join("")}</select>
       </div>
       <div class="panel" style="padding:0.3rem 1.1rem">
-        ${list.length ? list.map(wordRowHTML).join("") : `<div class="empty">ماكو نتائج</div>`}
+        ${list.length ? list.map(wordRowHTML).join("") : `<div class="empty">${t("noResults")}</div>`}
       </div>
       <div class="panel">
-        <div class="microlabel">النسخ الاحتياطي</div>
-        <div class="note-info" style="margin:0.4rem 0 0.6rem">تقدمك محفوظ بهالجهاز فقط — خذ نسخة بين فترة وفترة، أو انقل فيها تقدمك لجهاز ثاني.</div>
+        <div class="microlabel">${t("backupTitle")}</div>
+        <div class="note-info" style="margin:0.4rem 0 0.6rem">${t("backupNote")}</div>
         <div class="v-actions">
-          <button class="btn btn-sm" id="exportBtn">نسخة احتياطية</button>
-          <button class="btn btn-sm" id="importBtn">استعادة</button>
-          <label class="f" style="margin-inline-start:auto; display:flex; align-items:center; gap:0.4rem">يديدة باليوم
+          <button class="btn btn-sm" id="exportBtn">${t("backupBtn")}</button>
+          <button class="btn btn-sm" id="importBtn">${t("restoreBtn")}</button>
+          <label class="f" style="margin-inline-start:auto; display:flex; align-items:center; gap:0.4rem">${t("newPerDay")}
             <input type="number" id="newPerDay" min="0" max="50" value="${store.settings.newPerDay}" style="width:4.2rem" /></label>
         </div>
         ${backupPanel === "export" ? `
           <div class="word-detail" style="margin-top:0.7rem">
-            <div class="note-info">انسخ النص كله واحفظه بأي مكان أمين — أو نزّله كملف إذا جهازك يسمح.</div>
+            <div class="note-info">${t("exportNote")}</div>
             <textarea id="expText" rows="4" readonly style="margin-top:0.5rem; font-size:0.7rem" dir="ltr">${esc(JSON.stringify({ ...store, exportedAt: new Date().toISOString() }))}</textarea>
             <div class="v-actions">
-              <button class="btn btn-sm btn-primary" id="copyBtn">نسخ</button>
-              ${canDownload ? `<button class="btn btn-sm" id="dlBtn">تنزيل ملف</button>` : ""}
-              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+              <button class="btn btn-sm btn-primary" id="copyBtn">${t("copyBtn")}</button>
+              ${canDownload ? `<button class="btn btn-sm" id="dlBtn">${t("dlBtn")}</button>` : ""}
+              <button class="btn btn-sm btn-ghost" id="closeBackup">${t("close")}</button>
             </div>
           </div>` : ""}
         ${backupPanel === "import" ? `
           <div class="word-detail" style="margin-top:0.7rem">
-            <div class="note-info">الصق نص النسخة الاحتياطية هني، أو اختر الملف. ⚠ الاستعادة تستبدل تقدمك الحالي كله.</div>
-            <textarea id="impText" rows="4" placeholder="الصق النص هني…" style="margin-top:0.5rem; font-size:0.7rem" dir="ltr"></textarea>
+            <div class="note-info">${t("importNote")}</div>
+            <textarea id="impText" rows="4" placeholder="${esc(S("impPlaceholder").ar)}" style="margin-top:0.5rem; font-size:0.7rem" dir="ltr"></textarea>
             <div class="v-actions">
-              <button class="btn btn-sm btn-primary" id="impPaste">استعادة من النص</button>
-              ${canDownload ? `<button class="btn btn-sm" id="importBtnFile">اختر ملف</button>
+              <button class="btn btn-sm btn-primary" id="impPaste">${t("impPaste")}</button>
+              ${canDownload ? `<button class="btn btn-sm" id="importBtnFile">${t("pickFile")}</button>
               <input type="file" id="importFile" accept=".json,application/json" style="display:none" />` : ""}
-              <button class="btn btn-sm btn-ghost" id="closeBackup">إغلاق</button>
+              <button class="btn btn-sm btn-ghost" id="closeBackup">${t("close")}</button>
             </div>
           </div>` : ""}
       </div>`;
@@ -426,7 +470,7 @@
     stage.querySelectorAll("[data-open]").forEach((r) => r.addEventListener("click", () => { openWordId = openWordId === r.dataset.open ? null : r.dataset.open; render(); }));
     stage.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (confirm("تبي تأرشف هالكلمة؟ (تختفي من التدريب، وتقدر ترجعها من ملف التصدير)")) {
+      if (confirm(ts("confirmArchive"))) {
         store.removed.push(b.dataset.del); save(); openWordId = null; render();
       }
     }));
@@ -435,18 +479,18 @@
 
   function wordRowHTML(w) {
     const c = store.progress[w.id];
-    const state = !c ? "يديدة" : c.stability >= 21 ? "راسخة" : c.stability >= 7 ? "قاعدة تثبت" : "طرية";
+    const stateKey = !c ? "stateNew" : c.stability >= 21 ? "stateMature" : c.stability >= 7 ? "stateSettling" : "stateYoung";
     const open = openWordId === w.id;
     return `
       <div class="word-row" data-open="${esc(w.id)}" style="cursor:pointer">
         <div class="w-main">
           <span class="w-ar">${esc(w.ar)}</span>
-          <div class="w-meta">${regTag(w.reg)} · ${esc(w.topic)} · ${state}${c ? ` · التالية ${new Date(c.due).toLocaleDateString("ar-KW", { day: "numeric", month: "short" })}` : ""}</div>
+          <div class="w-meta">${regTag(w.reg)} · ${topicLabel(w.topic)} · ${ti(stateKey)}${c ? ` · ${esc(S("nextDue").ar)} ${new Date(c.due).toLocaleDateString(dateLocale(), { day: "numeric", month: "short" })}` : ""}</div>
           ${open ? `<div class="word-detail" onclick="event.stopPropagation()">
               ${w.tr ? `<div class="card-tr">${esc(w.tr)}</div>` : ""}
               ${w.ex && w.ex !== "—" ? `<div class="card-ex">${esc(w.ex)}</div>` : ""}
               ${w.note ? `<div class="card-note">${esc(w.note)}</div>` : ""}
-              <div class="v-actions"><button class="btn btn-sm btn-danger" data-del="${esc(w.id)}">أرشفة</button></div>
+              <div class="v-actions"><button class="btn btn-sm btn-danger" data-del="${esc(w.id)}">${t("archive")}</button></div>
             </div>` : ""}
         </div>
         <div class="w-en">${esc(w.en)}</div>
@@ -456,24 +500,24 @@
   function addFormHTML() {
     return `
       <div class="panel form-grid" id="addForm">
-        <label class="f">الكلمة أو العبارة (عربي) <input id="aAr" required /></label>
-        <label class="f">المعنى (English) <input id="aEn" dir="ltr" /></label>
-        <label class="f">النطق (translit) <input id="aTr" dir="ltr" placeholder="optional" /></label>
+        <label class="f">${t("fWord")} <input id="aAr" required /></label>
+        <label class="f">${t("fMeaning")} <input id="aEn" dir="ltr" /></label>
+        <label class="f">${t("fTranslit")} <input id="aTr" dir="ltr" placeholder="${esc(S("fOptional").ar)}" /></label>
         <div style="display:flex; gap:0.6rem">
-          <label class="f" style="flex:1">السجل
-            <select id="aReg"><option value="kw">كويتي</option><option value="msa">فصحى بالحچي</option><option value="phrase">عبارة</option></select></label>
-          <label class="f" style="flex:1">الموضوع <input id="aTopic" value="يومي" /></label>
+          <label class="f" style="flex:1">${t("fRegister")}
+            <select id="aReg">${["kw", "msa", "phrase"].map((k) => `<option value="${k}">${esc(S(REG_KEY[k]).ar)}</option>`).join("")}</select></label>
+          <label class="f" style="flex:1">${t("fTopic")} <input id="aTopic" value="يومي" /></label>
         </div>
-        <label class="f">جملة مثال (كويتي) — وين سمعتها؟ <textarea id="aEx" rows="2"></textarea></label>
-        <label class="f">ملاحظة <input id="aNote" placeholder="optional" /></label>
-        <button class="btn btn-primary" id="aSave">حفظ الكلمة</button>
+        <label class="f">${t("fExample")} <textarea id="aEx" rows="2"></textarea></label>
+        <label class="f">${t("fNote")} <input id="aNote" placeholder="${esc(S("fOptional").ar)}" /></label>
+        <button class="btn btn-primary" id="aSave">${t("fSave")}</button>
       </div>`;
   }
 
   function wireAddForm() {
     document.getElementById("aSave").addEventListener("click", () => {
       const ar = document.getElementById("aAr").value.trim();
-      if (!ar) return alert("اكتب الكلمة أول");
+      if (!ar) return alert(ts("needWord"));
       store.custom.push({
         id: "c" + Date.now(),
         ar, tr: document.getElementById("aTr").value.trim(),
@@ -492,9 +536,9 @@
   function copyBackup() {
     const ta = document.getElementById("expText");
     ta.focus(); ta.select();
-    const done = () => { const b = document.getElementById("copyBtn"); b.textContent = "تم النسخ ✓"; setTimeout(() => (b.textContent = "نسخ"), 1800); };
-    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } });
-    else { try { document.execCommand("copy"); done(); } catch { alert("اختر النص وانسخه يدويًا"); } }
+    const done = () => { const b = document.getElementById("copyBtn"); b.innerHTML = t("copied"); setTimeout(() => (b.innerHTML = t("copyBtn")), 1800); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(ta.value).then(done, () => { try { document.execCommand("copy"); done(); } catch { alert(ts("copyManual")); } });
+    else { try { document.execCommand("copy"); done(); } catch { alert(ts("copyManual")); } }
   }
 
   function downloadJSON() {
@@ -505,7 +549,7 @@
       a.download = `khosh-kalam-${todayKey()}.json`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    } catch { alert("التنزيل مو متاح هني — انسخ النص بدالها"); }
+    } catch { alert(ts("dlUnavailable")); }
   }
 
   function applyBackup(text) {
@@ -515,8 +559,8 @@
       store = Object.assign(defaults(), data);
       backupPanel = null;
       save(); render();
-      alert("تمت الاستعادة ✅");
-    } catch { alert("النص مو صالح — تأكد إنك ناسخ النسخة كاملة"); }
+      alert(ts("restored"));
+    } catch { alert(ts("badBackup")); }
   }
 
   function importJSON(e) {
@@ -532,30 +576,30 @@
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]);
     const doneCount = SEED_VERIFY.length - pending.length;
     const V_LABEL = {
-      "ok-msa": ["سليمة — فصحى", "tag-msa"], "ok-kw": ["سليمة — كويتية", "tag-kw"],
-      "wrong-gloss": ["المعنى غلط", "tag-bad"], misspelled: ["إملاء غلط", "tag-bad"],
-      "not-kuwaiti": ["مو كويتية", "tag-bad"], fabricated: ["مختلقة", "tag-bad"],
-      doubtful: ["مشكوك فيها", "tag-phrase"],
+      "ok-msa": ["vOkMsa", "tag-msa"], "ok-kw": ["vOkKw", "tag-kw"],
+      "wrong-gloss": ["vWrongGloss", "tag-bad"], misspelled: ["vMisspelled", "tag-bad"],
+      "not-kuwaiti": ["vNotKuwaiti", "tag-bad"], fabricated: ["vFabricated", "tag-bad"],
+      doubtful: ["vDoubtful", "tag-phrase"],
     };
     stage.innerHTML = `
-      <div class="h-row"><h2>التحقق من قوائم الذكاء الاصطناعي</h2></div>
-      <div class="note-info" style="margin-bottom:0.8rem">راجعت كل القوائم اللي جمعتها من قبل، كلمة كلمة. الحكم مكتوب على كل وحدة — اللي تعتمدها تدخل التدريب بمعناها المصحح، واللي ترفضها تنحفظ بالأرشيف. (${doneCount}/${SEED_VERIFY.length} خلصت)</div>
+      <div class="h-row"><h2>${t("verifyTitle")}</h2></div>
+      <div class="note-info" style="margin-bottom:0.8rem">${t("verifyNote", doneCount, SEED_VERIFY.length)}</div>
       ${pending.length ? pending.map((v) => {
-        const [label, cls] = V_LABEL[v.verdict] || [v.verdict, ""];
+        const [labelKey, cls] = V_LABEL[v.verdict] || [null, ""];
         const approvable = !!v.en;
         return `<div class="panel">
           <div class="h-row" style="margin:0">
             <span class="w-ar" style="font-family:var(--font-ar); font-size:1.3rem">${esc(v.ar)}</span>
-            <span class="tag ${cls}">${label}</span>
+            <span class="tag ${cls}">${labelKey ? ti(labelKey) : esc(v.verdict)}</span>
           </div>
-          ${v.aiGloss && v.aiGloss !== "—" ? `<div class="note-info">ترجمة القائمة القديمة: "${esc(v.aiGloss)}"</div>` : ""}
+          ${v.aiGloss && v.aiGloss !== "—" ? `<div class="note-info en-only">${esc(S("oldGloss").en)}: "${esc(v.aiGloss)}"</div>` : ""}
           <div class="verdict">${esc(v.fix)}</div>
           <div class="v-actions">
-            ${approvable ? `<button class="btn btn-sm btn-primary" data-approve="${esc(v.id)}">✓ ضيفها للتدريب${v.verdict.startsWith("ok") ? "" : " (بالمعنى المصحح)"}</button>` : ""}
-            <button class="btn btn-sm" data-reject="${esc(v.id)}">أرشفها</button>
+            ${approvable ? `<button class="btn btn-sm btn-primary" data-approve="${esc(v.id)}">${t("approve")}${v.verdict.startsWith("ok") ? "" : t("approveCorrected")}</button>` : ""}
+            <button class="btn btn-sm" data-reject="${esc(v.id)}">${t("rejectBtn")}</button>
           </div>
         </div>`;
-      }).join("") : `<div class="empty"><span class="big">🧹</span>خلصت التحقق كله — القائمة صارت نظيفة.</div>`}`;
+      }).join("") : `<div class="empty"><span class="big">🧹</span>${t("verifyDone")}</div>`}`;
     stage.querySelectorAll("[data-approve]").forEach((b) => b.addEventListener("click", () => { store.verify[b.dataset.approve] = "approved"; save(); render(); }));
     stage.querySelectorAll("[data-reject]").forEach((b) => b.addEventListener("click", () => { store.verify[b.dataset.reject] = "rejected"; save(); render(); }));
   }
@@ -563,18 +607,21 @@
   // ── packs ──
   function renderPacks() {
     stage.innerHTML = `
-      <div class="h-row"><h2>حزم التوسع</h2></div>
-      <div class="note-info" style="margin-bottom:0.8rem">عشان التطبيق يكبر وياك: كل حزمة مجموعة مدروسة تنضاف للتدريب لما تقرر إنك جاهز لها — مو كلها مرة وحدة.</div>
+      <div class="h-row"><h2>${t("packsTitle")}</h2></div>
+      <div class="note-info" style="margin-bottom:0.8rem">${t("packsNote")}</div>
       ${SEED_PACKS.map((p) => {
         const added = store.packs.includes(p.key);
         return `<div class="panel">
-          <div class="h-row" style="margin:0"><h2>${esc(p.name)}</h2><span class="tag">${p.words.length} بطاقة</span></div>
-          <div class="note-info" style="margin:0.4rem 0 0.6rem">${esc(p.desc)}</div>
+          <div class="h-row" style="margin:0">
+            <h2>${esc(p.name)}${bilingual() && p.nameEn ? `<span class="bi-en">${esc(p.nameEn)}</span>` : ""}</h2>
+            <span class="tag">${ti("packCards", p.words.length)}</span>
+          </div>
+          <div class="note-info" style="margin:0.4rem 0 0.6rem">${esc(p.desc)}${bilingual() && p.descEn ? `<span class="bi-en">${esc(p.descEn)}</span>` : ""}</div>
           <div class="card-ex" style="border:none; padding:0; font-size:1rem">${p.words.slice(0, 3).map((w) => esc(w.ar)).join(" · ")} …</div>
           <div class="v-actions">
             ${added
-              ? `<span class="tag tag-kw">مضافة ✓</span>`
-              : `<button class="btn btn-sm btn-primary" data-pack="${esc(p.key)}">أضف الحزمة</button>`}
+              ? `<span class="tag tag-kw">${ti("added")}</span>`
+              : `<button class="btn btn-sm btn-primary" data-pack="${esc(p.key)}">${t("addPack")}</button>`}
           </div>
         </div>`;
       }).join("")}`;
@@ -606,44 +653,43 @@
         const due = store.progress[w.id].due;
         return i === 0 ? due <= end.getTime() : due >= start.getTime() && due <= end.getTime();
       }).length;
-      days.push({ label: i === 0 ? "اليوم" : start.toLocaleDateString("ar-KW", { weekday: "short" }), n });
+      days.push({ label: i === 0 ? S("forecastToday").ar : start.toLocaleDateString(dateLocale(), { weekday: "short" }), n });
     }
     const max = Math.max(1, ...days.map((x) => x.n));
 
     stage.innerHTML = `
-      <div class="h-row"><h2>إحصائياتك</h2></div>
+      <div class="h-row"><h2>${t("statsTitle")}</h2></div>
       <div class="stat-grid">
-        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${active.length}</b><div class="microlabel">كلمة داخل التدريب (من ${words.length})</div></div>
-        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${mature.length}</b><div class="microlabel">راسخة (ثبات ٣ أسابيع+)</div></div>
-        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${retention === null ? "—" : retention + "٪"}</b><div class="microlabel">نسبة التذكر (٣٠ يوم)</div></div>
-        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${streak()}</b><div class="microlabel">أيام متتالية 🔥</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${active.length}</b><div class="microlabel">${t("statActive", words.length)}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${mature.length}</b><div class="microlabel">${t("statMature")}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${retention === null ? "—" : retention + "٪"}</b><div class="microlabel">${t("statRetention")}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${streak()}</b><div class="microlabel">${t("statStreak")}</div></div>
       </div>
       <div class="panel" style="margin-top:0.9rem">
-        <div class="microlabel">المستحق خلال الأسبوع الياي</div>
+        <div class="microlabel">${t("forecastTitle")}</div>
         <div class="forecast" style="margin-bottom:1.4rem">
           ${days.map((x) => `<div class="bar" style="height:${(x.n / max) * 100}%"><span>${x.n || ""}</span><em>${esc(x.label)}</em></div>`).join("")}
         </div>
       </div>
       <div class="panel">
-        <div class="microlabel">التوزيع</div>
+        <div class="microlabel">${t("distTitle")}</div>
         <div class="note-info" style="margin-top:0.4rem">
-          ${kw} كويتي صرف · ${words.filter((w) => w.reg === "msa").length} فصحى بالحچي · ${words.filter((w) => w.reg === "phrase").length} عبارات · ${words.filter((w) => w.reg === "pair").length} نداء ورد
-          ${retention !== null && retention < 80 ? "<br>💡 نسبة التذكر تحت ٨٠٪ — قلل الكلمات اليديدة باليوم شوي، والجودة قبل الكمية." : ""}
-          ${retention !== null && retention > 95 && active.length > 30 ? "<br>💡 نسبة تذكرك عالية وايد — تقدر تزيد الكلمات اليديدة باليوم." : ""}
+          ${t("distLine", kw, words.filter((w) => w.reg === "msa").length, words.filter((w) => w.reg === "phrase").length, words.filter((w) => w.reg === "pair").length)}
+          ${retention !== null && retention < 80 ? `<div style="margin-top:0.5rem">${t("tipLow")}</div>` : ""}
+          ${retention !== null && retention > 95 && active.length > 30 ? `<div style="margin-top:0.5rem">${t("tipHigh")}</div>` : ""}
         </div>
       </div>
       <div class="panel note-info">
-        <div class="microlabel" style="margin-bottom:0.4rem">ليش التطبيق مبني چذي؟</div>
-        الجدولة على خوارزمية FSRS للتكرار المتباعد — تراجع الكلمة قبل ما تنساها بشوي، وهذا أكفأ وقت للتثبيت.
-        كل مراجعة استرجاع نشط (تجاوب قبل ما تقلب) لأن الاختبار يثبت أقوى من إعادة القراءة،
-        والبطاقة تتدرج من التعرف إلى الإنتاج إلى إكمال الجملة لأن الصعوبة المدروسة تبني ذاكرة أمتن.
-        وتحدي الاستخدام اليومي ينقل الكلمة من التطبيق إلى لسانك.
+        <div class="microlabel" style="margin-bottom:0.4rem">${t("whyTitle")}</div>
+        ${t("whyBody")}
       </div>`;
   }
 
   // ── boot ──
-  document.querySelectorAll(".tab").forEach((t) =>
-    t.addEventListener("click", () => { view = t.dataset.view; session = null; render(); }));
+  document.querySelectorAll(".tab").forEach((el) =>
+    el.addEventListener("click", () => { view = el.dataset.view; session = null; render(); }));
+  document.querySelectorAll("[data-lang]").forEach((b) =>
+    b.addEventListener("click", () => { store.settings.lang = b.dataset.lang; save(); render(); }));
   render();
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http"))

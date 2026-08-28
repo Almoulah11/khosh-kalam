@@ -19,20 +19,27 @@
       <span class="brand-mark">خوش كلام</span>
       <span class="brand-sub">تدريب اللهجة الكويتية</span>
     </div>
-    <div class="streak" id="streakBadge" title="أيام متتالية">🔥 <span id="streakCount">0</span></div>
+    <div class="topbar-right">
+      <div class="langtoggle" role="group" aria-label="اللغة / Language">
+        <button type="button" data-lang="bi">ع + EN</button>
+        <button type="button" data-lang="ar">ع</button>
+      </div>
+      <div class="streak" id="streakBadge">🔥 <span id="streakCount">0</span></div>
+    </div>
   </header>
 
   <main id="stage"><!-- rendered by app.js --></main>
 
   <nav class="tabs" id="tabs">
-    <button data-view="today" class="tab active"><span class="tab-ico">◉</span>اليوم</button>
-    <button data-view="words" class="tab"><span class="tab-ico">☰</span>الكلمات</button>
-    <button data-view="verify" class="tab"><span class="tab-ico">؟</span>التحقق<span class="pill" id="verifyPill"></span></button>
-    <button data-view="packs" class="tab"><span class="tab-ico">◫</span>الحزم</button>
-    <button data-view="stats" class="tab"><span class="tab-ico">↗</span>إحصائيات</button>
+    <button data-view="today" data-i18n="tabToday" class="tab active"><span class="tab-ico">◉</span><span class="tab-label"></span></button>
+    <button data-view="words" data-i18n="tabWords" class="tab"><span class="tab-ico">☰</span><span class="tab-label"></span></button>
+    <button data-view="verify" data-i18n="tabVerify" class="tab"><span class="tab-ico">؟</span><span class="tab-label"></span><span class="pill" id="verifyPill"></span></button>
+    <button data-view="packs" data-i18n="tabPacks" class="tab"><span class="tab-ico">◫</span><span class="tab-label"></span></button>
+    <button data-view="stats" data-i18n="tabStats" class="tab"><span class="tab-ico">↗</span><span class="tab-label"></span></button>
   </nav>
 
   <script src="js/fsrs.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/seed-manual.js"></script>
   <script src="js/seed-packs.js"></script>
   <script src="js/seed-verify.js"></script>

@@ -64,6 +64,29 @@ there and rebuild; never hand-edit `dist/`.
    Each item shows its verdict; you approve corrected entries into training
    or archive the junk.
 
+## Bilingual interface
+
+The app ships **bilingual** — Arabic leads, English sits beneath it in a
+quieter weight — with a toggle in the header:
+
+- **ع + EN** — every label, button, hint and stat in both languages
+- **ع** — Arabic only, for immersion: the English disappears, and so do the
+  transliterations and English glosses on cards
+
+Arabic-only mode is not just a chrome change. The `produce` exercise prompts
+with the English gloss, so in Arabic-only mode a card that would have been
+`produce` becomes a cloze (or plain recall if no cloze can be built) — you
+are never shown a blank prompt. The choice is saved with your progress.
+
+Deliberately **not** translated: the Kuwaiti example sentences, the vocabulary
+itself, and the per-item verdicts on the التحقق screen. Those are the material
+being learned — putting them in English would defeat the app. Verdicts do
+quote the English gloss they are correcting, so some English shows there even
+in Arabic-only mode; that English *is* the thing under discussion.
+
+Interface strings live in `js/i18n.js` as one `{ ar, en }` table — add a
+language or reword a label in one place.
+
 ## Register honesty
 
 Cards are tagged so the Kuwaiti emphasis never blurs:
@@ -93,6 +116,7 @@ js/seed-manual.js     your captured list, curated (196 cards)
 js/seed-packs.js      expansion packs (60 cards)
 js/seed-verify.js     audited AI lists with verdicts (103 items)
 js/seed-responses.js  call-and-response pairs (32 exchanges)
+js/i18n.js            every interface string, Arabic + English
 js/app.js             session engine, cloze builder, stats, storage
 sw.js                 offline cache
 ```

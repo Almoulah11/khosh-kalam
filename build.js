@@ -17,6 +17,7 @@ const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
 
 const SCRIPTS = [
   "js/fsrs.js",
+  "js/i18n.js",
   "js/seed-manual.js",
   "js/seed-packs.js",
   "js/seed-verify.js",
