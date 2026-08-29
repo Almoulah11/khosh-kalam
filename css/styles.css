@@ -18,6 +18,8 @@
   --font-ar: "Amiri", "Traditional Arabic", "Times New Roman", serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* a class-level display rule outranks the hidden attribute without this */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   background: var(--bg);
@@ -281,3 +283,34 @@ h2 .bi-en { font-size: 0.62em; }
 .tab { font-size: 0.7rem; }
 .tab .tab-ico { font-size: 0.95rem; }
 @media (max-width: 380px) { .tab { font-size: 0.62rem; } .mode-grid { grid-template-columns: 1fr; } }
+
+/* ── auth gate ── */
+body.auth-mode { padding-bottom: 0; }
+body.auth-mode .topbar { visibility: hidden; }
+.auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 78dvh; padding: 1rem 0; }
+.auth-card {
+  width: 100%; max-width: 22rem; background: var(--bg-card);
+  border: 1px solid var(--hairline); border-radius: var(--radius);
+  padding: 1.8rem 1.4rem; text-align: center;
+}
+.auth-brand { font-family: var(--font-ar); font-size: 2.1rem; font-weight: 700; color: var(--green); }
+.auth-sub { font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.15rem; }
+.auth-card .f { text-align: start; }
+.auth-msg { margin-top: 0.9rem; font-size: 0.85rem; color: var(--gold); line-height: 1.7; white-space: pre-line; }
+.code-input {
+  text-align: center; font-size: 1.6rem; letter-spacing: 0.45em;
+  font-variant-numeric: tabular-nums; padding-inline-start: 0.45em;
+}
+
+/* ── sync status dot ── */
+.syncdot {
+  width: 0.5rem; height: 0.5rem; border-radius: 50%; flex: none;
+  background: var(--ink-faint); transition: background-color 0.25s ease;
+}
+.syncdot.ok { background: var(--green); }
+.syncdot.pending { background: var(--gold); }
+.syncdot.syncing { background: var(--gold); animation: pulse 1s ease-in-out infinite; }
+.syncdot.error { background: var(--red); }
+.syncdot.offline { background: var(--ink-faint); box-shadow: 0 0 0 2px rgb(233 237 243 / 0.12); }
+.syncdot.idle { opacity: 0.35; }
+@keyframes pulse { 50% { opacity: 0.35; } }

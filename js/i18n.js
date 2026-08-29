@@ -264,6 +264,20 @@ const UI = {
   },
   arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 
+  authIntro: {
+    ar: "سجل دخولك بإيميلك — بنرسل لك رمز من ٦ أرقام. تقدمك ونقاطك ينحفظون ويمشون وياك على أي جهاز.",
+    en: "Sign in with your email — we'll send a 6-digit code. Your progress and XP save automatically and follow you to any device.",
+  },
+  useLocalOnly: { ar: "استخدمه بدون حساب (هالجهاز بس)", en: "Use without an account (this device only)" },
+  changeEmail: { ar: "غيّر الإيميل", en: "Change email" },
+  confirmSignOut: {
+    ar: "تسجيل خروج؟ تقدمك محفوظ بالسحابة وبيرجع لك أول ما تسجل دخول.",
+    en: "Sign out? Your progress is saved in the cloud and returns when you sign back in.",
+  },
+  syncIdle: { ar: "غير مزامن", en: "Not syncing" },
+  syncPending: { ar: "في تغييرات ما انحفظت بعد", en: "Changes pending" },
+  syncOffline: { ar: "بدون إنترنت — بيتزامن أول ما يرجع", en: "Offline — will sync when back online" },
+
   // ── labels ──
   regKw: { ar: "كويتي", en: "Kuwaiti" },
   regMsa: { ar: "فصحى بالحچي", en: "MSA in speech" },

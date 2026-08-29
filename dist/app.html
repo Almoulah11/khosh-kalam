@@ -1,4 +1,14 @@
-<title>خوش كلام</title>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>خوش كلام — تدريب اللهجة الكويتية</title>
+<meta name="theme-color" content="#0d1117" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="خوش كلام" />
+<link rel="manifest" id="manifestLink" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
@@ -320,10 +330,8 @@ body.auth-mode .topbar { visibility: hidden; }
 .syncdot.idle { opacity: 0.35; }
 @keyframes pulse { 50% { opacity: 0.35; } }
 </style>
-<script>
-  document.documentElement.setAttribute("dir", "rtl");
-  document.documentElement.setAttribute("lang", "ar");
-</script>
+</head>
+<body>
 <header class="topbar">
     <div class="brand">
       <span class="brand-mark">خوش كلام</span>
@@ -3319,5 +3327,26 @@ function createSync(ctx) {
   document.querySelectorAll("[data-lang]").forEach((b) =>
     b.addEventListener("click", () => { store.settings.lang = b.dataset.lang; save(); render(); }));
   render();
+
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
+    navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
 </script>
+<script>
+  // The app is served as a single file, so the manifest and icon are built
+  // at runtime as blobs rather than fetched as separate assets.
+  (() => {
+    const icon = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#0d1117"/><rect x="72" y="128" width="368" height="72" rx="24" fill="#2fbf71"/><rect x="72" y="228" width="368" height="72" rx="24" fill="#e9edf3"/><rect x="72" y="328" width="240" height="72" rx="24" fill="#e5545e"/><circle cx="392" cy="364" r="36" fill="#e3b45c"/></svg>')));
+    const manifest = {"name": "خوش كلام — تدريب اللهجة الكويتية", "short_name": "خوش كلام", "lang": "ar", "dir": "rtl", "start_url": ".", "display": "standalone", "background_color": "#0d1117", "theme_color": "#0d1117", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}]};
+    manifest.icons = [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }];
+    manifest.start_url = location.pathname;
+    const link = document.getElementById('manifestLink');
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+    const fav = document.createElement('link');
+    fav.rel = 'icon'; fav.type = 'image/svg+xml'; fav.href = icon;
+    document.head.appendChild(fav);
+  })();
+</script>
+</body>
+</html>

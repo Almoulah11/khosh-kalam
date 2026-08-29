@@ -23,6 +23,7 @@
     challenges: {}, // date -> {ids: [], done: []}
     game: {}, // arena: xp, ranks, best scores, daily goal, freezes (see arena.js)
     revision: 0, // sync revision last agreed with the server
+    localOnly: false, // chose to run without an account
   });
 
   let store = defaults();
@@ -38,6 +39,7 @@
     } catch (e) {
       /* storage full/blocked — session continues in memory */
     }
+    sync?.markDirty(); // debounced background push; a no-op when signed out
   };
 
   const todayKey = (d = new Date()) =>
@@ -270,6 +272,9 @@
 
   function render() {
     document.body.classList.toggle("ar-only", !bilingual());
+    if (!sync.session() && !store.localOnly) return renderAuth();
+    document.body.classList.remove("auth-mode");
+    document.getElementById("tabs").hidden = false;
     document.querySelectorAll(".tab").forEach((el) => {
       el.classList.toggle("active", el.dataset.view === view);
       el.querySelector(".tab-label").innerHTML = t(el.dataset.i18n);
@@ -279,6 +284,8 @@
       b.title = ts(b.dataset.lang === "ar" ? "langArTitle" : "langBiTitle");
     });
     document.querySelector(".brand-sub").innerHTML = t("brandSub");
+    const dot = document.getElementById("syncDot");
+    if (dot) { dot.className = `syncdot ${syncState}`; dot.title = ts(SYNC_TITLE[syncState] || "syncIdle"); }
     document.getElementById("streakBadge").title = ts("streakTitle");
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
@@ -412,6 +419,66 @@
       if (mode === "learn" || session.flipped) gradeCurrent(+e.key);
     }
   });
+
+  // ── auth gate ──
+  function renderAuth() {
+    document.body.classList.add("auth-mode");
+    document.getElementById("tabs").hidden = true;
+    stage.innerHTML = `
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <div class="auth-brand">خوش كلام</div>
+          <div class="auth-sub">${t("brandSub")}</div>
+          <div class="note-info" style="margin:1rem 0 1.2rem">${t("authIntro")}</div>
+          ${authStep === "email"
+            ? `<label class="f">${t("emailLabel")}
+                 <input type="email" id="authEmail" dir="ltr" autocomplete="email" inputmode="email"
+                        value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+               <button class="btn btn-primary" id="sendCodeBtn" style="width:100%; margin-top:0.8rem">${t("sendCode")}</button>`
+            : `<label class="f">${t("codeLabel")}
+                 <input type="text" id="authCode" dir="ltr" inputmode="numeric" autocomplete="one-time-code"
+                        maxlength="6" placeholder="123456" class="code-input" /></label>
+               <button class="btn btn-primary" id="verifyBtn" style="width:100%; margin-top:0.8rem">${t("verifyCode")}</button>
+               <button class="btn btn-ghost btn-sm" id="backEmailBtn" style="width:100%; margin-top:0.4rem">${t("changeEmail")}</button>`}
+          ${syncMsg ? `<div class="auth-msg">${esc(syncMsg)}</div>` : ""}
+          <button class="btn btn-ghost btn-sm" id="localOnlyBtn" style="width:100%; margin-top:1.2rem">${t("useLocalOnly")}</button>
+        </div>
+      </div>`;
+    wireAuth();
+  }
+
+  function wireAuth() {
+    const send = async () => {
+      authEmail = (document.getElementById("authEmail")?.value || authEmail).trim();
+      if (!authEmail) return;
+      syncMsg = ts("syncing"); render();
+      try { await sync.sendCode(authEmail); authStep = "code"; syncMsg = ts("codeSent"); }
+      catch { syncMsg = ts("syncFail"); }
+      render();
+    };
+    const verify = async () => {
+      const code = (document.getElementById("authCode")?.value || "").trim();
+      if (code.length < 6) return;
+      syncMsg = ts("syncing"); render();
+      try {
+        await sync.verifyCode(authEmail, code);
+        syncMsg = null; authStep = "email";
+        startSync();
+        render();
+      } catch { syncMsg = ts("codeBad"); render(); }
+    };
+    document.getElementById("sendCodeBtn")?.addEventListener("click", send);
+    document.getElementById("authEmail")?.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+    document.getElementById("verifyBtn")?.addEventListener("click", verify);
+    const codeEl = document.getElementById("authCode");
+    codeEl?.focus();
+    // six digits in and it goes straight through — no extra tap
+    codeEl?.addEventListener("input", (e) => { if (e.target.value.trim().length === 6) verify(); });
+    document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
+    document.getElementById("localOnlyBtn")?.addEventListener("click", () => {
+      store.localOnly = true; save(); render();
+    });
+  }
 
   // ── arena ──
   function renderArena() {
@@ -600,7 +667,14 @@
   let authStep = "email"; // email | code
   let authEmail = "";
   let syncMsg = null;
-  let netOK = null; // null = unknown, false = blocked (artifact viewer)
+  let netOK = null; // null = unknown, false = blocked (no network reachable)
+  let syncState = "idle"; // idle | pending | syncing | ok | error | offline
+  const SYNC_TITLE = { idle: "syncIdle", pending: "syncPending", syncing: "syncing", ok: "syncDone", error: "syncFail", offline: "syncOffline" };
+
+  /** Begin background sync and reflect its state in the top bar. */
+  function startSync() {
+    sync.start((st) => { syncState = st; const d = document.getElementById("syncDot"); if (d) { d.className = `syncdot ${st}`; d.title = ts(SYNC_TITLE[st] || "syncIdle"); } });
+  }
 
   function accountPanelHTML() {
     const signedIn = sync.session();
@@ -651,7 +725,10 @@
     });
     document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
     document.getElementById("syncBtn")?.addEventListener("click", doSync);
-    document.getElementById("signOutBtn")?.addEventListener("click", () => { sync.signOut(); syncMsg = null; render(); });
+    document.getElementById("signOutBtn")?.addEventListener("click", () => {
+      if (!confirm(ts("confirmSignOut"))) return;
+      sync.signOut(); store.localOnly = false; syncMsg = null; view = "today"; render();
+    });
     document.getElementById("authEmail")?.addEventListener("input", (e) => { authEmail = e.target.value; });
   }
 
@@ -784,11 +861,15 @@
     rerender: () => render(),
   });
   const sync = createSync({
+    revision: () => store.revision,
     exportState: () => JSON.parse(JSON.stringify(store)),
     importState: (next) => { store = Object.assign(defaults(), next); save(); },
     setRevision: (r) => { store.revision = r; save(); },
   });
   arena.applyFreeze();
+  // an emailed link, if that is what was clicked, signs you in on arrival
+  if (sync.adoptLinkSession()) store.localOnly = false;
+  if (sync.session()) startSync();
   // A blocked network (the artifact viewer's CSP) is a supported state, not
   // an error — the account panel says so instead of offering a dead form.
   sync.probe().then((ok) => { netOK = ok; if (view === "words") render(); });

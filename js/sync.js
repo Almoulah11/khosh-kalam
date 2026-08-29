@@ -190,10 +190,89 @@ function createSync(ctx) {
     return "merged";
   }
 
+  /*
+   * If the emailed link was clicked instead of the code being typed, the
+   * browser lands here with the tokens in the URL fragment. Adopt them and
+   * scrub the fragment so a refresh does not replay it.
+   */
+  function adoptLinkSession() {
+    if (!location.hash.includes("access_token")) return false;
+    const h = new URLSearchParams(location.hash.slice(1));
+    const at = h.get("access_token"), rt = h.get("refresh_token");
+    if (!at) return false;
+    let email = null;
+    try { email = JSON.parse(atob(at.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).email; } catch {}
+    let uid = null;
+    try { uid = JSON.parse(atob(at.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub; } catch {}
+    if (!uid) return false;
+    saveSession({ access_token: at, refresh_token: rt, email, user_id: uid, at: Date.now() });
+    history.replaceState(null, "", location.pathname + location.search);
+    return true;
+  }
+
+  /*
+   * Auto-sync. The contract is simple: any local change schedules a push,
+   * and every return to the app pulls first so another device's work is
+   * merged in before anything is written back.
+   */
+  let dirty = false, timer = null, running = false, onStatus = () => {};
+  const DEBOUNCE = 2500;
+
+  function setStatus(s) { onStatus(s); }
+
+  function markDirty() {
+    if (!session) return;
+    dirty = true;
+    setStatus("pending");
+    clearTimeout(timer);
+    timer = setTimeout(() => run("push"), DEBOUNCE);
+  }
+
+  async function run(reason) {
+    if (!session || running) return;
+    if (!navigator.onLine) { setStatus("offline"); return; }
+    running = true;
+    setStatus("syncing");
+    try {
+      await syncNow();
+      dirty = false;
+      setStatus("ok");
+    } catch (e) {
+      setStatus("error");
+      // leave dirty set; the next focus, reconnect or edit retries
+    } finally {
+      running = false;
+    }
+  }
+
+  function start(statusCb) {
+    onStatus = statusCb || (() => {});
+    if (!session) return;
+    run("load");
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") run("focus");
+    });
+    window.addEventListener("online", () => run("online"));
+    window.addEventListener("offline", () => setStatus("offline"));
+    // a slow heartbeat catches a device that is left open all day
+    setInterval(() => { if (document.visibilityState === "visible") run("tick"); }, 5 * 60 * 1000);
+    // never lose the last few seconds of work on close
+    window.addEventListener("pagehide", () => {
+      if (!dirty || !session) return;
+      try {
+        const body = JSON.stringify({ user_id: session.user_id, state: ctx.exportState(), revision: (ctx.revision() || 0) + 1 });
+        navigator.sendBeacon?.(
+          `${SUPA.url}/rest/v1/kk_state?apikey=${SUPA.key}`,
+          new Blob([body], { type: "application/json" }));
+      } catch {}
+    });
+  }
+
   return {
-    probe,
+    probe, adoptLinkSession,
     sendCode, verifyCode, syncNow, mergeState,
-    signOut: () => saveSession(null),
+    start, markDirty, flush: () => run("manual"),
+    signOut: () => { saveSession(null); dirty = false; },
     session: () => session,
     email: () => session?.email || null,
   };
