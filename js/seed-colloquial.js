@@ -1,0 +1,92 @@
+/*
+ * SEED_COLLOQUIAL — three packs of living Kuwaiti speech.
+ *
+ * A note on the slang pack: slang moves faster than any reference can
+ * follow, and my knowledge has a cutoff. Items there are marked with their
+ * confidence — "راسخة" for usages established for years, and ⚠ for anything
+ * newer that you should confirm with younger relatives before deploying it.
+ * Everything in the first two packs is long-established.
+ */
+const SEED_COLLOQUIAL = [
+  {
+    key: "colloquial",
+    name: "كويتي أصيل — استخدامات تخصنا",
+    nameEn: "Pure Kuwaiti — usages that are ours",
+    desc: "الكلمات والتراكيب اللي ما تلقاها بأي لهجة ثانية. هذي اللي تخلي حچيك كويتي مو خليجي عام.",
+    descEn: "Words and constructions you won't find in any other dialect — what makes your speech Kuwaiti rather than generically Gulf.",
+    words: [
+      { id: "kw01", ar: "شفيك؟", tr: "shfīk?", en: "what's wrong with you? / what's up with you?", reg: "kw", topic: "يومي", ex: "شفيك ساكت من الصبح؟ عسى ما شر.", note: "الصيغة الكويتية. «وش فيك» نجدية و«إيه بك» مصرية" },
+      { id: "kw02", ar: "عبالي", tr: "ʿabāli", en: "I thought / I was under the impression", reg: "kw", topic: "يومي", ex: "عبالي الاجتماع باچر — طلع اليوم!", note: "كويتية أصيلة، وأدق من «ظنيت» بالحچي اليومي" },
+      { id: "kw03", ar: "توّني", tr: "tawwni", en: "I just (did something)", reg: "kw", topic: "يومي", ex: "توّني واصل البيت، عطني خمس دقايق." },
+      { id: "kw04", ar: "هالحزة", tr: "hal-ḥazza", en: "right now, at this hour", reg: "kw", topic: "يومي", ex: "هالحزة ماكو زحمة — يالله تحرك." },
+      { id: "kw05", ar: "دشّ / دشيت", tr: "dashsh / dashshēt", en: "to enter, go in", reg: "kw", topic: "يومي", ex: "دشيت الاجتماع متأخر وما لحقت على أول نقطة." },
+      { id: "kw06", ar: "طلع إن...", tr: "ṭilaʿ inn", en: "it turned out that...", reg: "kw", topic: "يومي", ex: "طلع إن المشكلة من البداية بالمواصفات، مو بالتنفيذ." },
+      { id: "kw07", ar: "زهقت", tr: "zihagt", en: "I got fed up, I'm sick of it", reg: "kw", topic: "يومي", ex: "زهقت من التأجيل — خلنا نقرر ونخلص." },
+      { id: "kw08", ar: "منقهر", tr: "mingihir", en: "gutted, upset in a helpless way", reg: "kw", topic: "يومي", ex: "منقهر على الفرصة اللي راحت من إيدي." },
+      { id: "kw09", ar: "دزّ", tr: "dazz", en: "to send", reg: "kw", topic: "يومي", ex: "دزّ لي الملف على الإيميل وأنا أراجعه." },
+      { id: "kw10", ar: "سولف / سوالف", tr: "sōlaf / sawālif", en: "to chat / conversations, stories", reg: "kw", topic: "يومي", ex: "قعدنا نسولف لين الفجر — سوالف ما تنمل." },
+      { id: "kw11", ar: "يطنّش", tr: "yṭannish", en: "to ignore, blank someone", reg: "kw", topic: "يومي", ex: "دزيت له ثلاث رسايل وهو يطنّش." },
+      { id: "kw12", ar: "مكشّخ", tr: "mkashshikh", en: "sharply dressed", reg: "kw", topic: "يومي", ex: "شنو مكشّخ اليوم؟ عندك مناسبة؟", note: "من «الكشخة» — الأناقة" },
+      { id: "kw13", ar: "يبي لها", tr: "yabī-lha", en: "it needs, it calls for", reg: "kw", topic: "يومي", ex: "هالسالفة يبي لها صبر، مو قرار سريع." },
+      { id: "kw14", ar: "چنّه", tr: "channa", en: "as if, it's like", reg: "kw", topic: "يومي", ex: "چنّه ما سمع الكلام — كمّل مثل ما هو." },
+      { id: "kw15", ar: "عاد", tr: "ʿād", en: "discourse particle: come on / well then", reg: "kw", topic: "يومي", ex: "لا تبالغ عاد! الموضوع مو لهالدرجة.", note: "أداة نبرة — تعطي الجملة ودّ أو عتب حسب السياق" },
+      { id: "kw16", ar: "بروحي", tr: "brūḥi", en: "by myself, on my own", reg: "kw", topic: "يومي", ex: "سويت المشروع بروحي من الصفر." },
+      { id: "kw17", ar: "سيدا", tr: "sīda", en: "straight ahead; directly", reg: "kw", topic: "يومي", ex: "روح سيدا وعقب الدوار لف يمين." },
+      { id: "kw18", ar: "أول بأول", tr: "awwal b-awwal", en: "as things come, without letting them pile up", reg: "phrase", topic: "شغل", ex: "خلّص الإيميلات أول بأول عشان ما تتكدس عليك." },
+      { id: "kw19", ar: "ونسة", tr: "wansa", en: "good company, warm sociable time", reg: "kw", topic: "يومي", ex: "الونسة وياكم أحلى من أي مكان.", note: "من أعز الكلمات الكويتية — ومنها «استانست»" },
+      { id: "kw20", ar: "خرابيط", tr: "kharābīṭ", en: "nonsense, rubbish talk", reg: "kw", topic: "يومي", ex: "لا تسمع خرابيط — دور على المصدر الأصلي." },
+      { id: "kw21", ar: "يتفلسف", tr: "yitfalsaf", en: "to overthink out loud, to pontificate", reg: "kw", topic: "يومي", ex: "بدال ما يتفلسف، ليته يجرب وشوف." },
+      { id: "kw22", ar: "بعده / بعدها", tr: "baʿda / baʿadha", en: "still, yet", reg: "kw", topic: "يومي", ex: "بعده ما رد علي — والموضوع مستعجل." },
+      { id: "kw23", ar: "شقد", tr: "shgadd", en: "how much, to what extent", reg: "kw", topic: "يومي", ex: "شقد تحتاج وقت عشان تخلصه؟" },
+      { id: "kw24", ar: "ما عليه", tr: "mā ʿalēh", en: "never mind, it's fine", reg: "kw", topic: "يومي", ex: "ما عليه، نأجلها لباچر وما صار شي." },
+    ],
+  },
+  {
+    key: "idioms",
+    name: "تعابير وأمثال دارجة",
+    nameEn: "Idioms & everyday sayings",
+    desc: "تعابير مجازية تسمعها بأي مجلس — المثل بمكانه يوصل المعنى أسرع من فقرة كاملة.",
+    descEn: "Figurative expressions you'll hear in any majlis — the right one lands faster than a paragraph.",
+    words: [
+      { id: "id01", ar: "ما يحك جلدك مثل ظفرك", tr: "mā yḥikk jildik mithil ẓifrik", en: "no one looks after your interests like you do", reg: "kw", topic: "أمثال", ex: "لا تعتمد على أحد بملفك — ما يحك جلدك مثل ظفرك." },
+      { id: "id02", ar: "على قد لحافك مد ريولك", tr: "ʿala gadd liḥāfik midd ryūlik", en: "live within your means", reg: "kw", topic: "أمثال", ex: "لا تشتري سيارة بقرض طويل — على قد لحافك مد ريولك.", note: "«ريول» الكويتية بدل «رجليك»" },
+      { id: "id03", ar: "دق الحديد وهو حامي", tr: "digg il-ḥadīd w-hu ḥāmi", en: "strike while the iron is hot", reg: "kw", topic: "أمثال", ex: "السوق متحمس للفكرة — دق الحديد وهو حامي." },
+      { id: "id04", ar: "عصفورين بحجر", tr: "ʿaṣfūrēn b-ḥajar", en: "two birds with one stone", reg: "kw", topic: "أمثال", ex: "نسوي الاجتماع بنفس السفرة — عصفورين بحجر." },
+      { id: "id05", ar: "يد وحدة ما تصفق", tr: "yad waḥda mā tṣaffig", en: "one hand alone can't clap — nothing gets done alone", reg: "kw", topic: "أمثال", ex: "المشروع يبي فريق — يد وحدة ما تصفق." },
+      { id: "id06", ar: "الطيور على أشكالها تقع", tr: "iṭ-ṭuyūr ʿala ashkālha tigaʿ", en: "birds of a feather flock together", reg: "kw", topic: "أمثال", ex: "شوف ربعه وبتعرفه — الطيور على أشكالها تقع." },
+      { id: "id07", ar: "من جدّ وجد", tr: "min jadd wajad", en: "who strives, finds", reg: "msa", topic: "أمثال", ex: "ما أحد وصل بالحظ بس — من جدّ وجد." },
+      { id: "id08", ar: "الصبر مفتاح الفرج", tr: "iṣ-ṣabr miftāḥ il-faraj", en: "patience is the key to relief", reg: "msa", topic: "أمثال", ex: "الأمور بتنفك، بس الصبر مفتاح الفرج." },
+      { id: "id09", ar: "ما كل ما يتمنى المرء يدركه", tr: "mā kill mā yatamanna il-marʾ yudrikuh", en: "not everything one wishes for is attained", reg: "msa", topic: "أمثال", ex: "حاولنا وايد، بس ما كل ما يتمنى المرء يدركه." },
+      { id: "id10", ar: "اللي ما يشري يتفرج", tr: "illi mā yishri yitfarraj", en: "window-shopping costs nothing", reg: "kw", topic: "أمثال", ex: "تعال وياي السوق — اللي ما يشري يتفرج." },
+      { id: "id11", ar: "طاح الفاس بالراس", tr: "ṭāḥ il-fās bir-rās", en: "the damage is done, it's too late now", reg: "kw", topic: "أمثال", ex: "حذرناهم من البداية، والحين طاح الفاس بالراس." },
+      { id: "id12", ar: "ضربني وبچى وسبقني واشتكى", tr: "ḍarabni w-bicha w-sabagni w-ishtaka", en: "he hit me, cried, and complained first", reg: "kw", topic: "أمثال", ex: "هو اللي غلط وهو أول من رفع شكوى — ضربني وبچى وسبقني واشتكى.", note: "لاحظ «بچى» بالچاف — نطق كويتي أصيل" },
+      { id: "id13", ar: "الجار قبل الدار", tr: "il-jār gabl id-dār", en: "check the neighbor before the house", reg: "kw", topic: "أمثال", ex: "قبل لا تشتري البيت، اسأل عن المنطقة — الجار قبل الدار." },
+      { id: "id14", ar: "إن كان صاحبك عسل لا تلحسه كله", tr: "in chān ṣāḥbik ʿasal lā tilḥasa killa", en: "don't exhaust a friend's goodwill", reg: "kw", topic: "أمثال", ex: "خالد ما يردني، بس إن كان صاحبك عسل لا تلحسه كله." },
+      { id: "id15", ar: "الحچي مو مثل الشوف", tr: "il-ḥachi mū mithil ish-shōf", en: "hearing about it isn't like seeing it", reg: "kw", topic: "أمثال", ex: "روح شوف الموقع بنفسك — الحچي مو مثل الشوف." },
+      { id: "id16", ar: "اللي يشوف بلوى غيره تهون عليه بلواه", tr: "illi yshūf balwa ghēra tihūn ʿalēh balwāh", en: "seeing others' troubles lightens your own", reg: "kw", topic: "أمثال", ex: "زرت المستشفى ورجعت شاكر — اللي يشوف بلوى غيره تهون عليه بلواه." },
+    ],
+  },
+  {
+    key: "slang",
+    name: "دارج وحديث ⚠",
+    nameEn: "Modern & youth slang ⚠",
+    desc: "كلمات الجيل الحالي. اللهجة الشبابية تتغير بسرعة — الكلمات المعلّمة بـ⚠ أكدها من أهل جيلها قبل ما تستخدمها بموقف رسمي.",
+    descEn: "Current-generation words. Youth speech changes fast — anything marked ⚠ should be confirmed with people its own age before you deploy it somewhere formal.",
+    words: [
+      { id: "sl01", ar: "طفشان", tr: "ṭafshān", en: "bored, over it", reg: "kw", topic: "يومي", ex: "طفشان من الروتين — أبي أغيّر جو.", note: "راسخة من سنين" },
+      { id: "sl02", ar: "يهبّل", tr: "yhabbil", en: "amazing, mind-blowing", reg: "kw", topic: "يومي", ex: "المكان يهبّل والخدمة أحسن.", note: "راسخة" },
+      { id: "sl03", ar: "فشيلة", tr: "fashīla", en: "an embarrassment, a cringe moment", reg: "kw", topic: "يومي", ex: "نسيت اسمه قدام الكل — فشيلة!", note: "راسخة" },
+      { id: "sl04", ar: "بزر / بزران", tr: "bizir / bizrān", en: "kid / kids", reg: "kw", topic: "يومي", ex: "البزران بالمدرسة والبيت هادي.", note: "راسخة — وأكثر ودًا من «أطفال»" },
+      { id: "sl05", ar: "خبل", tr: "khabal", en: "goofy, out of their mind (affectionate or literal)", reg: "kw", topic: "يومي", ex: "لا تسمع له، هذا خبل بس طيب.", note: "راسخة — بس النبرة تحدد إذا مزحة ولا إهانة" },
+      { id: "sl06", ar: "روقان", tr: "rōgān", en: "chill, relaxed vibe", reg: "kw", topic: "يومي", ex: "اليوم روقان — ماكو شغل ولا ضغط.", note: "راسخة" },
+      { id: "sl07", ar: "طفران", tr: "ṭafrān", en: "broke, out of money", reg: "kw", topic: "يومي", ex: "طفران لين الراتب — أجلها للشهر الياي.", note: "راسخة" },
+      { id: "sl08", ar: "فلّة", tr: "falla", en: "a great time, a blast", reg: "kw", topic: "يومي", ex: "الليلة كانت فلّة من أولها لآخرها.", note: "راسخة" },
+      { id: "sl09", ar: "كشخة", tr: "kashkha", en: "sharp style, looking good", reg: "kw", topic: "يومي", ex: "كشختك اليوم غير — من وين البشت؟", note: "راسخة" },
+      { id: "sl10", ar: "يسطّر", tr: "ysaṭṭir", en: "to talk big, to show off verbally", reg: "kw", topic: "يومي", ex: "قاعد يسطّر علينا وهو ما سوى شي.", note: "⚠ دارجة شبابية — أكدها قبل الاستخدام الرسمي" },
+      { id: "sl11", ar: "طق ونس", tr: "ṭagg wans", en: "to hang out and have a laugh", reg: "kw", topic: "يومي", ex: "تعال نطق ونس بالديوانية.", note: "راسخة" },
+      { id: "sl12", ar: "زحمة", tr: "zaḥma", en: "crowded; a hassle", reg: "kw", topic: "يومي", ex: "لا تروح الحين، السوق زحمة." },
+      { id: "sl13", ar: "دبّر حالك", tr: "dabbir ḥālik", en: "sort yourself out, figure it out", reg: "kw", topic: "يومي", ex: "ماكو مواصلات — دبّر حالك." },
+      { id: "sl14", ar: "على السريع", tr: "ʿas-sarīʿ", en: "quickly, in brief", reg: "phrase", topic: "يومي", ex: "عطني الخلاصة على السريع، عندي اجتماع." },
+    ],
+  },
+];

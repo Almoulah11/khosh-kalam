@@ -22,6 +22,11 @@ const SCRIPTS = [
   "js/seed-packs.js",
   "js/seed-verify.js",
   "js/seed-responses.js",
+  "js/seed-domains.js",
+  "js/seed-colloquial.js",
+  "js/seed-drills.js",
+  "js/arena.js",
+  "js/sync.js",
   "js/app.js",
 ];
 

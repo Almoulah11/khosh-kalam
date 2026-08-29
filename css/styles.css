@@ -213,3 +213,71 @@ h2 .bi-en { font-size: 0.62em; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── arena ──
+   The game screen leans on one accent (green) for progress and reserves
+   red/gold strictly for loss and reward, so state reads at a glance. */
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.mode-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
+  background: var(--bg-card); border: 1px solid var(--hairline);
+  border-radius: var(--radius); padding: 0.9rem; text-align: start;
+  transition: border-color 0.15s ease, transform 0.06s ease;
+}
+.mode-card:active { transform: scale(0.98); }
+.mode-card:hover:not(.locked) { border-color: rgb(47 191 113 / 0.45); }
+.mode-card.locked { opacity: 0.45; cursor: not-allowed; }
+.mode-ico { font-size: 1.3rem; color: var(--green); }
+.mode-name { font-size: 0.95rem; font-weight: 500; line-height: 1.25; }
+.mode-best { font-size: 0.68rem; color: var(--ink-faint); }
+.rank-name { font-family: var(--font-ar); font-size: 1.5rem; color: var(--green); }
+.freeze { font-size: 1rem; color: var(--blue); }
+.xpbar { height: 8px; background: var(--bg-raised); border-radius: 99px; overflow: hidden; margin: 0.6rem 0 0.35rem; }
+.xpbar > div { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s ease; }
+.xpbar.goal > div { background: var(--gold); }
+.goal-num { font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.goal-done { color: var(--green); font-size: 0.85rem; margin-top: 0.4rem; }
+
+.arena-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.8rem; }
+.hearts { color: var(--red); font-size: 1rem; letter-spacing: 0.08em; }
+.combo { color: var(--gold); font-weight: 700; }
+.q-face { padding: 1.3rem 0.3rem 1rem; text-align: center; }
+.q-ar { font-family: var(--font-ar); font-size: 1.55rem; line-height: 1.85; }
+.q-en { font-size: 1.25rem; color: var(--ink-dim); direction: ltr; }
+.q-weak {
+  margin-top: 0.7rem; font-family: var(--font-ar); font-size: 1.05rem;
+  color: var(--ink-faint); text-decoration: line-through; text-decoration-color: rgb(229 84 94 / 0.5);
+}
+.opts { display: grid; gap: 0.5rem; }
+.opt {
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius-chip);
+  background: var(--bg-raised); padding: 0.75rem 0.9rem; text-align: start;
+  font-family: var(--font-ar); font-size: 1.2rem; line-height: 1.6;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.opt-long { font-size: 1.02rem; }
+.opt:hover:not(:disabled) { border-color: var(--green); }
+.opt.right { border-color: var(--green); background: rgb(47 191 113 / 0.14); }
+.opt.wrong { border-color: var(--red); background: rgb(229 84 94 / 0.13); }
+.opt.dim { opacity: 0.4; }
+.verdict-box {
+  margin-top: 0.9rem; padding: 0.9rem; border-radius: var(--radius-chip);
+  border: 1px solid var(--hairline-strong);
+}
+.verdict-box.ok { border-color: rgb(47 191 113 / 0.45); background: rgb(47 191 113 / 0.07); }
+.verdict-box.no { border-color: rgb(229 84 94 / 0.45); background: rgb(229 84 94 / 0.07); }
+.verdict-head { font-weight: 700; margin-bottom: 0.3rem; }
+.verdict-ref { font-family: var(--font-ar); font-size: 1.25rem; color: var(--green); margin-bottom: 0.4rem; }
+.verdict-why { font-size: 0.88rem; color: var(--ink-dim); line-height: 1.85; }
+.result-title { font-size: 1.15rem; font-weight: 700; }
+.result-score { font-family: var(--font-display, inherit); font-size: 3rem; color: var(--green); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.miss { padding: 0.6rem 0; border-bottom: 1px dashed var(--hairline); }
+.miss:last-child { border-bottom: none; }
+.miss-ref { font-family: var(--font-ar); font-size: 1.15rem; color: var(--gold); }
+.miss-why { font-size: 0.82rem; color: var(--ink-dim); line-height: 1.8; }
+
+/* six tabs need a slightly tighter label */
+.tabs { gap: 0.1rem; }
+.tab { font-size: 0.7rem; }
+.tab .tab-ico { font-size: 0.95rem; }
+@media (max-width: 380px) { .tab { font-size: 0.62rem; } .mode-grid { grid-template-columns: 1fr; } }

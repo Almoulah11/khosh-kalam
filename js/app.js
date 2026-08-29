@@ -21,6 +21,8 @@
     settings: { newPerDay: 8, lang: "bi" }, // lang: "bi" bilingual | "ar" Arabic only
     log: {}, // "YYYY-MM-DD" -> {reviews, correct, intro}
     challenges: {}, // date -> {ids: [], done: []}
+    game: {}, // arena: xp, ranks, best scores, daily goal, freezes (see arena.js)
+    revision: 0, // sync revision last agreed with the server
   });
 
   let store = defaults();
@@ -43,6 +45,9 @@
 
   const log = () => (store.log[todayKey()] ||= { reviews: 0, correct: 0, intro: 0 });
 
+  /** Every pack the app offers, from all pack files. */
+  const ALL_PACKS = [...SEED_PACKS, ...SEED_DOMAINS, ...SEED_COLLOQUIAL];
+
   // ── word assembly ─────────────────────────────────────────────────────
   function allWords() {
     const words = [...SEED_MANUAL];
@@ -51,7 +56,7 @@
       id: r.id, ar: r.call, tr: r.callTr, en: r.en, reg: "pair", topic: r.topic,
       ex: `«${r.call}» — «${r.resp}»`, note: r.note, resp: r.resp, respTr: r.respTr,
     })));
-    for (const pack of SEED_PACKS)
+    for (const pack of ALL_PACKS)
       if (store.packs.includes(pack.key)) words.push(...pack.words);
     for (const v of SEED_VERIFY)
       if (store.verify[v.id] === "approved" && v.en)
@@ -83,7 +88,12 @@
         const c = store.progress[w.id];
         return c && c.reps > 0 && c.due <= endOfDay.getTime();
       })
-      .sort((a, b) => store.progress[a.id].due - store.progress[b.id].due);
+      // words fumbled in the arena come first among what is already due
+      .sort((a, b) => {
+        const ma = store.game?.misses?.[a.id] || 0, mb = store.game?.misses?.[b.id] || 0;
+        if (ma !== mb) return mb - ma;
+        return store.progress[a.id].due - store.progress[b.id].due;
+      });
 
     const newBudget = Math.max(0, store.settings.newPerDay - log().intro);
     // thread new cards from both pools so pairs surface early instead of
@@ -177,11 +187,17 @@
   }
 
   // ── streak & challenge ────────────────────────────────────────────────
+  /** A day counts if you reviewed, earned arena XP, or spent a streak freeze. */
+  function dayActive(k) {
+    return (store.log[k]?.reviews || 0) > 0
+      || (store.game?.xpLog?.[k] || 0) > 0
+      || (store.game?.frozen || []).includes(k);
+  }
   function streak() {
     let n = 0;
     const d = new Date();
-    if (!store.log[todayKey(d)]?.reviews) d.setDate(d.getDate() - 1); // today not yet done
-    while (store.log[todayKey(d)]?.reviews) { n += 1; d.setDate(d.getDate() - 1); }
+    if (!dayActive(todayKey(d))) d.setDate(d.getDate() - 1); // today not yet done
+    while (dayActive(todayKey(d))) { n += 1; d.setDate(d.getDate() - 1); }
     return n;
   }
 
@@ -267,7 +283,7 @@
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
     document.getElementById("verifyPill").textContent = pending || "";
-    ({ today: renderToday, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
+    ({ today: renderToday, arena: renderArena, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
   }
 
   // ── today ──
@@ -397,6 +413,12 @@
     }
   });
 
+  // ── arena ──
+  function renderArena() {
+    stage.innerHTML = arena.render();
+    arena.wire(stage);
+  }
+
   // ── words ──
   function renderWords() {
     const words = allWords();
@@ -421,6 +443,7 @@
       <div class="panel" style="padding:0.3rem 1.1rem">
         ${list.length ? list.map(wordRowHTML).join("") : `<div class="empty">${t("noResults")}</div>`}
       </div>
+      ${accountPanelHTML()}
       <div class="panel">
         <div class="microlabel">${t("backupTitle")}</div>
         <div class="note-info" style="margin:0.4rem 0 0.6rem">${t("backupNote")}</div>
@@ -458,6 +481,7 @@
     document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
     document.getElementById("fTopic").addEventListener("change", (e) => { wordsFilter.topic = e.target.value; render(); });
     document.getElementById("newPerDay").addEventListener("change", (e) => { store.settings.newPerDay = Math.max(0, +e.target.value || 0); save(); });
+    wireAccountPanel();
     document.getElementById("exportBtn").addEventListener("click", () => { backupPanel = backupPanel === "export" ? null : "export"; render(); });
     document.getElementById("importBtn").addEventListener("click", () => { backupPanel = backupPanel === "import" ? null : "import"; render(); });
     stage.querySelectorAll("#closeBackup").forEach((b) => b.addEventListener("click", () => { backupPanel = null; render(); }));
@@ -571,6 +595,73 @@
     reader.readAsText(f);
   }
 
+
+  // ── account & sync ────────────────────────────────────────────────────
+  let authStep = "email"; // email | code
+  let authEmail = "";
+  let syncMsg = null;
+  let netOK = null; // null = unknown, false = blocked (artifact viewer)
+
+  function accountPanelHTML() {
+    const signedIn = sync.session();
+    return `
+      <div class="panel">
+        <div class="microlabel">${t("accountTitle")}</div>
+        ${netOK === false
+          ? `<div class="note-info" style="margin-top:0.5rem">${t("syncBlocked")}</div>`
+          : signedIn
+            ? `<div class="note-info" style="margin:0.4rem 0 0.6rem">${ti("signedInAs")} <b dir="ltr">${esc(sync.email())}</b></div>
+               <div class="v-actions">
+                 <button class="btn btn-sm btn-primary" id="syncBtn">${t("syncNow")}</button>
+                 <button class="btn btn-sm btn-ghost" id="signOutBtn">${t("signOut")}</button>
+               </div>`
+            : `<div class="note-info" style="margin:0.4rem 0 0.6rem">${t("accountNote")}</div>
+               ${authStep === "email"
+                 ? `<label class="f">${t("emailLabel")}
+                      <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+                    <div class="v-actions"><button class="btn btn-sm btn-primary" id="sendCodeBtn">${t("sendCode")}</button></div>`
+                 : `<label class="f">${t("codeLabel")}
+                      <input type="text" id="authCode" dir="ltr" inputmode="numeric" maxlength="8" placeholder="123456" /></label>
+                    <div class="v-actions">
+                      <button class="btn btn-sm btn-primary" id="verifyBtn">${t("verifyCode")}</button>
+                      <button class="btn btn-sm btn-ghost" id="backEmailBtn">${t("close")}</button>
+                    </div>`}`}
+        ${syncMsg ? `<div class="note-info" style="margin-top:0.6rem">${esc(syncMsg)}</div>` : ""}
+      </div>`;
+  }
+
+  function wireAccountPanel() {
+    const setMsg = (k) => { syncMsg = ts(k); render(); };
+    document.getElementById("sendCodeBtn")?.addEventListener("click", async () => {
+      const el = document.getElementById("authEmail");
+      authEmail = el.value.trim();
+      if (!authEmail) return;
+      syncMsg = ts("syncing"); render();
+      try { await sync.sendCode(authEmail); authStep = "code"; setMsg("codeSent"); }
+      catch { setMsg("syncFail"); }
+    });
+    document.getElementById("verifyBtn")?.addEventListener("click", async () => {
+      const code = document.getElementById("authCode").value.trim();
+      syncMsg = ts("syncing"); render();
+      try {
+        await sync.verifyCode(authEmail, code);
+        authStep = "email";
+        await doSync();
+      } catch { setMsg("codeBad"); }
+    });
+    document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
+    document.getElementById("syncBtn")?.addEventListener("click", doSync);
+    document.getElementById("signOutBtn")?.addEventListener("click", () => { sync.signOut(); syncMsg = null; render(); });
+    document.getElementById("authEmail")?.addEventListener("input", (e) => { authEmail = e.target.value; });
+  }
+
+  async function doSync() {
+    syncMsg = ts("syncing"); render();
+    try { await sync.syncNow(); syncMsg = ts("syncDone"); }
+    catch { syncMsg = ts("syncFail"); }
+    render();
+  }
+
   // ── verify ──
   function renderVerify() {
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]);
@@ -609,7 +700,7 @@
     stage.innerHTML = `
       <div class="h-row"><h2>${t("packsTitle")}</h2></div>
       <div class="note-info" style="margin-bottom:0.8rem">${t("packsNote")}</div>
-      ${SEED_PACKS.map((p) => {
+      ${ALL_PACKS.map((p) => {
         const added = store.packs.includes(p.key);
         return `<div class="panel">
           <div class="h-row" style="margin:0">
@@ -686,6 +777,22 @@
   }
 
   // ── boot ──
+  const arena = createArena({
+    store: () => store,
+    todayKey, streak, save, esc, t, ti, ts, S, bilingual,
+    allWords, isStudyable,
+    rerender: () => render(),
+  });
+  const sync = createSync({
+    exportState: () => JSON.parse(JSON.stringify(store)),
+    importState: (next) => { store = Object.assign(defaults(), next); save(); },
+    setRevision: (r) => { store.revision = r; save(); },
+  });
+  arena.applyFreeze();
+  // A blocked network (the artifact viewer's CSP) is a supported state, not
+  // an error — the account panel says so instead of offering a dead form.
+  sync.probe().then((ok) => { netOK = ok; if (view === "words") render(); });
+
   document.querySelectorAll(".tab").forEach((el) =>
     el.addEventListener("click", () => { view = el.dataset.view; session = null; render(); }));
   document.querySelectorAll("[data-lang]").forEach((b) =>

@@ -218,6 +218,74 @@ h2 .bi-en { font-size: 0.62em; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── arena ──
+   The game screen leans on one accent (green) for progress and reserves
+   red/gold strictly for loss and reward, so state reads at a glance. */
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.mode-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;
+  background: var(--bg-card); border: 1px solid var(--hairline);
+  border-radius: var(--radius); padding: 0.9rem; text-align: start;
+  transition: border-color 0.15s ease, transform 0.06s ease;
+}
+.mode-card:active { transform: scale(0.98); }
+.mode-card:hover:not(.locked) { border-color: rgb(47 191 113 / 0.45); }
+.mode-card.locked { opacity: 0.45; cursor: not-allowed; }
+.mode-ico { font-size: 1.3rem; color: var(--green); }
+.mode-name { font-size: 0.95rem; font-weight: 500; line-height: 1.25; }
+.mode-best { font-size: 0.68rem; color: var(--ink-faint); }
+.rank-name { font-family: var(--font-ar); font-size: 1.5rem; color: var(--green); }
+.freeze { font-size: 1rem; color: var(--blue); }
+.xpbar { height: 8px; background: var(--bg-raised); border-radius: 99px; overflow: hidden; margin: 0.6rem 0 0.35rem; }
+.xpbar > div { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s ease; }
+.xpbar.goal > div { background: var(--gold); }
+.goal-num { font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.goal-done { color: var(--green); font-size: 0.85rem; margin-top: 0.4rem; }
+
+.arena-top { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.8rem; }
+.hearts { color: var(--red); font-size: 1rem; letter-spacing: 0.08em; }
+.combo { color: var(--gold); font-weight: 700; }
+.q-face { padding: 1.3rem 0.3rem 1rem; text-align: center; }
+.q-ar { font-family: var(--font-ar); font-size: 1.55rem; line-height: 1.85; }
+.q-en { font-size: 1.25rem; color: var(--ink-dim); direction: ltr; }
+.q-weak {
+  margin-top: 0.7rem; font-family: var(--font-ar); font-size: 1.05rem;
+  color: var(--ink-faint); text-decoration: line-through; text-decoration-color: rgb(229 84 94 / 0.5);
+}
+.opts { display: grid; gap: 0.5rem; }
+.opt {
+  border: 1px solid var(--hairline-strong); border-radius: var(--radius-chip);
+  background: var(--bg-raised); padding: 0.75rem 0.9rem; text-align: start;
+  font-family: var(--font-ar); font-size: 1.2rem; line-height: 1.6;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.opt-long { font-size: 1.02rem; }
+.opt:hover:not(:disabled) { border-color: var(--green); }
+.opt.right { border-color: var(--green); background: rgb(47 191 113 / 0.14); }
+.opt.wrong { border-color: var(--red); background: rgb(229 84 94 / 0.13); }
+.opt.dim { opacity: 0.4; }
+.verdict-box {
+  margin-top: 0.9rem; padding: 0.9rem; border-radius: var(--radius-chip);
+  border: 1px solid var(--hairline-strong);
+}
+.verdict-box.ok { border-color: rgb(47 191 113 / 0.45); background: rgb(47 191 113 / 0.07); }
+.verdict-box.no { border-color: rgb(229 84 94 / 0.45); background: rgb(229 84 94 / 0.07); }
+.verdict-head { font-weight: 700; margin-bottom: 0.3rem; }
+.verdict-ref { font-family: var(--font-ar); font-size: 1.25rem; color: var(--green); margin-bottom: 0.4rem; }
+.verdict-why { font-size: 0.88rem; color: var(--ink-dim); line-height: 1.85; }
+.result-title { font-size: 1.15rem; font-weight: 700; }
+.result-score { font-family: var(--font-display, inherit); font-size: 3rem; color: var(--green); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.miss { padding: 0.6rem 0; border-bottom: 1px dashed var(--hairline); }
+.miss:last-child { border-bottom: none; }
+.miss-ref { font-family: var(--font-ar); font-size: 1.15rem; color: var(--gold); }
+.miss-why { font-size: 0.82rem; color: var(--ink-dim); line-height: 1.8; }
+
+/* six tabs need a slightly tighter label */
+.tabs { gap: 0.1rem; }
+.tab { font-size: 0.7rem; }
+.tab .tab-ico { font-size: 0.95rem; }
+@media (max-width: 380px) { .tab { font-size: 0.62rem; } .mode-grid { grid-template-columns: 1fr; } }
 </style>
 <script>
   document.documentElement.setAttribute("dir", "rtl");
@@ -241,6 +309,7 @@ h2 .bi-en { font-size: 0.62em; }
 
   <nav class="tabs" id="tabs">
     <button data-view="today" data-i18n="tabToday" class="tab active"><span class="tab-ico">◉</span><span class="tab-label"></span></button>
+    <button data-view="arena" data-i18n="tabArena" class="tab"><span class="tab-ico">◆</span><span class="tab-label"></span></button>
     <button data-view="words" data-i18n="tabWords" class="tab"><span class="tab-ico">☰</span><span class="tab-label"></span></button>
     <button data-view="verify" data-i18n="tabVerify" class="tab"><span class="tab-ico">؟</span><span class="tab-label"></span><span class="pill" id="verifyPill"></span></button>
     <button data-view="packs" data-i18n="tabPacks" class="tab"><span class="tab-ico">◫</span><span class="tab-label"></span></button>
@@ -556,6 +625,76 @@ const UI = {
     ar: "الجدولة على خوارزمية FSRS للتكرار المتباعد — تراجع الكلمة قبل ما تنساها بشوي، وهذا أكفأ وقت للتثبيت. كل مراجعة استرجاع نشط (تجاوب قبل ما تقلب) لأن الاختبار يثبت أقوى من إعادة القراءة، والبطاقة تتدرج من التعرف إلى الإنتاج إلى إكمال الجملة لأن الصعوبة المدروسة تبني ذاكرة أمتن. وتحدي الاستخدام اليومي ينقل الكلمة من التطبيق إلى لسانك.",
     en: "Scheduling runs on FSRS spaced repetition — each word returns just before you'd forget it, the most efficient moment to reinforce it. Every review is active retrieval (you answer before flipping) because testing fixes memory harder than re-reading, and cards escalate from recognition to production to completing a sentence, because desirable difficulty builds sturdier recall. The daily usage challenge is what moves a word from the app onto your tongue.",
   },
+
+  // ── arena / game ──
+  tabArena: { ar: "التمرين", en: "Arena" },
+  rankNovice: { ar: "مبتدي", en: "Novice" },
+  rankListener: { ar: "سامع", en: "Listener" },
+  rankTalker: { ar: "مسولف", en: "Talker" },
+  rankDebater: { ar: "محاور", en: "Debater" },
+  rankEloquent: { ar: "بليغ", en: "Eloquent" },
+  rankMaster: { ar: "أستاذ", en: "Master" },
+  toNextRank: { ar: (n) => `باقي ${n} XP للرتبة الياية`, en: (n) => `${n} XP to next rank` },
+  maxRank: { ar: "وصلت أعلى رتبة", en: "Top rank reached" },
+  freezeTitle: { ar: "تجميد الستريك — يغطي لك يوم فايت", en: "Streak freeze — covers one missed day" },
+  dailyGoal: { ar: "هدف اليوم", en: "Today's goal" },
+  goalMet: { ar: "✅ خلصت هدف اليوم", en: "✅ Daily goal met" },
+  goalSize: { ar: "حجم الهدف", en: "Goal size" },
+  chooseMode: { ar: "اختر التمرين", en: "Choose a mode" },
+  bestScore: { ar: "أفضل نتيجة", en: "Best" },
+  notPlayed: { ar: "ما لعبتها بعد", en: "Not played yet" },
+  modeLocked: { ar: "تحتاج كلمات أكثر", en: "Needs more words" },
+  modeClozeGame: { ar: "كمّل الجملة", en: "Complete the sentence" },
+  modeMeaningGame: { ar: "شنو معناها", en: "What's the meaning" },
+  modeGenderGame: { ar: "مذكر ولا مؤنث", en: "Masculine or feminine" },
+  modeUpgradeGame: { ar: "قلها أحسن", en: "Say it better" },
+  modeReplyGame: { ar: "نداء ورد", en: "Call & response" },
+  modeProverbGame: { ar: "المثل بمكانه", en: "The right proverb" },
+  correct: { ar: "صح", en: "Correct" },
+  incorrect: { ar: "غلط", en: "Not quite" },
+  nextQ: { ar: "التالي", en: "Next" },
+  finishRound: { ar: "إنهاء الجولة", en: "Finish round" },
+  roundOver: { ar: "خلصت القلوب", en: "Out of hearts" },
+  perfectRound: { ar: "جولة كاملة! 🎉", en: "Perfect round! 🎉" },
+  outOfHearts: { ar: "خلصت القلوب", en: "Out of hearts" },
+  roundDone: { ar: "خلصت الجولة", en: "Round complete" },
+  finalScore: { ar: "النتيجة", en: "score" },
+  accuracy: { ar: "دقة", en: "accuracy" },
+  bestCombo: { ar: "أطول سلسلة", en: "best combo" },
+  newBest: { ar: "🏆 رقم قياسي يديد!", en: "🏆 New best!" },
+  reviewMisses: { ar: "اللي عثرت فيها", en: "What you missed" },
+  noMisses: { ar: "ما عثرت بأي وحدة — ممتاز.", en: "You missed nothing — excellent." },
+  playAgain: { ar: "مرة ثانية", en: "Play again" },
+  backToModes: { ar: "رجوع", en: "Back" },
+  arenaHowTitle: { ar: "شلون يشتغل التمرين؟", en: "How the arena works" },
+  arenaHow: {
+    ar: "كل جولة ١٠ أسئلة و٥ قلوب. الإجابة الأسرع تعطي نقاط أكثر، والسلسلة المتتالية تضاعفها. تكسب XP على كل إجابة صحيحة، وتترقى بالرتب. تجميد الستريك تكسبه كل ٧ أيام متتالية. التمرين ما يغيّر مواعيد المراجعة — بس الكلمات اللي تعثر فيها تجيك أول بجلسة اليوم.",
+    en: "Ten questions, five hearts. Faster answers score more and a streak multiplies them. Correct answers earn XP toward ranks. A streak freeze is earned every 7 unbroken days. The arena never changes your review schedule — but words you miss here jump to the front of your next daily session.",
+  },
+
+  // ── account / sync ──
+  accountTitle: { ar: "الحساب والمزامنة", en: "Account & sync" },
+  accountNote: {
+    ar: "سجل دخولك بإيميلك عشان تقدرك تكمل من أي جهاز — تقدمك ونقاطك وكل شي.",
+    en: "Sign in with your email to carry your progress, XP and decks across every device.",
+  },
+  emailLabel: { ar: "الإيميل", en: "Email" },
+  sendCode: { ar: "أرسل الرمز", en: "Send code" },
+  codeLabel: { ar: "الرمز اللي وصلك", en: "The code you received" },
+  verifyCode: { ar: "تأكيد", en: "Verify" },
+  signedInAs: { ar: "مسجل دخول باسم", en: "Signed in as" },
+  syncNow: { ar: "زامن الحين", en: "Sync now" },
+  signOut: { ar: "تسجيل خروج", en: "Sign out" },
+  syncing: { ar: "قاعد يزامن…", en: "Syncing…" },
+  syncDone: { ar: "تمت المزامنة ✅", en: "Synced ✅" },
+  syncFail: { ar: "ما نجحت المزامنة — جرب مرة ثانية", en: "Sync failed — try again" },
+  codeSent: { ar: "أرسلنا لك رمز على الإيميل", en: "We emailed you a code" },
+  codeBad: { ar: "الرمز مو صحيح أو منتهي", en: "That code is wrong or expired" },
+  syncBlocked: {
+    ar: "المزامنة ما تشتغل داخل عارض Claude لأنه يمنع الاتصال بالشبكة. استضف التطبيق على Netlify أو GitHub Pages وبتشتغل المزامنة على طول — والنسخة الاحتياطية بالنص تشتغل هني عادي.",
+    en: "Sync can't run inside the Claude artifact viewer — it blocks network calls. Host the app on Netlify or GitHub Pages and sync works immediately. Text backup works fine here.",
+  },
+  arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 
   // ── labels ──
   regKw: { ar: "كويتي", en: "Kuwaiti" },
@@ -1080,6 +1219,1099 @@ const SEED_RESPONSES = [
 </script>
 <script>
 /*
+ * SEED_DOMAINS — professional-domain packs. Same card shape as SEED_PACKS
+ * and merged into it at load, so they behave like any other pack: inert
+ * until added from الحزم.
+ *
+ * These are MSA technical terms as they are actually used inside educated
+ * Kuwaiti speech — tagged "msa" for that reason. Every example sentence is
+ * written in Kuwaiti dialect, because that is the frame you will use them in.
+ */
+const SEED_DOMAINS = [
+  {
+    key: "space",
+    name: "فضاء وطيران",
+    nameEn: "Space & aerospace",
+    desc: "مصطلحات الفضاء والطيران — من الإقلاع إلى المدار. مبنية بدقة، مو مثل القوائم القديمة.",
+    descEn: "Space and aerospace terminology — from takeoff to orbit. Built carefully, unlike the old lists.",
+    words: [
+      { id: "sp01", ar: "مدار", tr: "madār", en: "orbit", reg: "msa", topic: "فضاء", ex: "القمر الصناعي دخل مداره بنجاح عقب ثلاث ساعات من الإطلاق." },
+      { id: "sp02", ar: "الغلاف الجوي", tr: "il-ghilāf il-jawwi", en: "the atmosphere", reg: "msa", topic: "فضاء", ex: "الغلاف الجوي هو اللي يحمينا من الأشعة والنيازك." },
+      { id: "sp03", ar: "انعدام الوزن", tr: "inʿidām il-wazn", en: "weightlessness", reg: "msa", topic: "فضاء", ex: "انعدام الوزن يأثر على العظام والعضلات، فرواد الفضاء لازم يتمرنون كل يوم." },
+      { id: "sp04", ar: "سرعة الإفلات", tr: "surʿat il-iflāt", en: "escape velocity", reg: "msa", topic: "فضاء", ex: "لازم توصل سرعة الإفلات عشان تتحرر من جاذبية الأرض." },
+      { id: "sp05", ar: "الدفع", tr: "id-dafʿ", en: "thrust", reg: "msa", topic: "فضاء", ex: "الدفع لازم يتجاوز الوزن، وإلا الصاروخ ما يرتفع." },
+      { id: "sp06", ar: "وقود دافع", tr: "waqūd dāfiʿ", en: "propellant", reg: "msa", topic: "فضاء", ex: "أغلب وزن الصاروخ عند الإقلاع وقود دافع، مو حمولة." },
+      { id: "sp07", ar: "منصة الإطلاق", tr: "minaṣṣat il-iṭlāq", en: "launch pad", reg: "msa", topic: "فضاء", ex: "وقفوا العد التنازلي وهم على منصة الإطلاق بسبب الرياح." },
+      { id: "sp08", ar: "العد التنازلي", tr: "il-ʿadd it-tanāzuli", en: "the countdown", reg: "msa", topic: "فضاء", ex: "العد التنازلي ينوقف بأي لحظة إذا طلعت قراءة غريبة." },
+      { id: "sp09", ar: "إعادة الدخول", tr: "iʿādat id-dukhūl", en: "re-entry", reg: "msa", topic: "فضاء", ex: "إعادة الدخول أخطر من الإقلاع — الحرارة توصل آلاف الدرجات." },
+      { id: "sp10", ar: "درع حراري", tr: "dirʿ ḥarāri", en: "heat shield", reg: "msa", topic: "فضاء", ex: "بدون درع حراري سليم، المركبة تحترق قبل لا توصل." },
+      { id: "sp11", ar: "المدار الأرضي المنخفض", tr: "il-madār il-arḍi il-munkhafiḍ", en: "low Earth orbit (LEO)", reg: "msa", topic: "فضاء", ex: "أغلب الأقمار التجارية تشتغل بالمدار الأرضي المنخفض." },
+      { id: "sp12", ar: "محطة الفضاء الدولية", tr: "maḥaṭṭat il-faḍāʾ id-dawliyya", en: "the International Space Station", reg: "msa", topic: "فضاء", ex: "محطة الفضاء الدولية أكبر مشروع تعاون علمي بالتاريخ." },
+      { id: "sp13", ar: "بدلة الفضاء", tr: "badlat il-faḍāʾ", en: "spacesuit", reg: "msa", topic: "فضاء", ex: "بدلة الفضاء بحد ذاتها مركبة صغيرة — ضغط وأكسجين وتبريد." },
+      { id: "sp14", ar: "السير في الفضاء", tr: "is-sayr fi l-faḍāʾ", en: "spacewalk (EVA)", reg: "msa", topic: "فضاء", ex: "أي مهمة سير في الفضاء تتدرب عليها شهور تحت الماي." },
+      { id: "sp15", ar: "الطاقم", tr: "iṭ-ṭāqim", en: "the crew", reg: "msa", topic: "فضاء", ex: "الطاقم كله لازم يعرف يسوي شغل غيره — ماكو أحد ما ينعوض." },
+      { id: "sp16", ar: "الديناميكا الهوائية", tr: "id-dīnāmīka il-hawāʾiyya", en: "aerodynamics", reg: "msa", topic: "فضاء", ex: "شكل الجناح كله حسابات ديناميكا هوائية، مو ذوق." },
+      { id: "sp17", ar: "قوة الرفع", tr: "quwwat ir-rafʿ", en: "lift", reg: "msa", topic: "فضاء", ex: "قوة الرفع تيي من فرق الضغط فوق الجناح وتحته." },
+      { id: "sp18", ar: "مقاومة الهواء", tr: "muqāwamat il-hawa", en: "drag", reg: "msa", topic: "فضاء", ex: "كل ما قللت مقاومة الهواء، قل استهلاك الوقود." },
+      { id: "sp19", ar: "الاضطرابات الجوية", tr: "il-iḍṭirābāt il-jawwiyya", en: "turbulence", reg: "msa", topic: "فضاء", ex: "الاضطرابات الجوية مزعجة بس نادرًا تكون خطرة." },
+      { id: "sp20", ar: "تفوق سرعة الصوت", tr: "tafawwuq surʿat iṣ-ṣōt", en: "supersonic", reg: "msa", topic: "فضاء", ex: "الطيران بتفوق سرعة الصوت رجع يتطور من يديد." },
+      { id: "sp21", ar: "الطيار الآلي", tr: "iṭ-ṭayyār il-āli", en: "autopilot", reg: "msa", topic: "فضاء", ex: "الطيار الآلي يمسك أغلب الرحلة، بس الإقلاع والهبوط للبشر." },
+      { id: "sp22", ar: "برج المراقبة", tr: "burj il-murāqaba", en: "control tower", reg: "msa", topic: "فضاء", ex: "ماكو إقلاع بدون إذن من برج المراقبة." },
+      { id: "sp23", ar: "السنة الضوئية", tr: "is-sana iḍ-ḍōʾiyya", en: "light year", reg: "msa", topic: "فضاء", ex: "السنة الضوئية وحدة مسافة مو زمن — وهذي أشهر غلطة." },
+      { id: "sp24", ar: "الثقب الأسود", tr: "ith-thugub il-aswad", en: "black hole", reg: "msa", topic: "فضاء", ex: "الثقب الأسود جاذبيته قوية لدرجة إن الضوء ما يفلت منه." },
+      { id: "sp25", ar: "المرصد", tr: "il-marṣad", en: "observatory", reg: "msa", topic: "فضاء", ex: "المرصد لازم يكون بعيد عن أضواء المدينة." },
+      { id: "sp26", ar: "الكويكب", tr: "il-kuwaykib", en: "asteroid", reg: "msa", topic: "فضاء", ex: "أكو كويكبات فيها معادن تسوى أكثر من اقتصادات كاملة." },
+      { id: "sp27", ar: "المذنّب", tr: "il-mudhannab", en: "comet", reg: "msa", topic: "فضاء", ex: "ذيل المذنّب يطول كل ما قرّب من الشمس." },
+      { id: "sp28", ar: "الكسوف والخسوف", tr: "il-kusūf wil-khusūf", en: "solar & lunar eclipse", reg: "msa", topic: "فضاء", ex: "الكسوف للشمس والخسوف للقمر — والناس تخلطهم وايد." },
+    ],
+  },
+  {
+    key: "science",
+    name: "علوم وفيزياء",
+    nameEn: "Science & physics",
+    desc: "لغة العلم بالعربي — تنفع بالنقاش الجاد وبقراءة أي شي علمي بلغتك.",
+    descEn: "The language of science in Arabic — for serious discussion and for reading science in your own language.",
+    words: [
+      { id: "sc01", ar: "فرضية", tr: "faraḍiyya", en: "hypothesis", reg: "msa", topic: "علوم", ex: "الفرضية بدون تجربة تظل رأي، مو علم." },
+      { id: "sc02", ar: "نظرية", tr: "naẓariyya", en: "theory (scientific)", reg: "msa", topic: "علوم", ex: "بالعلم، «نظرية» يعني مثبتة بأدلة — مو مجرد تخمين." },
+      { id: "sc03", ar: "التجربة الضابطة", tr: "it-tajruba iḍ-ḍābiṭa", en: "control experiment", reg: "msa", topic: "علوم", ex: "بدون تجربة ضابطة، ما تعرف إذا النتيجة من العلاج ولا من الصدفة." },
+      { id: "sc04", ar: "العينة", tr: "il-ʿayyina", en: "sample", reg: "msa", topic: "علوم", ex: "العينة صغيرة، فالنتيجة ما تتعمم على الكل." },
+      { id: "sc05", ar: "الارتباط لا يعني السببية", tr: "il-irtibāṭ lā yaʿni is-sababiyya", en: "correlation is not causation", reg: "phrase", topic: "علوم", ex: "الرقمين يتحركون مع بعض، بس الارتباط لا يعني السببية." },
+      { id: "sc06", ar: "الذرة", tr: "idh-dharra", en: "atom", reg: "msa", topic: "علوم", ex: "الذرة أغلبها فراغ — وهذي حقيقة تغير نظرتك للمادة." },
+      { id: "sc07", ar: "الجزيء", tr: "il-juzayʾ", en: "molecule", reg: "msa", topic: "علوم", ex: "جزيء الماي ذرتين هيدروجين وذرة أكسجين." },
+      { id: "sc08", ar: "الاندماج النووي", tr: "il-indimāj in-nawawi", en: "nuclear fusion", reg: "msa", topic: "علوم", ex: "الاندماج النووي هو اللي يشغل الشمس من ملايين السنين." },
+      { id: "sc09", ar: "الانشطار النووي", tr: "il-inshiṭār in-nawawi", en: "nuclear fission", reg: "msa", topic: "علوم", ex: "المفاعلات الحالية كلها تشتغل بالانشطار، مو بالاندماج." },
+      { id: "sc10", ar: "النسبية", tr: "in-nisbiyya", en: "relativity", reg: "msa", topic: "علوم", ex: "النسبية تقول إن الزمن نفسه يتغير حسب السرعة والجاذبية." },
+      { id: "sc11", ar: "ميكانيكا الكم", tr: "mīkānīka il-kamm", en: "quantum mechanics", reg: "msa", topic: "علوم", ex: "ميكانيكا الكم تشتغل صح حتى لو ما أحد فاهم ليش." },
+      { id: "sc12", ar: "الطيف", tr: "iṭ-ṭayf", en: "spectrum", reg: "msa", topic: "علوم", ex: "من طيف الضوء نعرف تركيب نجم يبعد ملايين السنين." },
+      { id: "sc13", ar: "التحفيز", tr: "it-taḥfīz", en: "catalysis", reg: "msa", topic: "علوم", ex: "المحفّز يسرّع التفاعل بدون ما يستهلك نفسه." },
+      { id: "sc14", ar: "الكثافة", tr: "il-kathāfa", en: "density", reg: "msa", topic: "علوم", ex: "الحديد أثقل من الخشب بنفس الحجم لأن كثافته أعلى." },
+      { id: "sc15", ar: "اللزوجة", tr: "il-luzūja", en: "viscosity", reg: "msa", topic: "علوم", ex: "لزوجة الزيت تتغير بالحرارة، وهذا مهم بالمحركات." },
+      { id: "sc16", ar: "الاحتكاك", tr: "il-iḥtikāk", en: "friction (physics)", reg: "msa", topic: "علوم", ex: "بدون احتكاك ما تقدر تمشي ولا توقف سيارة." },
+      { id: "sc17", ar: "الزخم", tr: "iz-zakham", en: "momentum", reg: "msa", topic: "علوم", ex: "الزخم محفوظ — هذا اللي يفسر ارتداد البندقية." },
+      { id: "sc18", ar: "التسارع", tr: "it-tasāruʿ", en: "acceleration", reg: "msa", topic: "علوم", ex: "التسارع تغيّر بالسرعة، مو السرعة نفسها." },
+      { id: "sc19", ar: "الموصل والعازل", tr: "il-mūṣil wil-ʿāzil", en: "conductor and insulator", reg: "msa", topic: "علوم", ex: "النحاس موصل ممتاز، والمطاط عازل — والفرق بينهم ينقذ أرواح." },
+      { id: "sc20", ar: "التمثيل الضوئي", tr: "it-tamthīl iḍ-ḍōʾi", en: "photosynthesis", reg: "msa", topic: "علوم", ex: "التمثيل الضوئي هو اللي يحوّل ضوء الشمس إلى غذاء." },
+      { id: "sc21", ar: "الأيض", tr: "il-ayḍ", en: "metabolism", reg: "msa", topic: "علوم", ex: "الأيض يختلف من شخص لشخص، وهذا ليش الحميات ما تنفع الكل." },
+      { id: "sc22", ar: "المناعة", tr: "il-manāʿa", en: "immunity", reg: "msa", topic: "علوم", ex: "المناعة تتعلم — وهذا مبدأ التطعيم كله." },
+      { id: "sc23", ar: "الجينات", tr: "il-jīnāt", en: "genes", reg: "msa", topic: "علوم", ex: "الجينات تعطيك الاحتمالات، والبيئة تحدد النتيجة." },
+      { id: "sc24", ar: "الطفرة", tr: "iṭ-ṭafra", en: "mutation", reg: "msa", topic: "علوم", ex: "أغلب الطفرات ما تسوي شي، وقليل منها يغيّر كل شي." },
+      { id: "sc25", ar: "البيانات التجريبية", tr: "il-bayānāt it-tajrībiyya", en: "empirical data", reg: "msa", topic: "علوم", ex: "أنا ما أجادل بالرأي — عطني بيانات تجريبية." },
+      { id: "sc26", ar: "مراجعة الأقران", tr: "murājaʿat il-aqrān", en: "peer review", reg: "msa", topic: "علوم", ex: "أي بحث ما مرّ على مراجعة الأقران، خذه بحذر." },
+      { id: "sc27", ar: "قابلية التكرار", tr: "qābiliyyat it-takrār", en: "reproducibility", reg: "msa", topic: "علوم", ex: "إذا التجربة ما تنعاد بنفس النتيجة، فيها شي غلط." },
+      { id: "sc28", ar: "هامش الخطأ", tr: "hāmish il-khaṭaʾ", en: "margin of error", reg: "msa", topic: "علوم", ex: "الفرق بين النسبتين داخل هامش الخطأ — يعني ما يعني شي." },
+    ],
+  },
+  {
+    key: "finance",
+    name: "مال واستثمار",
+    nameEn: "Finance & investment",
+    desc: "لغة المال بالعربي — من قراءة ميزانية إلى نقاش استثمار بمجلس.",
+    descEn: "The language of money in Arabic — from reading a balance sheet to holding an investment conversation.",
+    words: [
+      { id: "fn01", ar: "السيولة", tr: "is-suyūla", en: "liquidity", reg: "msa", topic: "مال", ex: "الشركة مرابحة على الورق، بس ماكو عندها سيولة تدفع فيها الرواتب." },
+      { id: "fn02", ar: "الأصول والخصوم", tr: "il-uṣūl wil-khuṣūm", en: "assets and liabilities", reg: "msa", topic: "مال", ex: "أول شي أشوفه بأي شركة: الأصول مقابل الخصوم." },
+      { id: "fn03", ar: "حقوق الملكية", tr: "ḥuqūq il-milkiyya", en: "equity", reg: "msa", topic: "مال", ex: "حقوق الملكية هي اللي يظل لك عقب ما تسدد كل الديون." },
+      { id: "fn04", ar: "التدفق النقدي", tr: "it-tadaffuq in-naqdi", en: "cash flow", reg: "msa", topic: "مال", ex: "الشركات تموت من التدفق النقدي، مو من قلة الأرباح." },
+      { id: "fn05", ar: "صافي الربح", tr: "ṣāfi ir-ribḥ", en: "net profit", reg: "msa", topic: "مال", ex: "لا تنبهر بالإيرادات — قل لي شكثر صافي الربح." },
+      { id: "fn06", ar: "هامش الربح", tr: "hāmish ir-ribḥ", en: "profit margin", reg: "msa", topic: "مال", ex: "المبيعات زادت بس هامش الربح نزل — يعني نبيع أكثر ونكسب أقل." },
+      { id: "fn07", ar: "العائد على الاستثمار", tr: "il-ʿāʾid ʿala l-istithmār", en: "return on investment (ROI)", reg: "msa", topic: "مال", ex: "العائد على الاستثمار حلو، بس شنو المخاطرة اللي وراه؟" },
+      { id: "fn08", ar: "رأس المال العامل", tr: "raʾs il-māl il-ʿāmil", en: "working capital", reg: "msa", topic: "مال", ex: "رأس المال العامل هو اللي يخليك تشتغل يوم بيوم." },
+      { id: "fn09", ar: "التقييم", tr: "it-taqyīm", en: "valuation", reg: "msa", topic: "مال", ex: "تقييم الشركة مبني على توقعات، وهني بالضبط الخطر." },
+      { id: "fn10", ar: "الطرح العام الأولي", tr: "iṭ-ṭarḥ il-ʿāmm il-awwali", en: "IPO", reg: "msa", topic: "مال", ex: "قررت الشركة تدش الطرح العام الأولي السنة الياية." },
+      { id: "fn11", ar: "الاندماج والاستحواذ", tr: "il-indimāj wil-istiḥwādh", en: "mergers & acquisitions", reg: "msa", topic: "مال", ex: "أغلب صفقات الاندماج والاستحواذ ما تحقق اللي وعدوا فيه." },
+      { id: "fn12", ar: "التنويع", tr: "it-tanwīʿ", en: "diversification", reg: "msa", topic: "مال", ex: "التنويع مو عشان تربح أكثر — عشان ما تخسر كل شي مرة وحدة." },
+      { id: "fn13", ar: "المحفظة", tr: "il-maḥfaẓa", en: "portfolio", reg: "msa", topic: "مال", ex: "محفظتي كلها قطاع واحد — وهذي غلطة أعرفها." },
+      { id: "fn14", ar: "التحوّط", tr: "it-taḥawwuṭ", en: "hedging", reg: "msa", topic: "مال", ex: "التحوّط يقلل الربح المتوقع مقابل إنه يحميك من الانهيار." },
+      { id: "fn15", ar: "التقلّب", tr: "it-taqallub", en: "volatility", reg: "msa", topic: "مال", ex: "التقلّب مو خسارة — بس أعصاب الناس ما تتحمله." },
+      { id: "fn16", ar: "الرافعة المالية", tr: "ir-rāfiʿa il-māliyya", en: "leverage", reg: "msa", topic: "مال", ex: "الرافعة المالية تكبّر الربح والخسارة بنفس النسبة — لا تنسى النص الثاني." },
+      { id: "fn17", ar: "الفائدة المركبة", tr: "il-fāʾida il-murakkaba", en: "compound interest", reg: "msa", topic: "مال", ex: "الفائدة المركبة أقوى شي بالاستثمار — بس تبي وقت." },
+      { id: "fn18", ar: "الركود", tr: "ir-rukūd", en: "recession", reg: "msa", topic: "مال", ex: "بأوقات الركود، اللي عنده سيولة يشتري بأسعار ما تتكرر." },
+      { id: "fn19", ar: "التوزيعات", tr: "it-tawzīʿāt", en: "dividends", reg: "msa", topic: "مال", ex: "أفضل أسهم التوزيعات — تعطيني دخل بدون ما أبيع." },
+      { id: "fn20", ar: "القيمة السوقية", tr: "il-qīma is-sūqiyya", en: "market capitalization", reg: "msa", topic: "مال", ex: "القيمة السوقية ما تقول لك إذا الشركة رخيصة ولا غالية." },
+      { id: "fn21", ar: "الميزانية العمومية", tr: "il-mīzāniyya il-ʿumūmiyya", en: "balance sheet", reg: "msa", topic: "مال", ex: "اقرا الميزانية العمومية قبل لا تسمع عرض أي أحد." },
+      { id: "fn22", ar: "التدقيق", tr: "it-tadqīq", en: "audit", reg: "msa", topic: "مال", ex: "التدقيق المستقل مو رفاهية — هو اللي يحمي المساهم." },
+      { id: "fn23", ar: "الإفصاح", tr: "il-ifṣāḥ", en: "disclosure", reg: "msa", topic: "مال", ex: "ضعف الإفصاح أول علامة إن أكو شي مخبى." },
+      { id: "fn24", ar: "الحوكمة", tr: "il-ḥawkama", en: "corporate governance", reg: "msa", topic: "مال", ex: "الحوكمة الزينة تخلي الشركة تكبر بدون ما تعتمد على شخص واحد." },
+      { id: "fn25", ar: "الامتثال", tr: "il-imtithāl", en: "compliance", reg: "msa", topic: "مال", ex: "الامتثال مكلف، بس مخالفته أغلى بوايد." },
+      { id: "fn26", ar: "الصندوق السيادي", tr: "iṣ-ṣundūq is-siyādi", en: "sovereign wealth fund", reg: "msa", topic: "مال", ex: "الصندوق السيادي الكويتي من أقدم الصناديق بالعالم." },
+      { id: "fn27", ar: "المضاربة", tr: "il-muḍāraba", en: "speculation", reg: "msa", topic: "مال", ex: "الفرق بين الاستثمار والمضاربة: الأول يشتري قيمة، والثاني يشتري حركة." },
+      { id: "fn28", ar: "الأصول المدرّة للدخل", tr: "il-uṣūl il-mudirra lid-dakhl", en: "income-generating assets", reg: "phrase", topic: "مال", ex: "الثروة الحقيقية أصول مدرّة للدخل، مو أشياء تلمع." },
+    ],
+  },
+  {
+    key: "politics",
+    name: "سياسة ودستور",
+    nameEn: "Politics & constitution",
+    desc: "لغة السياسة والدستور — مصطلحات تسمعها بمجلس الأمة وبأي ديوانية جادة.",
+    descEn: "The language of politics and the constitution — terms you'll hear in the National Assembly and in any serious diwaniya.",
+    words: [
+      { id: "pl01", ar: "الدستور", tr: "id-dustūr", en: "the constitution", reg: "msa", topic: "سياسة", ex: "الدستور الكويتي من ١٩٦٢، ولين الحين هو المرجع." },
+      { id: "pl02", ar: "الفصل بين السلطات", tr: "il-faṣl bēn is-suluṭāt", en: "separation of powers", reg: "phrase", topic: "سياسة", ex: "الفصل بين السلطات هو اللي يمنع تركّز القرار بيد وحدة." },
+      { id: "pl03", ar: "السلطة التشريعية", tr: "is-sulṭa it-tashrīʿiyya", en: "the legislative branch", reg: "msa", topic: "سياسة", ex: "السلطة التشريعية تشرّع وتراقب، والتنفيذية تنفّذ." },
+      { id: "pl04", ar: "مرسوم", tr: "marsūm", en: "decree", reg: "msa", topic: "سياسة", ex: "صدر مرسوم بحل المجلس، والانتخابات خلال شهرين." },
+      { id: "pl05", ar: "اللائحة", tr: "il-lāʾiḥa", en: "bylaw, regulations", reg: "msa", topic: "سياسة", ex: "القانون شي واللائحة التنفيذية شي — والشيطان بالتفاصيل." },
+      { id: "pl06", ar: "طرح الثقة", tr: "ṭarḥ ith-thiqa", en: "vote of no confidence", reg: "phrase", topic: "سياسة", ex: "عقب الاستجواب، أكو نواب طالبوا بطرح الثقة." },
+      { id: "pl07", ar: "النصاب", tr: "in-niṣāb", en: "quorum", reg: "msa", topic: "سياسة", ex: "الجلسة ما انعقدت لأن النصاب ما اكتمل." },
+      { id: "pl08", ar: "الدائرة الانتخابية", tr: "id-dāʾira il-intikhābiyya", en: "electoral constituency", reg: "msa", topic: "سياسة", ex: "تقسيم الدوائر الانتخابية يغيّر النتيجة قبل لا يصوّت أحد." },
+      { id: "pl09", ar: "المساءلة", tr: "il-musāʾala", en: "accountability", reg: "msa", topic: "سياسة", ex: "بدون مساءلة، أحسن قانون يظل حبر على ورق." },
+      { id: "pl10", ar: "الشفافية", tr: "ish-shafāfiyya", en: "transparency", reg: "msa", topic: "سياسة", ex: "الشفافية أرخص وسيلة لمحاربة الفساد." },
+      { id: "pl11", ar: "المحسوبية", tr: "il-maḥsūbiyya", en: "nepotism, favoritism", reg: "msa", topic: "سياسة", ex: "المحسوبية تطلّع الكفاءات برى وتخلي الشاطر يهاجر." },
+      { id: "pl12", ar: "واسطة", tr: "wāsṭa", en: "wasta — connections used to get things done", reg: "kw", topic: "سياسة", ex: "المشكلة مو إن أكو واسطة — المشكلة إنها صارت الطريق الوحيد." },
+      { id: "pl13", ar: "البيروقراطية", tr: "il-bīrūqrāṭiyya", en: "bureaucracy", reg: "msa", topic: "سياسة", ex: "البيروقراطية تقتل أي مبادرة قبل لا تبدأ." },
+      { id: "pl14", ar: "السيادة", tr: "is-siyāda", en: "sovereignty", reg: "msa", topic: "سياسة", ex: "السيادة مو شعار — هي قدرتك تاخذ قرارك بدون ضغط." },
+      { id: "pl15", ar: "الدبلوماسية", tr: "id-diblūmāsiyya", en: "diplomacy", reg: "msa", topic: "سياسة", ex: "الكويت بنت سمعتها على الدبلوماسية والوساطة، مو على القوة." },
+      { id: "pl16", ar: "الوساطة", tr: "il-wisāṭa", en: "mediation (between parties)", reg: "msa", topic: "سياسة", ex: "دور الوساطة يحتاج ثقة الطرفين — وهذا اللي ميّز الكويت." },
+      { id: "pl17", ar: "المعاهدة", tr: "il-muʿāhada", en: "treaty", reg: "msa", topic: "سياسة", ex: "المعاهدة ما تصير نافذة إلا عقب ما يصادق عليها المجلس." },
+      { id: "pl18", ar: "العقوبات", tr: "il-ʿuqūbāt", en: "sanctions", reg: "msa", topic: "سياسة", ex: "العقوبات الاقتصادية سلاح بطيء وأثره يوصل للناس قبل الحكام." },
+      { id: "pl19", ar: "الحياد", tr: "il-ḥiyād", en: "neutrality", reg: "msa", topic: "سياسة", ex: "الحياد موقف بحد ذاته، مو غياب موقف." },
+      { id: "pl20", ar: "الإجماع", tr: "il-ijmāʿ", en: "consensus", reg: "msa", topic: "سياسة", ex: "وصلوا لإجماع عقب جلسات طويلة — وهذا نادر." },
+      { id: "pl21", ar: "التصعيد والتهدئة", tr: "it-taṣʿīd wit-tahdiʾa", en: "escalation and de-escalation", reg: "phrase", topic: "سياسة", ex: "كل طرف يهدد بالتصعيد وهو يبي التهدئة — هذي لعبة قديمة." },
+      { id: "pl22", ar: "الرأي المخالف", tr: "ir-raʾy il-mukhālif", en: "dissenting opinion", reg: "phrase", topic: "سياسة", ex: "الرأي المخالف يقوّي القرار إذا انسمع، ويضعفه إذا انقمع." },
+      { id: "pl23", ar: "الشرعية", tr: "ish-sharʿiyya", en: "legitimacy", reg: "msa", topic: "سياسة", ex: "الشرعية تيي من رضا الناس، مو من القوة." },
+      { id: "pl24", ar: "المصلحة العامة", tr: "il-maṣlaḥa il-ʿāmma", en: "the public interest", reg: "phrase", topic: "سياسة", ex: "كل واحد يتكلم باسم المصلحة العامة، والمقصود مصلحته." },
+      { id: "pl25", ar: "تضارب المصالح", tr: "taḍārub il-maṣāliḥ", en: "conflict of interest", reg: "phrase", topic: "سياسة", ex: "أكو تضارب مصالح واضح: هو اللي يقرر وهو اللي يستفيد." },
+      { id: "pl26", ar: "الرقابة", tr: "ir-riqāba", en: "oversight", reg: "msa", topic: "سياسة", ex: "الرقابة المسبقة تعطّل، والرقابة اللاحقة تحاسب — والفرق كبير." },
+      { id: "pl27", ar: "التداول السلمي للسلطة", tr: "it-tadāwul is-silmi lis-sulṭa", en: "peaceful transfer of power", reg: "phrase", topic: "سياسة", ex: "التداول السلمي للسلطة هو الاختبار الحقيقي لأي نظام." },
+      { id: "pl28", ar: "الدولة المؤسسية", tr: "id-dawla il-muʾassasiyya", en: "the institutional state", reg: "phrase", topic: "سياسة", ex: "الدولة المؤسسية ما تعتمد على أشخاص — تعتمد على أنظمة." },
+    ],
+  },
+  {
+    key: "engineering",
+    name: "هندسة وتنفيذ",
+    nameEn: "Engineering & delivery",
+    desc: "مصطلحات الهندسة والتنفيذ — تنفعك بأي اجتماع مشروع، من التصميم للتسليم.",
+    descEn: "Engineering and delivery terminology — for any project meeting, from design to handover.",
+    words: [
+      { id: "eg01", ar: "المواصفات", tr: "il-muwāṣafāt", en: "specifications", reg: "msa", topic: "هندسة", ex: "المواصفات لازم تكون مكتوبة، وإلا كل واحد بيفهمها على كيفه." },
+      { id: "eg02", ar: "النموذج الأولي", tr: "in-namūdhaj il-awwali", en: "prototype", reg: "msa", topic: "هندسة", ex: "نبني نموذج أولي بسيط قبل لا نصرف على التصنيع." },
+      { id: "eg03", ar: "دراسة الجدوى الفنية", tr: "dirāsat il-jadwa il-fanniyya", en: "technical feasibility study", reg: "phrase", topic: "هندسة", ex: "دراسة الجدوى الفنية توفّر عليك سنة ضياع." },
+      { id: "eg04", ar: "نطاق العمل", tr: "niṭāq il-ʿamal", en: "scope of work", reg: "phrase", topic: "هندسة", ex: "أي طلب برى نطاق العمل، يبي له عقد ملحق." },
+      { id: "eg05", ar: "تضخّم النطاق", tr: "taḍakhkhum in-niṭāq", en: "scope creep", reg: "phrase", topic: "هندسة", ex: "المشروع تأخر شهرين بسبب تضخّم النطاق، مو بسبب الفريق." },
+      { id: "eg06", ar: "الجدول الزمني", tr: "il-jadwal iz-zamani", en: "timeline, schedule", reg: "msa", topic: "هندسة", ex: "الجدول الزمني متفائل وايد — ماكو فيه هامش لأي مشكلة." },
+      { id: "eg07", ar: "المسار الحرج", tr: "il-masār il-ḥarij", en: "critical path", reg: "phrase", topic: "هندسة", ex: "أي تأخير على المسار الحرج يأخر المشروع كله." },
+      { id: "eg08", ar: "التسليم", tr: "it-taslīm", en: "handover, delivery", reg: "msa", topic: "هندسة", ex: "التسليم مو نهاية الشغل — بعده الضمان والصيانة." },
+      { id: "eg09", ar: "ضبط الجودة", tr: "ḍabṭ il-jōda", en: "quality control", reg: "phrase", topic: "هندسة", ex: "ضبط الجودة يكشف العيب قبل لا يوصل العميل." },
+      { id: "eg10", ar: "التفاوت المسموح", tr: "it-tafāwut il-masmūḥ", en: "tolerance", reg: "phrase", topic: "هندسة", ex: "القطعة برى التفاوت المسموح، لازم ترجع للتصنيع." },
+      { id: "eg11", ar: "الإجهاد", tr: "il-ijhād", en: "stress (material)", reg: "msa", topic: "هندسة", ex: "الإجهاد المتكرر يكسر المعدن حتى لو ما تجاوز الحد." },
+      { id: "eg12", ar: "الحمل", tr: "il-ḥiml", en: "load", reg: "msa", topic: "هندسة", ex: "لازم نحسب الحمل الأقصى، مو المتوسط." },
+      { id: "eg13", ar: "عامل الأمان", tr: "ʿāmil il-amān", en: "safety factor", reg: "phrase", topic: "هندسة", ex: "عامل الأمان يعني نصممها تتحمل أكثر من اللي نتوقعه." },
+      { id: "eg14", ar: "المتانة", tr: "il-matāna", en: "durability", reg: "msa", topic: "هندسة", ex: "متانة أعلى تعني تكلفة أول أكبر وصيانة أقل." },
+      { id: "eg15", ar: "الصيانة الوقائية", tr: "iṣ-ṣiyāna il-wiqāʾiyya", en: "preventive maintenance", reg: "phrase", topic: "هندسة", ex: "الصيانة الوقائية أرخص من العطل بعشر مرات." },
+      { id: "eg16", ar: "التوقف عن العمل", tr: "it-tawaqquf ʿan il-ʿamal", en: "downtime", reg: "phrase", topic: "هندسة", ex: "كل ساعة توقف عن العمل تكلفنا أكثر من الإصلاح نفسه." },
+      { id: "eg17", ar: "المعايرة", tr: "il-muʿāyara", en: "calibration", reg: "msa", topic: "هندسة", ex: "الجهاز بدون معايرة دورية يعطيك أرقام تثق فيها وهي غلط." },
+      { id: "eg18", ar: "الأتمتة", tr: "il-atmata", en: "automation", reg: "msa", topic: "هندسة", ex: "الأتمتة ما تلغي الناس — تنقلهم لشغل أذكى." },
+      { id: "eg19", ar: "الاستشعار", tr: "il-istishʿār", en: "sensing, sensors", reg: "msa", topic: "هندسة", ex: "أنظمة الاستشعار تنبهك قبل لا يصير العطل." },
+      { id: "eg20", ar: "السعة", tr: "is-saʿa", en: "capacity", reg: "msa", topic: "هندسة", ex: "المحطة تشتغل على كامل السعة، فماكو مجال لأي زيادة." },
+      { id: "eg21", ar: "البنية التحتية", tr: "il-binya it-taḥtiyya", en: "infrastructure", reg: "msa", topic: "هندسة", ex: "البنية التحتية مو مشاريع تنقص — هي أساس كل شي فوقها." },
+      { id: "eg22", ar: "الأساسات", tr: "il-asāsāt", en: "foundations", reg: "msa", topic: "هندسة", ex: "غلطة بالأساسات ما تنصلح بأي تشطيب." },
+      { id: "eg23", ar: "الخرسانة المسلحة", tr: "il-kharasāna il-musallaḥa", en: "reinforced concrete", reg: "msa", topic: "هندسة", ex: "الخرسانة المسلحة تتحمل الضغط والشد مع بعض." },
+      { id: "eg24", ar: "المخطط التنفيذي", tr: "il-mukhaṭṭaṭ it-tanfīdhi", en: "execution drawing", reg: "phrase", topic: "هندسة", ex: "لا يبدأ أحد شغل قبل ما يعتمد المخطط التنفيذي." },
+      { id: "eg25", ar: "المناقصة", tr: "il-munāqaṣa", en: "tender, bid", reg: "msa", topic: "هندسة", ex: "المناقصة راحت لأرخص سعر — ودفعنا الفرق بالجودة." },
+      { id: "eg26", ar: "المقاول", tr: "il-muqāwil", en: "contractor", reg: "msa", topic: "هندسة", ex: "اختيار المقاول أهم من اختيار التصميم أحيان." },
+      { id: "eg27", ar: "التكلفة الإجمالية للملكية", tr: "it-taklifa il-ijmāliyya lil-milkiyya", en: "total cost of ownership", reg: "phrase", topic: "هندسة", ex: "لا تحسب سعر الشراء بس — احسب التكلفة الإجمالية للملكية." },
+      { id: "eg28", ar: "قابلية التوسّع", tr: "qābiliyyat it-tawassuʿ", en: "scalability", reg: "phrase", topic: "هندسة", ex: "النظام يشتغل زين الحين، بس ماكو فيه قابلية توسّع." },
+    ],
+  },
+];
+</script>
+<script>
+/*
+ * SEED_COLLOQUIAL — three packs of living Kuwaiti speech.
+ *
+ * A note on the slang pack: slang moves faster than any reference can
+ * follow, and my knowledge has a cutoff. Items there are marked with their
+ * confidence — "راسخة" for usages established for years, and ⚠ for anything
+ * newer that you should confirm with younger relatives before deploying it.
+ * Everything in the first two packs is long-established.
+ */
+const SEED_COLLOQUIAL = [
+  {
+    key: "colloquial",
+    name: "كويتي أصيل — استخدامات تخصنا",
+    nameEn: "Pure Kuwaiti — usages that are ours",
+    desc: "الكلمات والتراكيب اللي ما تلقاها بأي لهجة ثانية. هذي اللي تخلي حچيك كويتي مو خليجي عام.",
+    descEn: "Words and constructions you won't find in any other dialect — what makes your speech Kuwaiti rather than generically Gulf.",
+    words: [
+      { id: "kw01", ar: "شفيك؟", tr: "shfīk?", en: "what's wrong with you? / what's up with you?", reg: "kw", topic: "يومي", ex: "شفيك ساكت من الصبح؟ عسى ما شر.", note: "الصيغة الكويتية. «وش فيك» نجدية و«إيه بك» مصرية" },
+      { id: "kw02", ar: "عبالي", tr: "ʿabāli", en: "I thought / I was under the impression", reg: "kw", topic: "يومي", ex: "عبالي الاجتماع باچر — طلع اليوم!", note: "كويتية أصيلة، وأدق من «ظنيت» بالحچي اليومي" },
+      { id: "kw03", ar: "توّني", tr: "tawwni", en: "I just (did something)", reg: "kw", topic: "يومي", ex: "توّني واصل البيت، عطني خمس دقايق." },
+      { id: "kw04", ar: "هالحزة", tr: "hal-ḥazza", en: "right now, at this hour", reg: "kw", topic: "يومي", ex: "هالحزة ماكو زحمة — يالله تحرك." },
+      { id: "kw05", ar: "دشّ / دشيت", tr: "dashsh / dashshēt", en: "to enter, go in", reg: "kw", topic: "يومي", ex: "دشيت الاجتماع متأخر وما لحقت على أول نقطة." },
+      { id: "kw06", ar: "طلع إن...", tr: "ṭilaʿ inn", en: "it turned out that...", reg: "kw", topic: "يومي", ex: "طلع إن المشكلة من البداية بالمواصفات، مو بالتنفيذ." },
+      { id: "kw07", ar: "زهقت", tr: "zihagt", en: "I got fed up, I'm sick of it", reg: "kw", topic: "يومي", ex: "زهقت من التأجيل — خلنا نقرر ونخلص." },
+      { id: "kw08", ar: "منقهر", tr: "mingihir", en: "gutted, upset in a helpless way", reg: "kw", topic: "يومي", ex: "منقهر على الفرصة اللي راحت من إيدي." },
+      { id: "kw09", ar: "دزّ", tr: "dazz", en: "to send", reg: "kw", topic: "يومي", ex: "دزّ لي الملف على الإيميل وأنا أراجعه." },
+      { id: "kw10", ar: "سولف / سوالف", tr: "sōlaf / sawālif", en: "to chat / conversations, stories", reg: "kw", topic: "يومي", ex: "قعدنا نسولف لين الفجر — سوالف ما تنمل." },
+      { id: "kw11", ar: "يطنّش", tr: "yṭannish", en: "to ignore, blank someone", reg: "kw", topic: "يومي", ex: "دزيت له ثلاث رسايل وهو يطنّش." },
+      { id: "kw12", ar: "مكشّخ", tr: "mkashshikh", en: "sharply dressed", reg: "kw", topic: "يومي", ex: "شنو مكشّخ اليوم؟ عندك مناسبة؟", note: "من «الكشخة» — الأناقة" },
+      { id: "kw13", ar: "يبي لها", tr: "yabī-lha", en: "it needs, it calls for", reg: "kw", topic: "يومي", ex: "هالسالفة يبي لها صبر، مو قرار سريع." },
+      { id: "kw14", ar: "چنّه", tr: "channa", en: "as if, it's like", reg: "kw", topic: "يومي", ex: "چنّه ما سمع الكلام — كمّل مثل ما هو." },
+      { id: "kw15", ar: "عاد", tr: "ʿād", en: "discourse particle: come on / well then", reg: "kw", topic: "يومي", ex: "لا تبالغ عاد! الموضوع مو لهالدرجة.", note: "أداة نبرة — تعطي الجملة ودّ أو عتب حسب السياق" },
+      { id: "kw16", ar: "بروحي", tr: "brūḥi", en: "by myself, on my own", reg: "kw", topic: "يومي", ex: "سويت المشروع بروحي من الصفر." },
+      { id: "kw17", ar: "سيدا", tr: "sīda", en: "straight ahead; directly", reg: "kw", topic: "يومي", ex: "روح سيدا وعقب الدوار لف يمين." },
+      { id: "kw18", ar: "أول بأول", tr: "awwal b-awwal", en: "as things come, without letting them pile up", reg: "phrase", topic: "شغل", ex: "خلّص الإيميلات أول بأول عشان ما تتكدس عليك." },
+      { id: "kw19", ar: "ونسة", tr: "wansa", en: "good company, warm sociable time", reg: "kw", topic: "يومي", ex: "الونسة وياكم أحلى من أي مكان.", note: "من أعز الكلمات الكويتية — ومنها «استانست»" },
+      { id: "kw20", ar: "خرابيط", tr: "kharābīṭ", en: "nonsense, rubbish talk", reg: "kw", topic: "يومي", ex: "لا تسمع خرابيط — دور على المصدر الأصلي." },
+      { id: "kw21", ar: "يتفلسف", tr: "yitfalsaf", en: "to overthink out loud, to pontificate", reg: "kw", topic: "يومي", ex: "بدال ما يتفلسف، ليته يجرب وشوف." },
+      { id: "kw22", ar: "بعده / بعدها", tr: "baʿda / baʿadha", en: "still, yet", reg: "kw", topic: "يومي", ex: "بعده ما رد علي — والموضوع مستعجل." },
+      { id: "kw23", ar: "شقد", tr: "shgadd", en: "how much, to what extent", reg: "kw", topic: "يومي", ex: "شقد تحتاج وقت عشان تخلصه؟" },
+      { id: "kw24", ar: "ما عليه", tr: "mā ʿalēh", en: "never mind, it's fine", reg: "kw", topic: "يومي", ex: "ما عليه، نأجلها لباچر وما صار شي." },
+    ],
+  },
+  {
+    key: "idioms",
+    name: "تعابير وأمثال دارجة",
+    nameEn: "Idioms & everyday sayings",
+    desc: "تعابير مجازية تسمعها بأي مجلس — المثل بمكانه يوصل المعنى أسرع من فقرة كاملة.",
+    descEn: "Figurative expressions you'll hear in any majlis — the right one lands faster than a paragraph.",
+    words: [
+      { id: "id01", ar: "ما يحك جلدك مثل ظفرك", tr: "mā yḥikk jildik mithil ẓifrik", en: "no one looks after your interests like you do", reg: "kw", topic: "أمثال", ex: "لا تعتمد على أحد بملفك — ما يحك جلدك مثل ظفرك." },
+      { id: "id02", ar: "على قد لحافك مد ريولك", tr: "ʿala gadd liḥāfik midd ryūlik", en: "live within your means", reg: "kw", topic: "أمثال", ex: "لا تشتري سيارة بقرض طويل — على قد لحافك مد ريولك.", note: "«ريول» الكويتية بدل «رجليك»" },
+      { id: "id03", ar: "دق الحديد وهو حامي", tr: "digg il-ḥadīd w-hu ḥāmi", en: "strike while the iron is hot", reg: "kw", topic: "أمثال", ex: "السوق متحمس للفكرة — دق الحديد وهو حامي." },
+      { id: "id04", ar: "عصفورين بحجر", tr: "ʿaṣfūrēn b-ḥajar", en: "two birds with one stone", reg: "kw", topic: "أمثال", ex: "نسوي الاجتماع بنفس السفرة — عصفورين بحجر." },
+      { id: "id05", ar: "يد وحدة ما تصفق", tr: "yad waḥda mā tṣaffig", en: "one hand alone can't clap — nothing gets done alone", reg: "kw", topic: "أمثال", ex: "المشروع يبي فريق — يد وحدة ما تصفق." },
+      { id: "id06", ar: "الطيور على أشكالها تقع", tr: "iṭ-ṭuyūr ʿala ashkālha tigaʿ", en: "birds of a feather flock together", reg: "kw", topic: "أمثال", ex: "شوف ربعه وبتعرفه — الطيور على أشكالها تقع." },
+      { id: "id07", ar: "من جدّ وجد", tr: "min jadd wajad", en: "who strives, finds", reg: "msa", topic: "أمثال", ex: "ما أحد وصل بالحظ بس — من جدّ وجد." },
+      { id: "id08", ar: "الصبر مفتاح الفرج", tr: "iṣ-ṣabr miftāḥ il-faraj", en: "patience is the key to relief", reg: "msa", topic: "أمثال", ex: "الأمور بتنفك، بس الصبر مفتاح الفرج." },
+      { id: "id09", ar: "ما كل ما يتمنى المرء يدركه", tr: "mā kill mā yatamanna il-marʾ yudrikuh", en: "not everything one wishes for is attained", reg: "msa", topic: "أمثال", ex: "حاولنا وايد، بس ما كل ما يتمنى المرء يدركه." },
+      { id: "id10", ar: "اللي ما يشري يتفرج", tr: "illi mā yishri yitfarraj", en: "window-shopping costs nothing", reg: "kw", topic: "أمثال", ex: "تعال وياي السوق — اللي ما يشري يتفرج." },
+      { id: "id11", ar: "طاح الفاس بالراس", tr: "ṭāḥ il-fās bir-rās", en: "the damage is done, it's too late now", reg: "kw", topic: "أمثال", ex: "حذرناهم من البداية، والحين طاح الفاس بالراس." },
+      { id: "id12", ar: "ضربني وبچى وسبقني واشتكى", tr: "ḍarabni w-bicha w-sabagni w-ishtaka", en: "he hit me, cried, and complained first", reg: "kw", topic: "أمثال", ex: "هو اللي غلط وهو أول من رفع شكوى — ضربني وبچى وسبقني واشتكى.", note: "لاحظ «بچى» بالچاف — نطق كويتي أصيل" },
+      { id: "id13", ar: "الجار قبل الدار", tr: "il-jār gabl id-dār", en: "check the neighbor before the house", reg: "kw", topic: "أمثال", ex: "قبل لا تشتري البيت، اسأل عن المنطقة — الجار قبل الدار." },
+      { id: "id14", ar: "إن كان صاحبك عسل لا تلحسه كله", tr: "in chān ṣāḥbik ʿasal lā tilḥasa killa", en: "don't exhaust a friend's goodwill", reg: "kw", topic: "أمثال", ex: "خالد ما يردني، بس إن كان صاحبك عسل لا تلحسه كله." },
+      { id: "id15", ar: "الحچي مو مثل الشوف", tr: "il-ḥachi mū mithil ish-shōf", en: "hearing about it isn't like seeing it", reg: "kw", topic: "أمثال", ex: "روح شوف الموقع بنفسك — الحچي مو مثل الشوف." },
+      { id: "id16", ar: "اللي يشوف بلوى غيره تهون عليه بلواه", tr: "illi yshūf balwa ghēra tihūn ʿalēh balwāh", en: "seeing others' troubles lightens your own", reg: "kw", topic: "أمثال", ex: "زرت المستشفى ورجعت شاكر — اللي يشوف بلوى غيره تهون عليه بلواه." },
+    ],
+  },
+  {
+    key: "slang",
+    name: "دارج وحديث ⚠",
+    nameEn: "Modern & youth slang ⚠",
+    desc: "كلمات الجيل الحالي. اللهجة الشبابية تتغير بسرعة — الكلمات المعلّمة بـ⚠ أكدها من أهل جيلها قبل ما تستخدمها بموقف رسمي.",
+    descEn: "Current-generation words. Youth speech changes fast — anything marked ⚠ should be confirmed with people its own age before you deploy it somewhere formal.",
+    words: [
+      { id: "sl01", ar: "طفشان", tr: "ṭafshān", en: "bored, over it", reg: "kw", topic: "يومي", ex: "طفشان من الروتين — أبي أغيّر جو.", note: "راسخة من سنين" },
+      { id: "sl02", ar: "يهبّل", tr: "yhabbil", en: "amazing, mind-blowing", reg: "kw", topic: "يومي", ex: "المكان يهبّل والخدمة أحسن.", note: "راسخة" },
+      { id: "sl03", ar: "فشيلة", tr: "fashīla", en: "an embarrassment, a cringe moment", reg: "kw", topic: "يومي", ex: "نسيت اسمه قدام الكل — فشيلة!", note: "راسخة" },
+      { id: "sl04", ar: "بزر / بزران", tr: "bizir / bizrān", en: "kid / kids", reg: "kw", topic: "يومي", ex: "البزران بالمدرسة والبيت هادي.", note: "راسخة — وأكثر ودًا من «أطفال»" },
+      { id: "sl05", ar: "خبل", tr: "khabal", en: "goofy, out of their mind (affectionate or literal)", reg: "kw", topic: "يومي", ex: "لا تسمع له، هذا خبل بس طيب.", note: "راسخة — بس النبرة تحدد إذا مزحة ولا إهانة" },
+      { id: "sl06", ar: "روقان", tr: "rōgān", en: "chill, relaxed vibe", reg: "kw", topic: "يومي", ex: "اليوم روقان — ماكو شغل ولا ضغط.", note: "راسخة" },
+      { id: "sl07", ar: "طفران", tr: "ṭafrān", en: "broke, out of money", reg: "kw", topic: "يومي", ex: "طفران لين الراتب — أجلها للشهر الياي.", note: "راسخة" },
+      { id: "sl08", ar: "فلّة", tr: "falla", en: "a great time, a blast", reg: "kw", topic: "يومي", ex: "الليلة كانت فلّة من أولها لآخرها.", note: "راسخة" },
+      { id: "sl09", ar: "كشخة", tr: "kashkha", en: "sharp style, looking good", reg: "kw", topic: "يومي", ex: "كشختك اليوم غير — من وين البشت؟", note: "راسخة" },
+      { id: "sl10", ar: "يسطّر", tr: "ysaṭṭir", en: "to talk big, to show off verbally", reg: "kw", topic: "يومي", ex: "قاعد يسطّر علينا وهو ما سوى شي.", note: "⚠ دارجة شبابية — أكدها قبل الاستخدام الرسمي" },
+      { id: "sl11", ar: "طق ونس", tr: "ṭagg wans", en: "to hang out and have a laugh", reg: "kw", topic: "يومي", ex: "تعال نطق ونس بالديوانية.", note: "راسخة" },
+      { id: "sl12", ar: "زحمة", tr: "zaḥma", en: "crowded; a hassle", reg: "kw", topic: "يومي", ex: "لا تروح الحين، السوق زحمة." },
+      { id: "sl13", ar: "دبّر حالك", tr: "dabbir ḥālik", en: "sort yourself out, figure it out", reg: "kw", topic: "يومي", ex: "ماكو مواصلات — دبّر حالك." },
+      { id: "sl14", ar: "على السريع", tr: "ʿas-sarīʿ", en: "quickly, in brief", reg: "phrase", topic: "يومي", ex: "عطني الخلاصة على السريع، عندي اجتماع." },
+    ],
+  },
+];
+</script>
+<script>
+/*
+ * SEED_GENDER — مذكر ولا مؤنث؟
+ * Agreement traps: sentences where, in the moment, a native speaker is
+ * genuinely likely to reach for the wrong gender. Three families:
+ *   1. Nouns whose gender contradicts their look (الطريق m, النار f)
+ *   2. Non-human plurals, which take FEMININE SINGULAR agreement
+ *   3. Addressing a woman — the Kuwaiti ‑چ suffix, which is easy to drop
+ * Every item carries the rule, because getting it right once is worth
+ * less than knowing why.
+ */
+const SEED_GENDER = [
+  { id: "gn01", prompt: "الطريق لبيتهم ___ وايد.", options: ["طويل", "طويلة"], answer: 0,
+    rule: "«الطريق» مذكر. اللي يغلط ينساق وراء «الطريقة» — وهذي كلمة ثانية تمامًا ومؤنثة.",
+    en: "الطريق (road) is masculine; people slip because الطريقة (method) is feminine." },
+  { id: "gn02", prompt: "السوق ___ اليوم بشكل قوي.", options: ["ارتفع", "ارتفعت"], answer: 0,
+    rule: "«السوق» مذكر بالاستخدام المالي والعام. تسمع «السوق ارتفعت» وايد، وهي غلط شائع.",
+    en: "السوق (market) is masculine — a very common slip when talking markets." },
+  { id: "gn03", prompt: "النار ___ بسرعة بسبب الهوا.", options: ["انتشرت", "انتشر"], answer: 0,
+    rule: "«النار» مؤنثة رغم إنها ما تنتهي بتاء مربوطة.",
+    en: "النار (fire) is feminine despite having no feminine ending." },
+  { id: "gn04", prompt: "الشمس ___ من الشرق.", options: ["تطلع", "يطلع"], answer: 0,
+    rule: "«الشمس» مؤنثة و«القمر» مذكر — ثنائي كلاسيكي يستاهل يترسخ.",
+    en: "الشمس (sun) feminine, القمر (moon) masculine." },
+  { id: "gn05", prompt: "الأرض اللي شريناها ___ بموقع ممتاز.", options: ["واقعة", "واقع"], answer: 0,
+    rule: "«الأرض» مؤنثة دايمًا.", en: "الأرض (land) is always feminine." },
+  { id: "gn06", prompt: "الحرب ___ عقب سنتين.", options: ["انتهت", "انتهى"], answer: 0,
+    rule: "«الحرب» مؤنثة.", en: "الحرب (war) is feminine." },
+  { id: "gn07", prompt: "السماء ___ اليوم، عسى تمطر.", options: ["ملبدة", "ملبد"], answer: 0,
+    rule: "«السماء» مؤنثة.", en: "السماء (sky) is feminine." },
+  { id: "gn08", prompt: "يدي ___ من أمس، لعبت بادل وايد.", options: ["توجعني", "يوجعني"], answer: 0,
+    rule: "أعضاء الجسم المزدوجة مؤنثة: اليد، العين، الأذن، الرجل.",
+    en: "Paired body parts are feminine: hand, eye, ear, leg." },
+  { id: "gn09", prompt: "عيني اليمين ___ من الشاشة.", options: ["تعبت", "تعب"], answer: 0,
+    rule: "«العين» مؤنثة — نفس قاعدة الأعضاء المزدوجة.",
+    en: "العين (eye) is feminine — same paired-organ rule." },
+  { id: "gn10", prompt: "البئر ___ من زمان.", options: ["جافة", "جاف"], answer: 0,
+    rule: "«البئر» مؤنثة، وهذي يغلط فيها حتى المتمكنين.",
+    en: "البئر (well) is feminine — even confident speakers miss this one." },
+  { id: "gn11", prompt: "روحي ___ من كثر الشغل.", options: ["مرهقة", "مرهق"], answer: 0,
+    rule: "«الروح» و«النفس» الاثنتين مؤنثات.",
+    en: "الروح (soul) and النفس (self) are both feminine." },
+  { id: "gn12", prompt: "الفلوس اللي حوّلتها ___ أمس.", options: ["وصلت", "وصلوا"], answer: 0,
+    rule: "جمع غير العاقل يعامَل معاملة المفرد المؤنث — «وصلت» مو «وصلوا».",
+    en: "Non-human plurals take FEMININE SINGULAR agreement, never the human plural." },
+  { id: "gn13", prompt: "السيارات كلها ___ بالكراج.", options: ["موجودة", "موجودين"], answer: 0,
+    rule: "نفس القاعدة: السيارات جمع غير عاقل ← مفرد مؤنث.",
+    en: "Same rule — cars are non-human, so feminine singular." },
+  { id: "gn14", prompt: "المشاريع ___ كلها بسبب الميزانية.", options: ["تأخرت", "تأخروا"], answer: 0,
+    rule: "«تأخروا» تنقال للبشر بس. المشاريع ← «تأخرت».",
+    en: "تأخروا is for people only; projects take تأخرت." },
+  { id: "gn15", prompt: "الاجتماعات الأسبوع الياي ___ ثلاثة.", options: ["صارت", "صاروا"], answer: 0,
+    rule: "جمع غير عاقل ← مفرد مؤنث، حتى لو العدد كبير.",
+    en: "Non-human plural stays feminine singular regardless of count." },
+  { id: "gn16", prompt: "الناس ___ إن الأسعار بترتفع.", options: ["تقول", "يقولون"], answer: 0,
+    rule: "«الناس» بالفصحى تاخذ مفرد مؤنث: «الناس تقول». بالكويتي اليومي تسمع «الناس يقولون» وهي مقبولة بالحچي، بس بالكتابة الرسمية «تقول».",
+    en: "In MSA الناس takes feminine singular; the plural form is tolerated in casual Kuwaiti but not in formal writing." },
+  { id: "gn17", prompt: "عندنا ___ شركات بالمجموعة.", options: ["ثلاث", "ثلاثة"], answer: 0,
+    rule: "قاعدة عكس العدد: «شركة» مؤنثة ← العدد يجي مذكر «ثلاث». الأعداد من ٣ إلى ١٠ تخالف المعدود.",
+    en: "Numbers 3–10 REVERSE gender: a feminine noun (شركة) takes the masculine-form number ثلاث." },
+  { id: "gn18", prompt: "خلصنا ___ مشاريع هالسنة.", options: ["ثلاثة", "ثلاث"], answer: 0,
+    rule: "«مشروع» مذكر ← العدد يجي مؤنث «ثلاثة». نفس قاعدة العكس بالاتجاه الثاني.",
+    en: "The same reversal the other way: masculine مشروع takes ثلاثة." },
+  { id: "gn19", prompt: "الكويت ___ بموقع استراتيجي.", options: ["تتميز", "يتميز"], answer: 0,
+    rule: "أسماء الدول والمدن مؤنثة.", en: "Country and city names are feminine." },
+  { id: "gn20", prompt: "الميزانية اللي اعتمدوها ___ ما تكفي.", options: ["صارت", "صار"], answer: 0,
+    rule: "«ميزانية» مؤنثة بوضوح — بس الخطأ يصير لما تبعد الصفة عن الاسم بجملة طويلة.",
+    en: "Obvious on its own; the trap is distance — a long clause between noun and verb." },
+  { id: "gn21", prompt: "القطاع الخاص ___ فرص أكثر.", options: ["يوفر", "توفر"], answer: 0,
+    rule: "«قطاع» مذكر. الالتباس يجي لأن «الشركات» اللي بذهنك مؤنثة.",
+    en: "قطاع is masculine; the pull comes from thinking of الشركات." },
+  { id: "gn22", prompt: "الوزارة ___ بيان أمس.", options: ["أصدرت", "أصدر"], answer: 0,
+    rule: "«الوزارة» و«الهيئة» و«المؤسسة» كلهن مؤنثات، حتى لو اللي يتكلم باسمهن رجال.",
+    en: "Institutions ending in ة are feminine regardless of who runs them." },
+  { id: "gn23", prompt: "المجلس ___ الجلسة لباچر.", options: ["أجّل", "أجّلت"], answer: 0,
+    rule: "«المجلس» مذكر، بعكس «الجلسة» المؤنثة — والاثنتين بنفس الجملة فخ.",
+    en: "المجلس masculine, الجلسة feminine — both in one sentence is the trap." },
+  { id: "gn24", prompt: "الحال ___ مثل ما هو.", options: ["باقي", "باقية"], answer: 0,
+    rule: "«الحال» مذكر بالاستخدام الشائع.", en: "الحال is masculine in common usage." },
+  { id: "gn25", prompt: "تكلم ويا أختك: «شلون___ اليوم؟»", options: ["چ", "ك"], answer: 0,
+    rule: "مخاطبة المؤنث بالكويتي تاخذ «ـچ»: شلونچ، عندچ، وياچ، بيتچ. وهذي أوضح بصمة كويتية.",
+    en: "Addressing a woman in Kuwaiti takes ‑چ everywhere: شلونچ، عندچ، وياچ. One of the clearest Kuwaiti markers." },
+  { id: "gn26", prompt: "قول لأمك: «عساچ ___ القوة».", options: ["على", "عن"], answer: 0,
+    rule: "«عساچ على القوة» — بالمؤنث تصير الكاف چاف. لاحظ إن التحية نفسها ما تتغير.",
+    en: "The greeting keeps its shape; only the suffix changes to ‑چ." },
+  { id: "gn27", prompt: "تسأل صديقتك: «___ تروحين وياي؟»", options: ["تبين", "تبي"], answer: 0,
+    rule: "الفعل المضارع للمؤنثة ياخذ نون: تبين، تروحين، تسوين. الغلط الشائع إنك تستخدم صيغة المذكر.",
+    en: "Feminine present-tense verbs take the ‑īn ending: تبين، تروحين، تسوين." },
+  { id: "gn28", prompt: "أختي ___ من السفر أمس.", options: ["رجعت", "رجع"], answer: 0,
+    rule: "بسيطة بس تنغلط بالكلام السريع لما يكون الفاعل بعيد عن الفعل.",
+    en: "Simple in isolation — missed in fast speech when subject and verb drift apart." },
+  { id: "gn29", prompt: "الكتب اللي طلبتها ___ أمس.", options: ["وصلت", "وصلوا"], answer: 0,
+    rule: "الكتب جمع غير عاقل ← مفرد مؤنث. القاعدة نفسها تنطبق على كل شي مو بشر.",
+    en: "Books are non-human: feminine singular agreement." },
+  { id: "gn30", prompt: "الموظفين ___ عن التأخير.", options: ["اعتذروا", "اعتذرت"], answer: 0,
+    rule: "هني بالعكس: «الموظفين» جمع عاقل (بشر) ← ياخذ جمع المذكر «اعتذروا». هذا الفرق اللي لازم يترسخ.",
+    en: "The mirror case: employees ARE human, so they take the real masculine plural." },
+];
+
+/*
+ * SEED_UPGRADE — قلها أحسن (the conversationalist developer)
+ * You know what you want to say; the drill is saying it with more precision
+ * and more weight. Each item gives the situation and a serviceable-but-flat
+ * way of saying it, then asks for the upgrade. Distractors are wrong for a
+ * REASON — too formal, wrong register, or plain inaccurate — never filler.
+ */
+const SEED_UPGRADE = [
+  { id: "up01", situation: "تبي تقول إن الفكرة زينة بس التنفيذ ضعيف",
+    weak: "الفكرة زينة بس ما نفذوها زين",
+    options: ["الفكرة ممتازة، لكن رداءة التنفيذ ضيّعتها", "الفكرة حلوة بس التنفيذ مو حلو", "الفكرة عجيبة والتنفيذ فاشل"],
+    answer: 0, why: "«رداءة التنفيذ» تختصر جملة كاملة بكلمتين، و«لكن» أرقى من «بس» بالنقاش الجاد. والخيار الثالث قاسي بلا داعي." },
+  { id: "up02", situation: "تبي تعترض بأدب على رأي بدون ما تلغيه",
+    weak: "لا، أنا ما أتفق وياك",
+    options: ["أتفق وياك بالتشخيص، وأختلف وياك بالحل", "أنا رأيي غير", "كلامك غلط"],
+    answer: 0, why: "تثبت إنك سامع وفاهم قبل ما ترد — وهذي أقوى صيغة اعتراض بأي مجلس." },
+  { id: "up03", situation: "تبي تقول إن المشكلة عميقة مو سطحية",
+    weak: "المشكلة كبيرة",
+    options: ["هذي مو مشكلة سطحية — هذي علة بالنظام نفسه", "المشكلة وايد كبيرة", "المشكلة مستحيلة"],
+    answer: 0, why: "«علة» تعني خلل جذري مزمن، مو حجم. الفرق بين «كبيرة» و«علة» هو الفرق بين وصف وتشخيص." },
+  { id: "up04", situation: "تبي تعطي مثال يوضح نقطتك",
+    weak: "يعني مثلًا زي كذا",
+    options: ["على سبيل المثال، وهذا ينطبق على أغلب الحالات", "يعني مثال كذا", "زي مثلًا"],
+    answer: 0, why: "«على سبيل المثال» + «ينطبق» ينقلونك من الحچي العابر إلى الكلام المرتب." },
+  { id: "up05", situation: "تبي تقول إن فئة معينة من الناس بتتأثر",
+    weak: "ناس وايد بيتأثرون",
+    options: ["القرار بيأثر على شريحة كبيرة، مو على فئة محدودة", "ناس كثير بيتأثرون", "الكل بيتأثر"],
+    answer: 0, why: "«شريحة» تعطي دقة اجتماعية، و«مو على فئة محدودة» تحدد الحجم بدل ما تبالغ." },
+  { id: "up06", situation: "تبي تقول إن الشي ما يستاهل نقاش طويل",
+    weak: "هذي مو مهمة",
+    options: ["هذي نقطة هامشية — لا نضيّع وقت النقاش عليها", "هذي ما تسوى", "خلها"],
+    answer: 0, why: "«هامشية» توصف موقع النقطة من الموضوع، مو قيمتها — فما تجرح صاحبها." },
+  { id: "up07", situation: "تبي تقول إن الأرقام تحسنت بس النتيجة ما تغيرت",
+    weak: "الأرقام أحسن بس ما تغير شي",
+    options: ["النسب تحسنت، لكن المخرجات على أرض الواقع ما اختلفت", "الأرقام زانت بس نفس الشي", "ما فرقت"],
+    answer: 0, why: "«المخرجات» و«على أرض الواقع» تفرّق بين المؤشر والأثر — وهذا جوهر النقاش." },
+  { id: "up08", situation: "تبي تقول إن أحد يتصرف بدون خطة",
+    weak: "يشتغل بدون ترتيب",
+    options: ["قراراته عشوائية — ماكو تخطيط واضح وراها", "شغله مب مرتب", "ما يعرف يشتغل"],
+    answer: 0, why: "«عشوائي» توصف النمط، مو الشخص — فتنتقد بدون ما تهاجم." },
+  { id: "up09", situation: "تبي تقول إن أكو فرق بين اللي نتعلمه واللي السوق يبيه",
+    weak: "اللي ندرسه مو نفس اللي يبونه",
+    options: ["أكو فجوة بين المخرجات التعليمية ومتطلبات سوق العمل", "الدراسة شي والشغل شي", "التعليم مو زين"],
+    answer: 0, why: "«فجوة» + «مخرجات» + «متطلبات» — ثلاث كلمات تحوّل شكوى إلى تحليل." },
+  { id: "up10", situation: "تبي تمدح شغل أحد بدون مبالغة",
+    weak: "شغلك حلو",
+    options: ["شغلك ممتاز — بس عندي ملاحظتين بسيطات", "شغلك زين وايد", "ما شاء الله عليك"],
+    answer: 0, why: "المدح اللي وراه ملاحظة يصير أصدق، والطرف الثاني ياخذك بجدية أكثر." },
+  { id: "up11", situation: "تبي تقول إن أحد قال شي وأنت تبي تبني عليه",
+    weak: "زي ما قلت أنت",
+    options: ["مثل ما تفضلت، الموضوع يحتاج دراسة أعمق", "زي ما قلت", "صح كلامك"],
+    answer: 0, why: "«مثل ما تفضلت» تكريم لمحاورك وترفع مستوى الجلسة كلها." },
+  { id: "up12", situation: "تبي تقول إن أكو خلل بالتوزيع مو بالكمية",
+    weak: "المشكلة مو بالعدد",
+    options: ["المشكلة اختلال بالتوزيع، مو نقص بالموارد", "مو قلة، المشكلة وين تروح", "أكو مشكلة بالتوزيع"],
+    answer: 0, why: "«اختلال» كلمة تشخيصية دقيقة، و«موارد» أوسع من «فلوس» أو «عدد»." },
+  { id: "up13", situation: "تبي تقول إن الموضوع خارج نقاش اليوم",
+    weak: "هذا موضوع ثاني",
+    options: ["هذا خارج نطاق الاجتماع — نفتح له جلسة مستقلة", "هذا مو موضوعنا", "بعدين نتكلم فيه"],
+    answer: 0, why: "«نطاق» تحدد الحدود بمهنية، و«جلسة مستقلة» تحترم الموضوع بدل ما ترفضه." },
+  { id: "up14", situation: "تبي تقول إن أحد يستاهل الشكر على مجهود حقيقي",
+    weak: "شكرًا على تعبك",
+    options: ["ما قصرت والله — بذلت مجهود واضح", "مشكور", "تسلم"],
+    answer: 0, why: "«ما قصرت» كويتية أصيلة ودافئة، و«بذلت مجهود» تسمّي اللي سواه بالضبط." },
+  { id: "up15", situation: "تبي تقول إن الفكرة تحتاج وقت وما تنفرض بالقوة",
+    weak: "ما ينفع تستعجل",
+    options: ["هالسالفة ما تنأخذ بالذراع — تبي لها صبر", "لا تستعجل عليها", "خلها على مهلها"],
+    answer: 0, why: "تعبير كويتي أصيل يوصل المعنى بصورة، والصورة تنحفظ أكثر من النصيحة." },
+  { id: "up16", situation: "تبي تقول إن أكو ناس تتحكم بمن يدخل المجال",
+    weak: "أكو ناس تتحكم",
+    options: ["بكل مجال أكو بوابين يقررون منو يدخل ومنو لا", "أكو ناس تسكر الأبواب", "أكو محسوبية"],
+    answer: 0, why: "«بوابين» استعارة تشرح آلية كاملة بكلمة، والخيار الثالث يتهم بدل ما يوصف." },
+  { id: "up17", situation: "تبي تقول إن الاقتصاد معتمد على مصدر واحد",
+    weak: "كلنا عايشين على النفط",
+    options: ["اقتصادنا ريعي — مربوط بمورد واحد، وهني الخطر", "الاقتصاد كله نفط", "لازم نغير الاقتصاد"],
+    answer: 0, why: "«ريعي» مصطلح اقتصادي محدد، ويختصر نقاش ساعة بكلمة وحدة." },
+  { id: "up18", situation: "تبي تعترف بنقطة للطرف الثاني قبل ما تكمل",
+    weak: "أوكي صح بس",
+    options: ["بالمقابل، لازم نعترف إن للقرار تكاليفه", "صح بس أكو شي ثاني", "أوكي بس"],
+    answer: 0, why: "«بالمقابل» تربط الطرفين بتوازن بدل ما تلغي اللي قبلها." },
+  { id: "up19", situation: "تبي تقول إن الحماس راح ينتهي بدون نظام",
+    weak: "الناس بيملون بعدين",
+    options: ["الحماس يتلاشى بسرعة إذا ماكو نظام يثبته", "بيملون منها", "ما بتكمل"],
+    answer: 0, why: "«يتلاشى» تصف التدرج، و«نظام يثبته» تعطي الحل بنفس الجملة." },
+  { id: "up20", situation: "تبي تسأل عن المعيار اللي بيتقاس فيه النجاح",
+    weak: "شلون نعرف إنها نجحت؟",
+    options: ["شنو المعيار اللي نقيس فيه النجاح؟", "شلون نعرف؟", "متى نقول نجحت؟"],
+    answer: 0, why: "السؤال عن «المعيار» ينقل النقاش من الانطباع إلى القياس — وهذا أقوى سؤال بأي اجتماع." },
+  { id: "up21", situation: "تبي تقول إن التجربة علمتك حتى لو ما نجحت",
+    weak: "ما نجحت بس تعلمت",
+    options: ["ما حققنا الهدف، لكن التجربة نفسها مكسب", "خسرنا بس استفدنا", "على الأقل تعلمنا"],
+    answer: 0, why: "«التجربة نفسها مكسب» تعيد تعريف النتيجة بدل ما تعتذر عنها." },
+  { id: "up22", situation: "تبي توضح إنك تتكلم بالعموم مو بالتفاصيل",
+    weak: "أتكلم بشكل عام",
+    options: ["قاعد أتكلم بشكل أفقي — عن الصورة العامة مو التفاصيل", "بشكل عام يعني", "ما أدخل بالتفاصيل"],
+    answer: 0, why: "«أفقي» تعطي إشارة واضحة لمستوى النقاش، وتمنع سوء الفهم قبل لا يصير." },
+  { id: "up23", situation: "تبي تقول إن أكو ناس تستفيد من الوضع كما هو",
+    weak: "أكو ناس مستفيدة",
+    options: ["أكو مستفيدون من بقاء الوضع، وهذي أكبر عقبة أمام الإصلاح", "أكو ناس مرتاحة چذي", "ماكو أحد يبي يغير"],
+    answer: 0, why: "تسمّي المصلحة وتربطها بالعقبة — تحليل، مو تذمر." },
+  { id: "up24", situation: "تبي تختم كلامك بخلاصة عملية",
+    weak: "يعني بالنهاية...",
+    options: ["الزبدة: نبدأ صغير، نقيس، وعقبها نوسّع", "بالنهاية لازم نسوي شي", "المهم نتحرك"],
+    answer: 0, why: "«الزبدة» كويتية محبوبة، والخلاصة اللي فيها ثلاث خطوات تنحفظ وتنفذ." },
+];
+</script>
+<script>
+/*
+ * ARENA — التمرين. The game mode you enter and play, separate from the
+ * daily spaced-repetition session.
+ *
+ * What is borrowed from Duolingo, and why:
+ *   hearts        — stakes. A round can be lost, so attention is real.
+ *   XP + ranks    — a long arc of progress that survives any single bad day.
+ *   daily XP goal — a target that is finishable in five minutes.
+ *   streak freeze — earned, not bought; protects a real streak from one bad day.
+ *   combo         — rewards sustained accuracy inside a round.
+ *   end-of-round  — every miss is shown WITH its explanation.
+ * Deliberately NOT borrowed: leagues (there is nobody to compete with) and
+ * a gem shop (nothing worth buying). Both would be theatre here.
+ *
+ * Arena never writes to the FSRS scheduler — recognising a word among four
+ * options is not the same evidence as recalling it cold, so it must not move
+ * a due date. Misses are recorded instead, and the daily session puts those
+ * words first among the cards already due.
+ */
+function createArena(ctx) {
+  const { esc, t, ti, ts, S, bilingual, save, allWords, isStudyable } = ctx;
+  const store = () => ctx.store();
+
+  const RANKS = [
+    { xp: 0, key: "rankNovice" },
+    { xp: 300, key: "rankListener" },
+    { xp: 900, key: "rankTalker" },
+    { xp: 2000, key: "rankDebater" },
+    { xp: 4000, key: "rankEloquent" },
+    { xp: 7500, key: "rankMaster" },
+  ];
+  const HEARTS = 5;
+  const ROUND_LEN = 10;
+
+  const game = () => {
+    const s = store();
+    s.game ||= {};
+    const g = s.game;
+    g.xp ??= 0; g.best ??= {}; g.rounds ??= 0; g.misses ??= {};
+    g.freezes ??= 0; g.dailyGoal ??= 30; g.xpLog ??= {}; g.frozen ??= [];
+    return g;
+  };
+
+  function rankOf(xp) {
+    let i = 0;
+    for (let k = 0; k < RANKS.length; k++) if (xp >= RANKS[k].xp) i = k;
+    return { index: i, ...RANKS[i], next: RANKS[i + 1] || null };
+  }
+
+  // ── question builders ────────────────────────────────────────────────
+  const shuffle = (a) => {
+    for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  };
+  const sample = (arr, n) => shuffle([...arr]).slice(0, n);
+
+  /** Blank the target word out of its own example sentence. */
+  function blankOut(word) {
+    if (!word.ex || word.ex === "—") return null;
+    const head = word.ar.replace(/^ال/, "").split(/[\s/]+/)[0];
+    if (head.length < 3) return null;
+    const toks = word.ex.split(" ");
+    let best = -1, bestLen = 2;
+    toks.forEach((tk, i) => {
+      const l = lcs(tk.replace(/[،.؟!:—«»"()]/g, ""), head);
+      if (l > bestLen) { bestLen = l; best = i; }
+    });
+    if (best < 0) return null;
+    return toks.map((tk, i) => (i === best ? "＿＿＿" : tk)).join(" ");
+  }
+  function lcs(a, b) {
+    let m = 0;
+    for (let i = 0; i < a.length; i++) for (let j = 0; j < b.length; j++) {
+      let k = 0; while (a[i + k] && a[i + k] === b[j + k]) k++;
+      if (k > m) m = k;
+    }
+    return m;
+  }
+
+  function deck() { return allWords().filter(isStudyable); }
+
+  const MODES = {
+    // كمّل الجملة — works in both language modes, so it is the default
+    cloze: {
+      key: "cloze", labelKey: "modeClozeGame", icon: "◧",
+      available: () => deck().filter(blankOut).length >= 8,
+      build() {
+        const pool = deck().filter(blankOut);
+        return sample(pool, ROUND_LEN).map((w) => {
+          const wrong = sample(pool.filter((x) => x.id !== w.id && x.reg === w.reg), 3);
+          const filler = sample(pool.filter((x) => x.id !== w.id), 3);
+          const opts = shuffle([w, ...(wrong.length === 3 ? wrong : filler)].slice(0, 4));
+          return {
+            id: w.id, prompt: blankOut(w), promptClass: "q-ar",
+            options: opts.map((o) => o.ar), answer: opts.findIndex((o) => o.id === w.id),
+            why: w.en, ref: w.ar,
+          };
+        });
+      },
+    },
+    // شنو معناها — needs the English gloss, so bilingual only
+    meaning: {
+      key: "meaning", labelKey: "modeMeaningGame", icon: "◑",
+      available: () => bilingual() && deck().length >= 8,
+      build() {
+        const pool = deck().filter((w) => w.en);
+        return sample(pool, ROUND_LEN).map((w) => {
+          const opts = shuffle([w, ...sample(pool.filter((x) => x.id !== w.id), 3)]);
+          return {
+            id: w.id, prompt: w.en, promptClass: "q-en",
+            options: opts.map((o) => o.ar), answer: opts.findIndex((o) => o.id === w.id),
+            why: w.ex && w.ex !== "—" ? w.ex : w.en, ref: w.ar,
+          };
+        });
+      },
+    },
+    gender: {
+      key: "gender", labelKey: "modeGenderGame", icon: "⚥",
+      available: () => true,
+      build() {
+        return sample(SEED_GENDER, ROUND_LEN).map((d) => {
+          // the source data always lists the correct form first, so the
+          // options MUST be shuffled or the round is won by tapping option 1
+          const order = shuffle(d.options.map((_, i) => i));
+          return {
+            id: d.id, prompt: d.prompt, promptClass: "q-ar",
+            options: order.map((i) => d.options[i]), answer: order.indexOf(d.answer),
+            why: bilingual() ? `${d.rule}\n${d.en}` : d.rule, ref: d.options[d.answer],
+          };
+        });
+      },
+    },
+    upgrade: {
+      key: "upgrade", labelKey: "modeUpgradeGame", icon: "▲",
+      available: () => true,
+      build() {
+        return sample(SEED_UPGRADE, Math.min(ROUND_LEN, SEED_UPGRADE.length)).map((d) => {
+          const idx = shuffle(d.options.map((_, i) => i));
+          return {
+            id: d.id, prompt: d.situation, sub: d.weak, promptClass: "q-ar",
+            options: idx.map((i) => d.options[i]), answer: idx.indexOf(d.answer),
+            why: d.why, ref: d.options[d.answer], long: true,
+          };
+        });
+      },
+    },
+    reply: {
+      key: "reply", labelKey: "modeReplyGame", icon: "⇄",
+      available: () => true,
+      build() {
+        return sample(SEED_RESPONSES, ROUND_LEN).map((r) => {
+          const opts = shuffle([r, ...sample(SEED_RESPONSES.filter((x) => x.id !== r.id), 3)]);
+          return {
+            id: r.id, prompt: r.call, promptClass: "q-ar",
+            options: opts.map((o) => o.resp), answer: opts.findIndex((o) => o.id === r.id),
+            why: bilingual() ? `${r.en}` : r.note || r.call, ref: r.resp, long: true,
+          };
+        });
+      },
+    },
+    proverb: {
+      key: "proverb", labelKey: "modeProverbGame", icon: "❝",
+      available: () => proverbPool().length >= 6,
+      build() {
+        const pool = proverbPool();
+        return sample(pool, Math.min(ROUND_LEN, pool.length)).map((w) => {
+          const opts = shuffle([w, ...sample(pool.filter((x) => x.id !== w.id), 3)]);
+          const situation = (w.ex || "").split("—")[0].trim() || w.note || w.en;
+          return {
+            id: w.id, prompt: situation, promptClass: "q-ar",
+            options: opts.map((o) => o.ar), answer: opts.findIndex((o) => o.id === w.id),
+            why: w.note || w.en, ref: w.ar, long: true,
+          };
+        });
+      },
+    },
+  };
+  const proverbPool = () => deck().filter((w) => w.topic === "أمثال");
+
+  // ── round state ──────────────────────────────────────────────────────
+  let round = null; // {mode, qs, i, score, hearts, combo, answered, correct, misses[]}
+
+  function start(modeKey) {
+    const qs = MODES[modeKey].build();
+    round = { mode: modeKey, qs, i: 0, score: 0, hearts: HEARTS, combo: 0, best: 0, answered: null, correct: 0, misses: [], t0: Date.now() };
+    ctx.rerender();
+  }
+
+  function answer(choice) {
+    if (round.answered !== null) return;
+    const q = round.qs[round.i];
+    const right = choice === q.answer;
+    const secs = (Date.now() - round.t0) / 1000;
+    let gained = 0;
+    if (right) {
+      round.combo += 1;
+      round.best = Math.max(round.best, round.combo);
+      const speed = Math.round(Math.max(0, 50 - Math.max(0, secs - 3) * 5));
+      const mult = Math.min(2, 1 + round.combo * 0.1);
+      gained = Math.round((100 + speed) * mult);
+      round.score += gained;
+      round.correct += 1;
+    } else {
+      round.combo = 0;
+      round.hearts -= 1;
+      round.misses.push(q);
+      const g = game();
+      g.misses[q.id] = (g.misses[q.id] || 0) + 1;
+    }
+    round.answered = { choice, right, gained };
+    save();
+    ctx.rerender();
+  }
+
+  function next() {
+    if (round.hearts <= 0 || round.i >= round.qs.length - 1) return finish();
+    round.i += 1;
+    round.answered = null;
+    round.t0 = Date.now();
+    ctx.rerender();
+  }
+
+  function finish() {
+    const g = game();
+    const perfect = round.hearts === HEARTS && round.correct === round.qs.length;
+    const xp = round.correct * 10 + (perfect ? 20 : 0);
+    g.xp += xp;
+    g.rounds += 1;
+    g.best[round.mode] = Math.max(g.best[round.mode] || 0, round.score);
+    const day = ctx.todayKey();
+    g.xpLog[day] = (g.xpLog[day] || 0) + xp;
+    // a streak freeze is earned every 7th day of an unbroken streak, capped at 2
+    if (ctx.streak() > 0 && ctx.streak() % 7 === 0 && g.freezes < 2 && g.lastFreezeDay !== day) {
+      g.freezes += 1; g.lastFreezeDay = day;
+    }
+    round = { ...round, done: true, xp, perfect };
+    save();
+    ctx.rerender();
+  }
+
+  const quit = () => { round = null; ctx.rerender(); };
+
+  /** Consume a freeze to cover yesterday if it was missed. Called on load. */
+  function applyFreeze() {
+    const g = game();
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const yk = ctx.todayKey(y);
+    const s = store();
+    const activeY = (s.log[yk]?.reviews || 0) > 0 || (g.xpLog[yk] || 0) > 0 || g.frozen.includes(yk);
+    if (activeY) return;
+    const d2 = new Date(); d2.setDate(d2.getDate() - 2);
+    const k2 = ctx.todayKey(d2);
+    const hadStreak = (s.log[k2]?.reviews || 0) > 0 || (g.xpLog[k2] || 0) > 0 || g.frozen.includes(k2);
+    if (hadStreak && g.freezes > 0) { g.freezes -= 1; g.frozen.push(yk); save(); }
+  }
+
+  // ── rendering ────────────────────────────────────────────────────────
+  function render() {
+    if (round && round.done) return renderResult();
+    if (round) return renderQuestion();
+    return renderHome();
+  }
+
+  function renderHome() {
+    const g = game();
+    const r = rankOf(g.xp);
+    const span = r.next ? r.next.xp - r.xp : 1;
+    const into = r.next ? g.xp - r.xp : 1;
+    const pct = r.next ? Math.min(100, Math.round((into / span) * 100)) : 100;
+    const todayXp = g.xpLog[ctx.todayKey()] || 0;
+    const goalPct = Math.min(100, Math.round((todayXp / g.dailyGoal) * 100));
+
+    const modes = Object.values(MODES).map((m) => {
+      const ok = m.available();
+      const best = g.best[m.key] || 0;
+      return `<button class="mode-card ${ok ? "" : "locked"}" ${ok ? `data-mode="${m.key}"` : "disabled"}>
+        <span class="mode-ico">${m.icon}</span>
+        <span class="mode-name">${t(m.labelKey)}</span>
+        <span class="mode-best">${ok ? (best ? `${ti("bestScore")} ${best}` : ti("notPlayed")) : ti("modeLocked")}</span>
+      </button>`;
+    }).join("");
+
+    return `
+      <div class="panel">
+        <div class="h-row" style="margin:0">
+          <div><div class="rank-name">${t(r.key)}</div><div class="microlabel">${g.xp} XP</div></div>
+          <div class="freeze" title="${esc(ts("freezeTitle"))}">❄ ${g.freezes}</div>
+        </div>
+        <div class="xpbar"><div style="width:${pct}%"></div></div>
+        <div class="microlabel">${r.next ? ti("toNextRank", r.next.xp - g.xp) : ti("maxRank")}</div>
+      </div>
+
+      <div class="panel">
+        <div class="h-row" style="margin:0"><span class="microlabel">${t("dailyGoal")}</span>
+          <span class="goal-num">${todayXp} / ${g.dailyGoal} XP</span></div>
+        <div class="xpbar goal"><div style="width:${goalPct}%"></div></div>
+        ${goalPct >= 100 ? `<div class="goal-done">${t("goalMet")}</div>` : ""}
+        <label class="f" style="margin-top:0.7rem">${t("goalSize")}
+          <select id="goalSel">${[20, 30, 50, 80].map((v) => `<option value="${v}" ${g.dailyGoal === v ? "selected" : ""}>${v} XP</option>`).join("")}</select>
+        </label>
+      </div>
+
+      <div class="h-row"><h2>${t("chooseMode")}</h2></div>
+      <div class="mode-grid">${modes}</div>
+
+      <div class="panel note-info">
+        <div class="microlabel" style="margin-bottom:0.4rem">${t("arenaHowTitle")}</div>
+        ${t("arenaHow")}
+      </div>`;
+  }
+
+  function renderQuestion() {
+    const q = round.qs[round.i];
+    const a = round.answered;
+    const hearts = "♥".repeat(round.hearts) + "♡".repeat(HEARTS - round.hearts);
+    const pct = Math.round((round.i / round.qs.length) * 100);
+
+    const opts = q.options.map((o, i) => {
+      let cls = "opt";
+      if (a) {
+        if (i === q.answer) cls += " right";
+        else if (i === a.choice) cls += " wrong";
+        else cls += " dim";
+      }
+      return `<button class="${cls} ${q.long ? "opt-long" : ""}" data-opt="${i}" ${a ? "disabled" : ""}>${esc(o)}</button>`;
+    }).join("");
+
+    return `
+      <div class="arena-top">
+        <button class="btn btn-ghost btn-sm" id="quitBtn">✕</button>
+        <div class="progressbar" style="flex:1; margin:0"><div style="width:${pct}%"></div></div>
+        <div class="hearts">${hearts}</div>
+      </div>
+      <div class="panel">
+        <div class="h-row" style="margin:0">
+          <span class="microlabel" dir="ltr">${round.i + 1} / ${round.qs.length}</span>
+          <span class="microlabel">${round.score} ${round.combo > 1 ? `<span class="combo">×${(Math.min(2, 1 + round.combo * 0.1)).toFixed(1)}</span>` : ""}</span>
+        </div>
+        <div class="q-face">
+          <div class="${q.promptClass}">${esc(q.prompt)}</div>
+          ${q.sub ? `<div class="q-weak">${esc(q.sub)}</div>` : ""}
+        </div>
+        <div class="opts">${opts}</div>
+        ${a ? `<div class="verdict-box ${a.right ? "ok" : "no"}">
+            <div class="verdict-head">${a.right ? `${ti("correct")} +${a.gained}` : ti("incorrect")}</div>
+            ${!a.right ? `<div class="verdict-ref">${esc(q.ref)}</div>` : ""}
+            <div class="verdict-why">${esc(q.why).replace(/\n/g, "<br>")}</div>
+            <button class="btn btn-primary" id="nextBtn" style="width:100%; margin-top:0.7rem">${round.hearts <= 0 ? t("roundOver") : round.i >= round.qs.length - 1 ? t("finishRound") : t("nextQ")}</button>
+          </div>` : ""}
+      </div>`;
+  }
+
+  function renderResult() {
+    const acc = Math.round((round.correct / round.qs.length) * 100);
+    const g = game();
+    return `
+      <div class="panel" style="text-align:center">
+        <div class="result-title">${round.perfect ? t("perfectRound") : round.hearts <= 0 ? t("outOfHearts") : t("roundDone")}</div>
+        <div class="result-score">${round.score}</div>
+        <div class="microlabel">${ti("finalScore")}</div>
+        <div class="day-summary" style="margin-top:1rem">
+          <div class="cell"><b>+${round.xp}</b><span>XP</span></div>
+          <div class="cell"><b>${acc}٪</b><span>${ti("accuracy")}</span></div>
+          <div class="cell"><b>×${round.best}</b><span>${ti("bestCombo")}</span></div>
+        </div>
+        ${round.score >= (g.best[round.mode] || 0) && round.score > 0 ? `<div class="goal-done" style="margin-top:0.8rem">${t("newBest")}</div>` : ""}
+      </div>
+      ${round.misses.length ? `<div class="panel">
+        <div class="microlabel">${t("reviewMisses")}</div>
+        ${round.misses.map((m) => `<div class="miss">
+            <div class="miss-ref">${esc(m.ref)}</div>
+            <div class="miss-why">${esc(m.why).replace(/\n/g, "<br>")}</div>
+          </div>`).join("")}
+      </div>` : `<div class="panel note-info">${t("noMisses")}</div>`}
+      <div class="v-actions">
+        <button class="btn btn-primary" id="againBtn">${t("playAgain")}</button>
+        <button class="btn" id="homeBtn">${t("backToModes")}</button>
+      </div>`;
+  }
+
+  function wire(stage) {
+    stage.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => start(b.dataset.mode)));
+    stage.querySelectorAll("[data-opt]").forEach((b) => b.addEventListener("click", () => answer(+b.dataset.opt)));
+    stage.querySelector("#nextBtn")?.addEventListener("click", next);
+    stage.querySelector("#quitBtn")?.addEventListener("click", quit);
+    stage.querySelector("#againBtn")?.addEventListener("click", () => start(round.mode));
+    stage.querySelector("#homeBtn")?.addEventListener("click", quit);
+    stage.querySelector("#goalSel")?.addEventListener("change", (e) => { game().dailyGoal = +e.target.value; save(); ctx.rerender(); });
+  }
+
+  return { render, wire, game, rankOf, applyFreeze, RANKS, inRound: () => !!round };
+}
+</script>
+<script>
+/*
+ * SYNC — one account, every device.
+ *
+ * The whole app state is one JSON document per user in Supabase (kk_state),
+ * protected by row-level security so a token can only ever reach its own row.
+ * Auth is an emailed 6-digit code: no password to manage, no redirect to
+ * handle inside a PWA.
+ *
+ * IMPORTANT — where this works:
+ *   ✅ a real host (GitHub Pages, Netlify, Vercel, localhost)
+ *   ❌ inside the Claude artifact viewer, whose CSP blocks network calls to
+ *      any host. There the app runs perfectly but stays local-only, and the
+ *      UI says so rather than failing silently.
+ *
+ * Conflict handling is a real merge, not last-write-wins: two devices that
+ * both studied offline keep both sets of work (see mergeState).
+ */
+const SUPA = {
+  url: "https://feutbrnpcjsjfllptziq.supabase.co",
+  // Publishable key — safe to ship. RLS is the actual boundary.
+  key: "sb_publishable_0EI5Efo5zO0DgvNqsc2WMg_Tkqvs2qR",
+};
+
+function createSync(ctx) {
+  const SESSION_KEY = "khosh-kalam-session";
+  let session = null;
+  try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch {}
+
+  const saveSession = (s) => {
+    session = s;
+    try { s ? localStorage.setItem(SESSION_KEY, JSON.stringify(s)) : localStorage.removeItem(SESSION_KEY); } catch {}
+  };
+
+  const api = (path, opts = {}) =>
+    fetch(SUPA.url + path, {
+      ...opts,
+      headers: { apikey: SUPA.key, "Content-Type": "application/json", ...(opts.headers || {}) },
+    });
+
+  const authed = (path, opts = {}) =>
+    api(path, { ...opts, headers: { Authorization: `Bearer ${session.access_token}`, ...(opts.headers || {}) } });
+
+  /** Network reachable at all? Artifact CSP makes this false. */
+  let reachable = null;
+  async function probe() {
+    if (reachable !== null) return reachable;
+    try {
+      await fetch(SUPA.url + "/auth/v1/health", { headers: { apikey: SUPA.key } });
+      reachable = true;
+    } catch { reachable = false; }
+    return reachable;
+  }
+
+  async function sendCode(email) {
+    const r = await api("/auth/v1/otp", {
+      method: "POST",
+      body: JSON.stringify({ email, create_user: true }),
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).msg || "send failed");
+  }
+
+  async function verifyCode(email, token) {
+    const r = await api("/auth/v1/verify", {
+      method: "POST",
+      body: JSON.stringify({ email, token, type: "email" }),
+    });
+    const j = await r.json();
+    if (!r.ok || !j.access_token) throw new Error(j.msg || j.error_description || "bad code");
+    saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
+    return session;
+  }
+
+  async function refresh() {
+    if (!session?.refresh_token) return false;
+    const r = await api("/auth/v1/token?grant_type=refresh_token", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: session.refresh_token }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.access_token) { saveSession(null); return false; }
+    saveSession({ ...session, access_token: j.access_token, refresh_token: j.refresh_token, at: Date.now() });
+    return true;
+  }
+
+  /** Run fn, refreshing the token once if the server says it expired. */
+  async function withAuth(fn) {
+    let r = await fn();
+    if (r.status === 401) { if (await refresh()) r = await fn(); }
+    return r;
+  }
+
+  async function pull() {
+    const r = await withAuth(() => authed(`/rest/v1/kk_state?select=state,revision&user_id=eq.${session.user_id}`));
+    if (!r.ok) throw new Error("pull failed");
+    const rows = await r.json();
+    return rows[0] || null;
+  }
+
+  async function push(state, revision) {
+    const body = JSON.stringify({ user_id: session.user_id, state, revision, device: navigator.userAgent.slice(0, 60) });
+    const r = await withAuth(() =>
+      authed("/rest/v1/kk_state", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body,
+      }));
+    if (!r.ok) throw new Error("push failed");
+  }
+
+  /*
+   * Merge two states so that studying on two devices never loses work.
+   * The rule per field is chosen from what the field means:
+   *   progress   — per card, the review that happened LATER wins
+   *   logs       — per day, the larger count wins (both devices may have studied)
+   *   sets       — union (packs added, words archived, words captured)
+   *   settings   — this device wins; it is the one being used right now
+   */
+  function mergeState(local, remote) {
+    const out = { ...remote, ...local };
+
+    out.progress = { ...remote.progress };
+    for (const [id, c] of Object.entries(local.progress || {})) {
+      const r = remote.progress?.[id];
+      out.progress[id] = !r || (c.last || 0) >= (r.last || 0) ? c : r;
+    }
+
+    out.log = { ...remote.log };
+    for (const [d, l] of Object.entries(local.log || {})) {
+      const r = remote.log?.[d] || {};
+      out.log[d] = {
+        reviews: Math.max(l.reviews || 0, r.reviews || 0),
+        correct: Math.max(l.correct || 0, r.correct || 0),
+        intro: Math.max(l.intro || 0, r.intro || 0),
+      };
+    }
+
+    const union = (a = [], b = []) => [...new Set([...a, ...b])];
+    out.packs = union(local.packs, remote.packs);
+    out.removed = union(local.removed, remote.removed);
+    out.verify = { ...remote.verify, ...local.verify };
+    out.overrides = { ...remote.overrides, ...local.overrides };
+
+    const byId = new Map();
+    for (const w of [...(remote.custom || []), ...(local.custom || [])]) byId.set(w.id, w);
+    out.custom = [...byId.values()];
+
+    out.challenges = { ...remote.challenges };
+    for (const [d, c] of Object.entries(local.challenges || {})) {
+      const r = remote.challenges?.[d];
+      out.challenges[d] = r ? { ids: c.ids, done: union(c.done, r.done) } : c;
+    }
+
+    const lg = local.game || {}, rg = remote.game || {};
+    out.game = {
+      ...rg, ...lg,
+      xp: Math.max(lg.xp || 0, rg.xp || 0),
+      rounds: Math.max(lg.rounds || 0, rg.rounds || 0),
+      freezes: Math.max(lg.freezes || 0, rg.freezes || 0),
+      frozen: union(lg.frozen, rg.frozen),
+      best: Object.fromEntries(
+        union(Object.keys(lg.best || {}), Object.keys(rg.best || {}))
+          .map((k) => [k, Math.max(lg.best?.[k] || 0, rg.best?.[k] || 0)])),
+      xpLog: Object.fromEntries(
+        union(Object.keys(lg.xpLog || {}), Object.keys(rg.xpLog || {}))
+          .map((k) => [k, Math.max(lg.xpLog?.[k] || 0, rg.xpLog?.[k] || 0)])),
+      misses: Object.fromEntries(
+        union(Object.keys(lg.misses || {}), Object.keys(rg.misses || {}))
+          .map((k) => [k, Math.max(lg.misses?.[k] || 0, rg.misses?.[k] || 0)])),
+    };
+
+    out.settings = { ...rg.settings, ...remote.settings, ...local.settings };
+    return out;
+  }
+
+  /** Pull, merge, push. Returns a short status key for the UI. */
+  async function syncNow() {
+    if (!session) return "signedOut";
+    const local = ctx.exportState();
+    const row = await pull();
+    if (!row) {
+      await push(local, 1);
+      ctx.setRevision(1);
+      return "pushed";
+    }
+    const merged = mergeState(local, row.state || {});
+    const rev = (row.revision || 0) + 1;
+    await push(merged, rev);
+    ctx.importState(merged);
+    ctx.setRevision(rev);
+    return "merged";
+  }
+
+  return {
+    probe,
+    sendCode, verifyCode, syncNow, mergeState,
+    signOut: () => saveSession(null),
+    session: () => session,
+    email: () => session?.email || null,
+  };
+}
+</script>
+<script>
+/*
  * خوش كلام — app logic.
  * Everything lives in localStorage under one key; export/import moves it
  * between devices. Learning design: FSRS spacing + retrieval practice with
@@ -1102,6 +2334,8 @@ const SEED_RESPONSES = [
     settings: { newPerDay: 8, lang: "bi" }, // lang: "bi" bilingual | "ar" Arabic only
     log: {}, // "YYYY-MM-DD" -> {reviews, correct, intro}
     challenges: {}, // date -> {ids: [], done: []}
+    game: {}, // arena: xp, ranks, best scores, daily goal, freezes (see arena.js)
+    revision: 0, // sync revision last agreed with the server
   });
 
   let store = defaults();
@@ -1124,6 +2358,9 @@ const SEED_RESPONSES = [
 
   const log = () => (store.log[todayKey()] ||= { reviews: 0, correct: 0, intro: 0 });
 
+  /** Every pack the app offers, from all pack files. */
+  const ALL_PACKS = [...SEED_PACKS, ...SEED_DOMAINS, ...SEED_COLLOQUIAL];
+
   // ── word assembly ─────────────────────────────────────────────────────
   function allWords() {
     const words = [...SEED_MANUAL];
@@ -1132,7 +2369,7 @@ const SEED_RESPONSES = [
       id: r.id, ar: r.call, tr: r.callTr, en: r.en, reg: "pair", topic: r.topic,
       ex: `«${r.call}» — «${r.resp}»`, note: r.note, resp: r.resp, respTr: r.respTr,
     })));
-    for (const pack of SEED_PACKS)
+    for (const pack of ALL_PACKS)
       if (store.packs.includes(pack.key)) words.push(...pack.words);
     for (const v of SEED_VERIFY)
       if (store.verify[v.id] === "approved" && v.en)
@@ -1164,7 +2401,12 @@ const SEED_RESPONSES = [
         const c = store.progress[w.id];
         return c && c.reps > 0 && c.due <= endOfDay.getTime();
       })
-      .sort((a, b) => store.progress[a.id].due - store.progress[b.id].due);
+      // words fumbled in the arena come first among what is already due
+      .sort((a, b) => {
+        const ma = store.game?.misses?.[a.id] || 0, mb = store.game?.misses?.[b.id] || 0;
+        if (ma !== mb) return mb - ma;
+        return store.progress[a.id].due - store.progress[b.id].due;
+      });
 
     const newBudget = Math.max(0, store.settings.newPerDay - log().intro);
     // thread new cards from both pools so pairs surface early instead of
@@ -1258,11 +2500,17 @@ const SEED_RESPONSES = [
   }
 
   // ── streak & challenge ────────────────────────────────────────────────
+  /** A day counts if you reviewed, earned arena XP, or spent a streak freeze. */
+  function dayActive(k) {
+    return (store.log[k]?.reviews || 0) > 0
+      || (store.game?.xpLog?.[k] || 0) > 0
+      || (store.game?.frozen || []).includes(k);
+  }
   function streak() {
     let n = 0;
     const d = new Date();
-    if (!store.log[todayKey(d)]?.reviews) d.setDate(d.getDate() - 1); // today not yet done
-    while (store.log[todayKey(d)]?.reviews) { n += 1; d.setDate(d.getDate() - 1); }
+    if (!dayActive(todayKey(d))) d.setDate(d.getDate() - 1); // today not yet done
+    while (dayActive(todayKey(d))) { n += 1; d.setDate(d.getDate() - 1); }
     return n;
   }
 
@@ -1348,7 +2596,7 @@ const SEED_RESPONSES = [
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
     document.getElementById("verifyPill").textContent = pending || "";
-    ({ today: renderToday, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
+    ({ today: renderToday, arena: renderArena, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
   }
 
   // ── today ──
@@ -1478,6 +2726,12 @@ const SEED_RESPONSES = [
     }
   });
 
+  // ── arena ──
+  function renderArena() {
+    stage.innerHTML = arena.render();
+    arena.wire(stage);
+  }
+
   // ── words ──
   function renderWords() {
     const words = allWords();
@@ -1502,6 +2756,7 @@ const SEED_RESPONSES = [
       <div class="panel" style="padding:0.3rem 1.1rem">
         ${list.length ? list.map(wordRowHTML).join("") : `<div class="empty">${t("noResults")}</div>`}
       </div>
+      ${accountPanelHTML()}
       <div class="panel">
         <div class="microlabel">${t("backupTitle")}</div>
         <div class="note-info" style="margin:0.4rem 0 0.6rem">${t("backupNote")}</div>
@@ -1539,6 +2794,7 @@ const SEED_RESPONSES = [
     document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
     document.getElementById("fTopic").addEventListener("change", (e) => { wordsFilter.topic = e.target.value; render(); });
     document.getElementById("newPerDay").addEventListener("change", (e) => { store.settings.newPerDay = Math.max(0, +e.target.value || 0); save(); });
+    wireAccountPanel();
     document.getElementById("exportBtn").addEventListener("click", () => { backupPanel = backupPanel === "export" ? null : "export"; render(); });
     document.getElementById("importBtn").addEventListener("click", () => { backupPanel = backupPanel === "import" ? null : "import"; render(); });
     stage.querySelectorAll("#closeBackup").forEach((b) => b.addEventListener("click", () => { backupPanel = null; render(); }));
@@ -1652,6 +2908,73 @@ const SEED_RESPONSES = [
     reader.readAsText(f);
   }
 
+
+  // ── account & sync ────────────────────────────────────────────────────
+  let authStep = "email"; // email | code
+  let authEmail = "";
+  let syncMsg = null;
+  let netOK = null; // null = unknown, false = blocked (artifact viewer)
+
+  function accountPanelHTML() {
+    const signedIn = sync.session();
+    return `
+      <div class="panel">
+        <div class="microlabel">${t("accountTitle")}</div>
+        ${netOK === false
+          ? `<div class="note-info" style="margin-top:0.5rem">${t("syncBlocked")}</div>`
+          : signedIn
+            ? `<div class="note-info" style="margin:0.4rem 0 0.6rem">${ti("signedInAs")} <b dir="ltr">${esc(sync.email())}</b></div>
+               <div class="v-actions">
+                 <button class="btn btn-sm btn-primary" id="syncBtn">${t("syncNow")}</button>
+                 <button class="btn btn-sm btn-ghost" id="signOutBtn">${t("signOut")}</button>
+               </div>`
+            : `<div class="note-info" style="margin:0.4rem 0 0.6rem">${t("accountNote")}</div>
+               ${authStep === "email"
+                 ? `<label class="f">${t("emailLabel")}
+                      <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+                    <div class="v-actions"><button class="btn btn-sm btn-primary" id="sendCodeBtn">${t("sendCode")}</button></div>`
+                 : `<label class="f">${t("codeLabel")}
+                      <input type="text" id="authCode" dir="ltr" inputmode="numeric" maxlength="8" placeholder="123456" /></label>
+                    <div class="v-actions">
+                      <button class="btn btn-sm btn-primary" id="verifyBtn">${t("verifyCode")}</button>
+                      <button class="btn btn-sm btn-ghost" id="backEmailBtn">${t("close")}</button>
+                    </div>`}`}
+        ${syncMsg ? `<div class="note-info" style="margin-top:0.6rem">${esc(syncMsg)}</div>` : ""}
+      </div>`;
+  }
+
+  function wireAccountPanel() {
+    const setMsg = (k) => { syncMsg = ts(k); render(); };
+    document.getElementById("sendCodeBtn")?.addEventListener("click", async () => {
+      const el = document.getElementById("authEmail");
+      authEmail = el.value.trim();
+      if (!authEmail) return;
+      syncMsg = ts("syncing"); render();
+      try { await sync.sendCode(authEmail); authStep = "code"; setMsg("codeSent"); }
+      catch { setMsg("syncFail"); }
+    });
+    document.getElementById("verifyBtn")?.addEventListener("click", async () => {
+      const code = document.getElementById("authCode").value.trim();
+      syncMsg = ts("syncing"); render();
+      try {
+        await sync.verifyCode(authEmail, code);
+        authStep = "email";
+        await doSync();
+      } catch { setMsg("codeBad"); }
+    });
+    document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
+    document.getElementById("syncBtn")?.addEventListener("click", doSync);
+    document.getElementById("signOutBtn")?.addEventListener("click", () => { sync.signOut(); syncMsg = null; render(); });
+    document.getElementById("authEmail")?.addEventListener("input", (e) => { authEmail = e.target.value; });
+  }
+
+  async function doSync() {
+    syncMsg = ts("syncing"); render();
+    try { await sync.syncNow(); syncMsg = ts("syncDone"); }
+    catch { syncMsg = ts("syncFail"); }
+    render();
+  }
+
   // ── verify ──
   function renderVerify() {
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]);
@@ -1690,7 +3013,7 @@ const SEED_RESPONSES = [
     stage.innerHTML = `
       <div class="h-row"><h2>${t("packsTitle")}</h2></div>
       <div class="note-info" style="margin-bottom:0.8rem">${t("packsNote")}</div>
-      ${SEED_PACKS.map((p) => {
+      ${ALL_PACKS.map((p) => {
         const added = store.packs.includes(p.key);
         return `<div class="panel">
           <div class="h-row" style="margin:0">
@@ -1767,6 +3090,22 @@ const SEED_RESPONSES = [
   }
 
   // ── boot ──
+  const arena = createArena({
+    store: () => store,
+    todayKey, streak, save, esc, t, ti, ts, S, bilingual,
+    allWords, isStudyable,
+    rerender: () => render(),
+  });
+  const sync = createSync({
+    exportState: () => JSON.parse(JSON.stringify(store)),
+    importState: (next) => { store = Object.assign(defaults(), next); save(); },
+    setRevision: (r) => { store.revision = r; save(); },
+  });
+  arena.applyFreeze();
+  // A blocked network (the artifact viewer's CSP) is a supported state, not
+  // an error — the account panel says so instead of offering a dead form.
+  sync.probe().then((ok) => { netOK = ok; if (view === "words") render(); });
+
   document.querySelectorAll(".tab").forEach((el) =>
     el.addEventListener("click", () => { view = el.dataset.view; session = null; render(); }));
   document.querySelectorAll("[data-lang]").forEach((b) =>
