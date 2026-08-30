@@ -193,6 +193,7 @@
   function dayActive(k) {
     return (store.log[k]?.reviews || 0) > 0
       || (store.game?.xpLog?.[k] || 0) > 0
+      || (store.practice?.sessions || []).some((x) => x.d === k)
       || (store.game?.frozen || []).includes(k);
   }
   function streak() {
@@ -290,7 +291,8 @@
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
     document.getElementById("verifyPill").textContent = pending || "";
-    ({ today: renderToday, arena: renderArena, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
+    ({ today: renderToday, arena: renderArena, practice: renderPractice,
+       words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
   }
 
   // ── today ──
@@ -420,6 +422,12 @@
     }
   });
 
+  // ── practice ──
+  function renderPractice() {
+    stage.innerHTML = practice.render();
+    practice.wire(stage);
+  }
+
   // ── auth gate ──
   function renderAuth() {
     document.body.classList.add("auth-mode");
@@ -498,6 +506,7 @@
 
     stage.innerHTML = `
       <div class="h-row"><h2>${t("wordsTitle", words.length)}</h2>
+        <button class="btn btn-sm" id="goPacks">${t("tabPacks")}</button>
         <button class="btn btn-sm ${showAddForm ? "" : "btn-primary"}" id="addToggle">${showAddForm ? t("close") : t("addNew")}</button></div>
       ${showAddForm ? addFormHTML() : ""}
       <div class="toolbar">
@@ -543,6 +552,7 @@
           </div>` : ""}
       </div>`;
 
+    document.getElementById("goPacks")?.addEventListener("click", () => { view = "packs"; render(); });
     document.getElementById("addToggle").addEventListener("click", () => { showAddForm = !showAddForm; render(); });
     document.getElementById("q").addEventListener("input", (e) => { wordsFilter.q = e.target.value; render(); document.getElementById("q").focus(); const el = document.getElementById("q"); el.setSelectionRange(el.value.length, el.value.length); });
     document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
@@ -825,7 +835,7 @@
     }
     const max = Math.max(1, ...days.map((x) => x.n));
 
-    stage.innerHTML = `
+    stage.innerHTML = practice.renderDash() + `
       <div class="h-row"><h2>${t("statsTitle")}</h2></div>
       <div class="stat-grid">
         <div class="panel" style="margin:0"><b style="font-size:1.6rem">${active.length}</b><div class="microlabel">${t("statActive", words.length)}</div></div>
@@ -860,6 +870,11 @@
     allWords, isStudyable,
     rerender: () => render(),
   });
+  const practice = createPractice({
+    store: () => store,
+    todayKey, streak, save, esc, t, ti, ts, S, bilingual,
+    rerender: () => render(),
+  });
   const sync = createSync({
     revision: () => store.revision,
     exportState: () => JSON.parse(JSON.stringify(store)),
@@ -875,7 +890,12 @@
   sync.probe().then((ok) => { netOK = ok; if (view === "words") render(); });
 
   document.querySelectorAll(".tab").forEach((el) =>
-    el.addEventListener("click", () => { view = el.dataset.view; session = null; render(); }));
+    el.addEventListener("click", () => {
+      // tapping التدريب while inside an exercise returns to its hub, and
+      // leaving the tab entirely stops its timers and logs the session
+      if (view === "practice") practice.leave();
+      view = el.dataset.view; session = null; render();
+    }));
   document.querySelectorAll("[data-lang]").forEach((b) =>
     b.addEventListener("click", () => { store.settings.lang = b.dataset.lang; save(); render(); }));
   render();

@@ -64,6 +64,44 @@ there and rebuild; never hand-edit `dist/`.
    Each item shows its verdict; you approve corrected entries into training
    or archive the junk.
 
+
+## The six practice modes (التدريب)
+
+Production-side work — the vocabulary trainer builds recognition; these build
+speech.
+
+| Mode | What it does |
+|---|---|
+| **الظل** Shadowing | YouTube player with 0.75×/1× speed, an A–B loop for a 15–30s segment, and a session clock targeting 15 minutes. Minutes are logged per session |
+| **قراءة جهرية** Read aloud | 14 Arabic texts in large RTL type at a 38ch measure. Tap any word you stumble on; on finishing, each stumble becomes a lexicon phrase (word plus its neighbours, so the phrase rule holds by construction) |
+| **لقطة وحدة** One-take | A prompt drawn from 60 interview-style questions, recorded via MediaRecorder. Stopping saves — there is no re-record. Audio goes to IndexedDB and locks for 7 days, then appears in a review queue for a 1–5 rating and notes |
+| **الالتفاف** Circumlocution | A concept plus a banned-word list and 45 seconds to convey it anyway. Self-scored; success rate is tracked over time |
+| **المعجم** Lexicon | Phrase-only entries (Arabic phrase, gender, plural, gloss, source, domain) on an SM-2 schedule. Review is always production: the English is shown and you produce the Arabic |
+| **بنك الرسائل** Message bank | Repeated public questions with your worked Arabic answer, a rehearsal counter, and a last-rehearsed date. Sorted by staleness |
+
+The dashboard (اللوحة, on the stats tab) shows streak, minutes by exercise
+over 30 days, lexicon size by domain, the circumlocution success-rate trend,
+and how many monologues are awaiting review.
+
+### Two deliberate constraints
+
+**The lexicon refuses bare nouns.** `قرار` is rejected; `القرار الصعب` is
+accepted. A phrase is a noun with an adjective or a bound demonstrative, and
+the form enforces it rather than suggesting it.
+
+**Shadowing sources are channels, not video IDs.** Individual videos get
+deleted and made private; channels don't. The library carries verified
+Kuwaiti channels (بدون ورق, منصة, تلفزيون الكويت, قناة الأخبار), a few starter
+episodes checked at build time, and a paste box for any link. No video ID in
+this repo was invented, and a dead one falls back to its channel.
+
+### On the reading texts
+
+Everything in the reading library is either public-domain classical verse
+(زهير, المتنبي, أبو تمام) or original prose written for this app in the style
+of an opinion column, literary prose, or Kuwaiti dialect. Nothing is copied
+from a living newspaper or author.
+
 ## Bilingual interface
 
 The app ships **bilingual** — Arabic leads, English sits beneath it in a

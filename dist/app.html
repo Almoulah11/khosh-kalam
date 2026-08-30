@@ -329,6 +329,58 @@ body.auth-mode .topbar { visibility: hidden; }
 .syncdot.offline { background: var(--ink-faint); box-shadow: 0 0 0 2px rgb(233 237 243 / 0.12); }
 .syncdot.idle { opacity: 0.35; }
 @keyframes pulse { 50% { opacity: 0.35; } }
+
+/* ── practice ── */
+.src-row {
+  display: block; width: 100%; text-align: start; color: inherit; text-decoration: none;
+  padding: 0.7rem 0; border-bottom: 1px solid var(--hairline);
+}
+.src-row:last-child { border-bottom: none; }
+.src-title { font-family: var(--font-ar); font-size: 1.15rem; line-height: 1.6; }
+.src-note { font-size: 0.75rem; color: var(--ink-faint); line-height: 1.7; margin-top: 0.15rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.chip {
+  display: inline-block; font-size: 0.78rem; padding: 0.3rem 0.65rem; border-radius: 99px;
+  border: 1px solid var(--hairline-strong); color: var(--ink-dim); text-decoration: none;
+}
+.chip.on { border-color: var(--green); color: var(--green); background: rgb(47 191 113 / 0.12); }
+.chip.no { border-color: rgb(229 84 94 / 0.45); color: var(--red); }
+.pill-inline {
+  position: absolute; top: 0.5rem; inset-inline-end: 0.5rem;
+  background: var(--red); color: #fff; font-size: 0.62rem; font-weight: 700;
+  border-radius: 99px; padding: 0.05rem 0.4rem;
+}
+.mode-card { position: relative; }
+
+.yt-wrap { position: relative; padding-top: 56.25%; border-radius: var(--radius-chip); overflow: hidden; background: #000; }
+.yt-wrap iframe, .yt-wrap > div { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.clock { font-size: 1.5rem; font-variant-numeric: tabular-nums; color: var(--green); }
+.ctrl-row { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.7rem; }
+.seg { font-size: 0.72rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+.reader { line-height: 2.4; }
+.reader p { font-family: var(--font-ar); font-size: 1.5rem; margin-bottom: 1.4rem; max-width: 38ch; }
+.rw { cursor: pointer; border-radius: 4px; padding: 0 2px; transition: background-color 0.12s ease; }
+.rw:hover { background: rgb(233 237 243 / 0.06); }
+.rw.stumble { background: rgb(227 180 92 / 0.22); color: var(--gold); }
+
+.mono-q { font-family: var(--font-ar); font-size: 1.5rem; line-height: 1.9; margin: 0.6rem 0 1rem; }
+.countdown { font-size: 3.2rem; text-align: center; color: var(--green); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.countdown.low { color: var(--red); }
+.concept { font-size: 1.5rem; text-align: center; margin-top: 0.6rem; }
+.banned { justify-content: center; }
+.big-num { font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.msg-answer { font-family: var(--font-ar); font-size: 1.1rem; line-height: 2; color: var(--ink-dim); margin-top: 0.4rem; white-space: pre-wrap; }
+.microlabel.stale { color: var(--red); }
+
+/* dashboard bars: 4px rounded data-end, 2px gap to the label, value direct-labeled */
+.hbar-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.55rem; font-size: 0.8rem; }
+.hbar-label { flex: 0 0 8.5rem; display: flex; align-items: center; gap: 0.35rem; color: var(--ink-dim); line-height: 1.3; }
+.hbar-label i { width: 0.55rem; height: 0.55rem; border-radius: 2px; flex: none; }
+.hbar-track { flex: 1; height: 0.55rem; background: rgb(233 237 243 / 0.07); border-radius: 3px; overflow: hidden; }
+.hbar-fill { display: block; height: 100%; border-radius: 3px; }
+.hbar-val { flex: 0 0 2.2rem; text-align: end; font-variant-numeric: tabular-nums; color: var(--ink); }
+.trend { width: 100%; height: auto; display: block; margin-top: 0.5rem; }
 </style>
 </head>
 <body>
@@ -352,9 +404,9 @@ body.auth-mode .topbar { visibility: hidden; }
   <nav class="tabs" id="tabs">
     <button data-view="today" data-i18n="tabToday" class="tab active"><span class="tab-ico">◉</span><span class="tab-label"></span></button>
     <button data-view="arena" data-i18n="tabArena" class="tab"><span class="tab-ico">◆</span><span class="tab-label"></span></button>
+    <button data-view="practice" data-i18n="tabPractice" class="tab"><span class="tab-ico">✦</span><span class="tab-label"></span></button>
     <button data-view="words" data-i18n="tabWords" class="tab"><span class="tab-ico">☰</span><span class="tab-label"></span></button>
     <button data-view="verify" data-i18n="tabVerify" class="tab"><span class="tab-ico">؟</span><span class="tab-label"></span><span class="pill" id="verifyPill"></span></button>
-    <button data-view="packs" data-i18n="tabPacks" class="tab"><span class="tab-ico">◫</span><span class="tab-label"></span></button>
     <button data-view="stats" data-i18n="tabStats" class="tab"><span class="tab-ico">↗</span><span class="tab-label"></span></button>
   </nav>
 <script>
@@ -751,6 +803,143 @@ const UI = {
   syncIdle: { ar: "غير مزامن", en: "Not syncing" },
   syncPending: { ar: "في تغييرات ما انحفظت بعد", en: "Changes pending" },
   syncOffline: { ar: "بدون إنترنت — بيتزامن أول ما يرجع", en: "Offline — will sync when back online" },
+
+  // ── practice modes ──
+  tabPractice: { ar: "التدريب", en: "Practice" },
+  exShadow: { ar: "الظل", en: "Shadowing" },
+  exShadowD: { ar: "قلّد المتحدث لحظة بلحظة", en: "Echo a speaker in real time" },
+  exRead: { ar: "قراءة جهرية", en: "Read aloud" },
+  exReadD: { ar: "نصوص عربية بخط كبير", en: "Arabic texts, large type" },
+  exMono: { ar: "لقطة وحدة", en: "One-take" },
+  exMonoD: { ar: "سؤال، تسجيل واحد، بدون إعادة", en: "One prompt, one take, no retries" },
+  exCircum: { ar: "الالتفاف", en: "Circumlocution" },
+  exCircumD: { ar: "٤٥ ثانية بدون الكلمة الممنوعة", en: "45s without the banned word" },
+  exLex: { ar: "المعجم", en: "Lexicon" },
+  exLexD: { ar: "عبارات، مو كلمات مفردة", en: "Phrases, never bare nouns" },
+  exMsg: { ar: "بنك الرسائل", en: "Message bank" },
+  exMsgD: { ar: "إجاباتك الجاهزة للأسئلة المتكررة", en: "Rehearsed answers you'll reuse" },
+
+  shPaste: { ar: "الصق رابط يوتيوب", en: "Paste a YouTube link" },
+  shOpen: { ar: "افتح", en: "Open" },
+  shRecent: { ar: "آخر اللي شغلته", en: "Recently played" },
+  shStarters: { ar: "حلقات للبداية", en: "Starter episodes" },
+  shChannels: { ar: "قنوات كويتية", en: "Kuwaiti channels" },
+  shChannelsNote: {
+    ar: "الحلقات تنحذف وتتغير، فالقنوات أثبت. افتح القناة، انسخ رابط أي حلقة، والصقه فوق.",
+    en: "Individual episodes disappear; channels don't. Open one, copy any episode link, paste it above.",
+  },
+  shDead: { ar: "⚠ الفيديو ما اشتغل — يمكن انحذف. جرب قناة من القائمة.", en: "⚠ That video wouldn't load — it may be gone. Try a channel instead." },
+  shSpeed: { ar: "السرعة", en: "Speed" },
+  shLoop: { ar: "تكرار A–B", en: "A–B loop" },
+  shClear: { ar: "مسح", en: "Clear" },
+  shTarget: { ar: "الهدف ١٥ دقيقة", en: "target 15 min" },
+  shHow: {
+    ar: "شغّل، وحدد A عند بداية المقطع وB عند نهايته (١٥–٣٠ ثانية)، وبيلف عليه لحاله. قلّد بصوت مسموع، مو بصمت.",
+    en: "Play, mark A at the start of a 15–30s segment and B at its end, and it loops itself. Shadow out loud, not silently.",
+  },
+  shBadUrl: { ar: "الرابط مو صحيح", en: "That link doesn't look right" },
+  shSetAFirst: { ar: "حدد A أول، وبعدها B", en: "Set A first, then B" },
+
+  rdPick: { ar: "اختر نصًا واقراه بصوت عالٍ. علّم أي كلمة تعثرت فيها.", en: "Pick a text and read it aloud. Tap any word you stumble on." },
+  rdWords: { ar: "كلمة", en: "words" },
+  rdStart: { ar: "ابدأ", en: "Start" },
+  rdPause: { ar: "إيقاف مؤقت", en: "Pause" },
+  rdFinish: { ar: "خلصت", en: "Finish" },
+  rdTapHint: { ar: "المس أي كلمة تعثرت فيها", en: "Tap any word you stumbled on" },
+  rdMarked: { ar: "معلّمة", en: "marked" },
+  rdSaved: { ar: "انحفظت {n} عبارة بالمعجم — كمّل معانيها.", en: "{n} phrases saved to the lexicon — add their meanings." },
+  rdNoMarks: { ar: "ما علّمت أي كلمة — الجلسة انحسبت.", en: "No words marked — the session was logged." },
+
+  mnIntro: {
+    ar: "سؤال عشوائي، تسجيل واحد بدون إعادة. ينقفل ٧ أيام، وعقبها تسمعه وتقيّمه — عشان تسمع نفسك مثل ما يسمعك غيرك.",
+    en: "A random prompt, one take, no retries. It locks for 7 days, then you rate it — so you hear yourself the way others do.",
+  },
+  mnDraw: { ar: "اسحب سؤال", en: "Draw a prompt" },
+  mnStart: { ar: "ابدأ التسجيل", en: "Start recording" },
+  mnStop: { ar: "إيقاف وحفظ", en: "Stop and save" },
+  mnRecording: { ar: "🔴 قاعد يسجل", en: "🔴 recording" },
+  mnOneTake: { ar: "لقطة وحدة فقط", en: "one take only" },
+  mnRule: { ar: "أول ما توقف، ينحفظ. ماكو إعادة — هذا بيت القصيد.", en: "The moment you stop, it saves. No retries — that is the point." },
+  mnSaved: { ar: "انحفظ. بينفتح لك بعد ٧ أيام.", en: "Saved. It unlocks in 7 days." },
+  mnReady: { ar: "جاهز للمراجعة", en: "Ready to review" },
+  mnLocked: { ar: "مقفول", en: "Locked" },
+  mnUnlocksIn: { ar: (n) => `يفتح بعد ${n} يوم`, en: (n) => `unlocks in ${n}d` },
+  mnRate: { ar: "قيّم نفسك من ١ إلى ٥", en: "Rate yourself 1–5" },
+  mnNotes: { ar: "ملاحظات", en: "Notes" },
+  mnSaveReview: { ar: "احفظ التقييم", en: "Save review" },
+  mnPickRating: { ar: "اختر تقييم أول", en: "Pick a rating first" },
+  mnNoMic: { ar: "ما قدرنا نوصل للمايك — تأكد من الإذن.", en: "Couldn't reach the microphone — check permissions." },
+  mnNoAudio: { ar: "التسجيل محفوظ على الجهاز اللي سجّلت فيه.", en: "The audio lives on the device that recorded it." },
+  mnCannotLeave: { ar: "أوقف التسجيل أول.", en: "Stop the recording first." },
+
+  crStart: { ar: "ابدأ جولة", en: "Start a run" },
+  crRate: { ar: "نسبة النجاح", en: "Success rate" },
+  crRuns: { ar: (n) => `${n} جولة`, en: (n) => `${n} runs` },
+  crBanned: { ar: "ممنوع تستخدم", en: "Banned words" },
+  crStop: { ar: "خلصت", en: "Done" },
+  crSelfScore: { ar: "عبرت الفجوة بدون توقف؟", en: "Did you glide past the gap without stalling?" },
+  crPass: { ar: "نعم", en: "Yes" },
+  crFail: { ar: "لا، تعثرت", en: "No, I stalled" },
+  crHow: {
+    ar: "بيطلع لك مفهوم وقائمة كلمات ممنوعة، وعندك ٤٥ ثانية توصله بدونها. الهدف مو الكلمة الصح — الهدف إنك ما تتوقف.",
+    en: "A concept appears with words you may not use, and 45 seconds to convey it anyway. The goal isn't the right word — it's not stopping.",
+  },
+
+  lxTotal: { ar: "عبارة", en: "entries" },
+  lxDue: { ar: "مستحقة", en: "due" },
+  lxIncomplete: { ar: "ناقصة", en: "incomplete" },
+  lxAdd: { ar: "أضف عبارة", en: "Add a phrase" },
+  lxPhrase: { ar: "العبارة (عربي)", en: "The phrase (Arabic)" },
+  lxPhraseRule: {
+    ar: "لازم تكون عبارة — اسم ومعه صفة أو إشارة. «قرار» ما تنقبل، «القرار الصعب» تنقبل.",
+    en: "It must be a phrase — a noun with an adjective or demonstrative. «قرار» is rejected; «القرار الصعب» is accepted.",
+  },
+  lxGender: { ar: "التذكير/التأنيث", en: "Gender" },
+  lxPlural: { ar: "الجمع", en: "Plural" },
+  lxGloss: { ar: "المعنى (English)", en: "English gloss" },
+  lxSource: { ar: "المصدر", en: "Source context" },
+  lxDomain: { ar: "المجال", en: "Domain" },
+  lxSaveBtn: { ar: "احفظ", en: "Save" },
+  lxRejectBare: {
+    ar: "ما تنحفظ كلمة مفردة. أضف صفة أو إشارة — «القرار الصعب» بدال «قرار».",
+    en: "A bare noun can't be saved. Add an adjective or demonstrative — «القرار الصعب», not «قرار».",
+  },
+  lxNeedGloss: { ar: "اكتب المعنى بالإنجليزي", en: "Add the English gloss" },
+  lxNeedsWork: { ar: "عبارات من القراءة تحتاج معنى", en: "From reading — needs a gloss" },
+  lxAddGloss: { ar: "أضف المعنى", en: "add the meaning" },
+  lxComplete: { ar: "كمّلها", en: "Complete" },
+  lxEmpty: { ar: "المعجم فاضي — أضف أول عبارة.", en: "The lexicon is empty — add your first phrase." },
+  lxStartReview: { ar: (n) => `راجع (${n})`, en: (n) => `Review (${n})` },
+  lxProduce: { ar: "قل العبارة بالعربي", en: "Produce the Arabic" },
+  lxShow: { ar: "أظهر الجواب", en: "Show the answer" },
+  lxSayFirst: { ar: "قلها بصوتك قبل لا تشوف", en: "Say it out loud before you look" },
+  lxRate: { ar: "شقد كانت سهلة؟ (١ نسيت — ٥ فورية)", en: "How easily? (1 forgot — 5 instant)" },
+
+  mgIntro: {
+    ar: "الأسئلة اللي تتكرر عليك بالمقابلات والمناسبات. اكتب جوابك مرة، وارجع تمرّن عليه — ورتّبها حسب الأقدم تمرينًا.",
+    en: "The questions you get asked again and again. Write the answer once, then rehearse it — sorted by what's gone stalest.",
+  },
+  mgAdd: { ar: "＋ سؤال يديد", en: "＋ New question" },
+  mgQ: { ar: "السؤال", en: "Question" },
+  mgA: { ar: "جوابك بالعربي", en: "Your Arabic answer" },
+  mgSave: { ar: "احفظ", en: "Save" },
+  mgEdit: { ar: "تعديل", en: "Edit" },
+  mgRehearsed: { ar: "تمرنت", en: "Rehearsed" },
+  mgReps: { ar: "مرة", en: "reps" },
+  mgNever: { ar: "ما تمرنت عليه", en: "never rehearsed" },
+  mgDaysAgo: { ar: (n) => `قبل ${n} يوم`, en: (n) => `${n}d ago` },
+
+  dashTitle: { ar: "اللوحة", en: "Dashboard" },
+  dashMinutes: { ar: "دقيقة (٣٠ يوم)", en: "minutes (30d)" },
+  dashLexicon: { ar: "عبارة بالمعجم", en: "lexicon entries" },
+  dashPending: { ar: "بانتظار المراجعة", en: "awaiting review" },
+  dashByType: { ar: "الدقائق حسب التمرين — آخر ٣٠ يوم", en: "Minutes by exercise — last 30 days" },
+  dashDomains: { ar: "المعجم حسب المجال", en: "Lexicon by domain" },
+  dashCircum: { ar: "نسبة نجاح الالتفاف", en: "Circumlocution success rate" },
+  dashWeeks: { ar: "آخر ٥ أسابيع", en: "last 5 weeks" },
+  dashNoData: { ar: "ماكو جلسات بعد.", en: "No sessions yet." },
+  dashNoLex: { ar: "المعجم فاضي.", en: "Lexicon is empty." },
+  dashNoCircum: { ar: "ماكو جولات التفاف بعد.", en: "No circumlocution runs yet." },
 
   // ── labels ──
   regKw: { ar: "كويتي", en: "Kuwaiti" },
@@ -1772,6 +1961,350 @@ const SEED_UPGRADE = [
 </script>
 <script>
 /*
+ * SEED_LIBRARY — source material for the six practice modes.
+ *
+ * On the shadowing sources: individual YouTube videos get deleted, renamed
+ * and made private, so this library is built on CHANNELS, which are stable,
+ * plus a small number of starter episodes verified at build time. The player
+ * also takes any pasted link, and if a seeded video fails to load the UI
+ * falls back to the channel. No video ID here is invented.
+ *
+ * On the reading texts: everything here is either public-domain classical
+ * verse (centuries old) or original prose written for this app. Nothing is
+ * copied from a living newspaper or author.
+ */
+
+const LIB_SHADOW = {
+  channels: [
+    { id: "bidonwaraq", name: "بودكاست بدون ورق", nameEn: "Bidon Waraq",
+      url: "https://www.youtube.com/@BidonWaraq",
+      note: "أشهر بودكاست كويتي — حوارات طويلة بلهجة كويتية واضحة. الأقرب لجو الديوانية.",
+      noteEn: "The best-known Kuwaiti podcast — long-form conversation in clear Kuwaiti. Closest to a diwaniya.",
+      level: "متوسط" },
+    { id: "mn9a", name: "بودكاست منصة", nameEn: "Mn9a Podcast",
+      url: "https://www.youtube.com/@mn9apodcast",
+      note: "ضيوف من شرائح مختلفة بالمجتمع الكويتي — مواضيع محلية وحچي عفوي.",
+      noteEn: "Guests from across Kuwaiti society — local subjects, unscripted speech.",
+      level: "متوسط" },
+    { id: "kwttv", name: "تلفزيون دولة الكويت", nameEn: "Kuwait TV",
+      url: "https://www.youtube.com/@KWTTV1",
+      note: "لقاءات ونشرات — لغة أقرب للفصحى المخففة، مفيدة للسجل الرسمي.",
+      noteEn: "Interviews and bulletins — closer to light MSA, useful for the formal register.",
+      level: "رسمي" },
+    { id: "newsktv", name: "قناة الأخبار الكويتية", nameEn: "Kuwait News Channel",
+      url: "https://www.youtube.com/@newsktv1",
+      note: "نشرات إخبارية — إلقاء منضبط وسرعة ثابتة، ممتاز لأول أسبوعين من الشادوينق.",
+      noteEn: "News bulletins — disciplined delivery at a steady pace; ideal for your first weeks of shadowing.",
+      level: "رسمي" },
+  ],
+  // Starter episodes found and checked while building. If one has since been
+  // removed, the player says so and offers its channel instead.
+  starters: [
+    { id: "RJq6inqowW4", title: "غزو الكويت: الرواية الاستخباراتية الأمريكية — جون كيرياكو",
+      channel: "bidonwaraq", note: "حلقة طويلة، مضيفها يتكلم كويتي واضح والضيف بالإنجليزي مترجم." },
+    { id: "FWOeYcgkvv4", title: "بودكاست سؤال — المقابلة الشخصية", channel: null,
+      note: "موضوع المقابلات الشخصية — مفردات مفيدة لبنك الرسائل." },
+    { id: "uHIKh7NhAUc", title: "بودكاست دائرة — كويتية عايشة في المكسيك", channel: null,
+      note: "حوار شخصي، لهجة كويتية يومية." },
+  ],
+  searches: [
+    { q: "بودكاست بدون ورق حلقة كاملة", label: "حلقات بدون ورق" },
+    { q: "بودكاست كويتي حوار كامل", label: "بودكاست كويتي" },
+    { q: "ديوانية كويتية نقاش", label: "نقاشات ديوانية" },
+    { q: "مقابلة كويتية تلفزيون الكويت", label: "مقابلات رسمية" },
+  ],
+};
+
+/* ── Read-aloud texts ─────────────────────────────────────────────────
+ * kind: "column" original opinion prose · "poetry" public-domain verse
+ *       · "literary" original literary prose · "kuwaiti" original dialect prose
+ * Word counts are approximate; the app counts them exactly at render.
+ */
+const LIB_READ = [
+  {
+    id: "rd01", kind: "column", title: "مخرجات التعليم",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متوسط",
+    text: `حين نتحدث عن التعليم، نميل إلى الحديث عن المباني والميزانيات، وهذه أسهل الأشياء قياسًا وأقلها أثرًا. السؤال الذي نتجنبه عادة هو سؤال المخرجات: ماذا يعرف الخريج، وماذا يستطيع أن يفعل؟
+
+الفجوة بين ما تنتجه مدارسنا وما يطلبه سوق العمل ليست فجوة معلومات، بل فجوة مهارات. الطالب يحفظ ولا يحلل، ويجيب ولا يسأل. ثم نتعجب حين يصطدم بأول مشروع حقيقي فلا يعرف من أين يبدأ.
+
+الإصلاح هنا لا يبدأ بمنهج جديد، بل بمعيار جديد للنجاح. ما دمنا نقيس النجاح بالدرجة، فسنحصل على طلاب بارعين في الامتحانات فقط. وحين نقيسه بالقدرة على إنجاز شيء ملموس، سيتغير كل ما قبله تلقائيًا.`,
+  },
+  {
+    id: "rd02", kind: "column", title: "الاقتصاد الريعي وسؤال التنويع",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متوسط",
+    text: `الدولة الريعية تعيش على مورد واحد، وهذا وضع مريح إلى أن يتوقف عن كونه مريحًا. المشكلة ليست في المورد نفسه، بل في السلوك الذي يولّده: حين يأتي الدخل بلا جهد إنتاجي، تضمر القدرة على الإنتاج.
+
+تنويع مصادر الدخل شعار قديم يتكرر في كل خطة تنموية، ثم تمر السنوات ونكتشف أن نسبة النفط من الإيرادات لم تتغير. السبب أن التنويع الحقيقي يتطلب قرارات غير شعبية: قطاع خاص حقيقي لا يعيش على العقود الحكومية، وسوق عمل يكافئ الكفاءة، وتقبّل فكرة أن بعض المشاريع ستفشل.
+
+لسنا في سباق مع أحد، لكننا في سباق مع الزمن. والأجيال القادمة لن تسألنا عن نوايانا، بل عن الأرقام.`,
+  },
+  {
+    id: "rd03", kind: "column", title: "المدينة التي لا تمشى",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متوسط",
+    text: `صُمّمت مدننا للسيارة لا للإنسان. الطرق واسعة والأرصفة ضيقة أو غائبة، والمسافة بين البيت وأقرب محل تُقاس بالدقائق خلف المقود لا بالخطوات.
+
+التخطيط العمراني ليس مسألة جمال، بل مسألة صحة عامة وعلاقات اجتماعية. المدينة التي تُمشى فيها تُنتج لقاءات عابرة، والمدينة التي تُقاد فيها تُنتج عزلة مكيّفة.
+
+مناخنا قاسٍ صيفًا، وهذه حقيقة يجب أن يحترمها التصميم لا أن يستسلم لها: ظلال، وممرات مغطاة، وأشجار تُزرع لأنها تُظلّل لا لأنها تُصوَّر. ثمانية أشهر في السنة يمكن المشي فيها إذا صمّمنا لها.`,
+  },
+  {
+    id: "rd04", kind: "column", title: "الذكاء الاصطناعي ومهنة لم تُخترع بعد",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متقدم",
+    text: `كل موجة تقنية تُثير السؤال نفسه: هل ستأخذ وظائفنا؟ والجواب التاريخي كان دائمًا أنها تأخذ مهامًا وتترك وظائف، ثم تخلق وظائف لم تكن في بال أحد.
+
+لكن سرعة هذه الموجة مختلفة. ما كان يستغرق جيلًا صار يستغرق سنتين، والفارق بين من يجيد استخدام الأداة ومن لا يجيدها يتسع بسرعة تفوق قدرة أنظمتنا التعليمية على اللحاق.
+
+الموقف العملي ليس الحماس ولا الذعر، بل الإتقان. من يفهم حدود الأداة يستخدمها كرافعة، ومن لا يفهمها يسلّمها قرارات لا تصلح لها. والفرق بين الاثنين سيظهر في المخرجات قبل أن يظهر في الشعارات.`,
+  },
+  {
+    id: "rd05", kind: "column", title: "صناعة صورة",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متوسط",
+    text: `تُبنى صناعة السينما على ثلاثة أشياء: حكاية تستحق أن تُروى، وكوادر تعرف كيف تُروى، وسوق يدفع ثمن روايتها. ونحن ننجح أحيانًا في الأول، ونستورد الثاني، ونتجاهل الثالث.
+
+المؤثرات البصرية ليست زينة تُضاف في آخر المشروع، بل قرار يُتخذ في أول جلسة كتابة. اللقطة التي تُخطَّط جيدًا تُنفَّذ بنصف الميزانية، واللقطة التي تُترك للمعالجة لاحقًا تلتهم المشروع كله.
+
+الأهم من كل ذلك أن الصورة تُصدّر ثقافة. من يملك أدوات الحكاية يملك كيف يراه الآخرون، وهذه ليست مسألة فنية بل مسألة سيادة ناعمة.`,
+  },
+  {
+    id: "rd06", kind: "column", title: "لماذا الفضاء؟",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متقدم",
+    text: `السؤال الذي يُطرح دائمًا: لماذا ننفق على الفضاء ولدينا مشاكل على الأرض؟ وهو سؤال وجيه يستحق جوابًا جادًا لا دفاعيًا.
+
+برامج الفضاء لا تُبرَّر بما تجده هناك، بل بما تبنيه هنا: مهندسون يتدرّبون على معايير لا تحتمل الخطأ، وسلاسل توريد محلية، وثقافة هندسية تنتقل بعد ذلك إلى الطاقة والمياه والاتصالات. العائد الحقيقي بشري لا معدني.
+
+وهناك عائد أصعب في القياس: أن يرى طفل شخصًا يشبهه على متن مركبة، فيصير المستحيل عنده مسألة جدول زمني لا مسألة خيال.`,
+  },
+  {
+    id: "rd07", kind: "poetry", title: "من معلقة زهير بن أبي سلمى",
+    source: "شعر جاهلي — ملكية عامة", level: "متقدم",
+    text: `وَمَن يَجعَلِ المَعروفَ مِن دونِ عِرضِهِ
+يَفِرهُ وَمَن لا يَتَّقِ الشَتمَ يُشتَمِ
+
+وَمَن يَكُ ذا فَضلٍ فَيَبخَل بِفَضلِهِ
+عَلى قَومِهِ يُستَغنَ عَنهُ وَيُذمَمِ
+
+وَمَن يوفِ لا يُذمَم وَمَن يُهدَ قَلبُهُ
+إِلى مُطمَئِنِّ البِرِّ لا يَتَجَمجَمِ
+
+وَمَهما تَكُن عِندَ اِمرِئٍ مِن خَليقَةٍ
+وَإِن خالَها تَخفى عَلى الناسِ تُعلَمِ`,
+  },
+  {
+    id: "rd08", kind: "poetry", title: "من شعر المتنبي",
+    source: "أبو الطيب المتنبي — ملكية عامة", level: "متقدم",
+    text: `عَلى قَدرِ أَهلِ العَزمِ تَأتي العَزائِمُ
+وَتَأتي عَلى قَدرِ الكِرامِ المَكارِمُ
+
+وَتَعظُمُ في عَينِ الصَغيرِ صِغارُها
+وَتَصغُرُ في عَينِ العَظيمِ العَظائِمُ
+
+وَما الدَهرُ إِلّا مِن رُواةِ قَصائِدي
+إِذا قُلتُ شِعرًا أَصبَحَ الدَهرُ مُنشِدا`,
+  },
+  {
+    id: "rd09", kind: "poetry", title: "من شعر أبي تمام",
+    source: "أبو تمام — ملكية عامة", level: "متقدم",
+    text: `السَيفُ أَصدَقُ أَنباءً مِنَ الكُتُبِ
+في حَدِّهِ الحَدُّ بَينَ الجِدِّ وَاللَعِبِ
+
+بيضُ الصَفائِحِ لا سودُ الصَحائِفِ في
+مُتونِهِنَّ جَلاءُ الشَكِّ وَالرِيَبِ
+
+وَالعِلمُ في شُهُبِ الأَرماحِ لامِعَةً
+بَينَ الخَميسَينِ لا في السَبعَةِ الشُهُبِ`,
+  },
+  {
+    id: "rd10", kind: "literary", title: "الفريج القديم",
+    source: "نص أصلي — نثر أدبي", level: "متوسط",
+    text: `لم تكن البيوت في الفريج القديم تفصل بينها جدران بقدر ما تصلها أبواب. الباب يُترك مواربًا لا نسيانًا، بل دعوةً صامتة: ادخل، أنت منّا.
+
+كانت الحياة تُدار في الممرات الضيقة بين البيوت، حيث يعرف كل طفل أي بيت يطعمه إذا تأخر، وأي امرأة ستخبر أمه إذا تأخر أكثر. لم تكن الخصوصية غائبة، لكنها كانت تُفهم على نحو آخر: أن يعرف الناس عنك، وأن يستروك.
+
+ثم اتسعت الشوارع وارتفعت الأسوار، وصار الجار اسمًا على لوحة لا وجهًا في ذاكرة. لسنا نبكي الماضي، فالماضي كان أضيق وأقسى مما نتذكر. لكن شيئًا ما فُقد في الطريق، ولم نجلس بعد لنسميه.`,
+  },
+  {
+    id: "rd11", kind: "literary", title: "البحر قبل النفط",
+    source: "نص أصلي — نثر أدبي", level: "متقدم",
+    text: `قبل أن يخرج النفط من الأرض، كان الرزق يُنتزع من البحر انتزاعًا. يخرج الرجال في السفن أشهرًا، ويبقى على الساحل نساء يحسبن الأيام بعلامات على الجدار.
+
+كان الغوص مهنة لا تعرف الوسط: إما أن تعود بما يكفي السنة، أو تعود بلا شيء، أو لا تعود. ومع ذلك كانت الأغاني التي تُغنّى على ظهر السفينة أقرب إلى الفرح منها إلى الشكوى، كأن الصوت وسيلة لترويض الخوف.
+
+ثم جاء النفط فغيّر كل شيء في عقدين، وهذه سرعة لا تحتملها ذاكرة مجتمع. ما زلنا، بعد أجيال، نتصرّف أحيانًا كأننا في موسم غوص: نجمع بسرعة، ونخشى أن ينتهي الموسم.`,
+  },
+  {
+    id: "rd12", kind: "kuwaiti", title: "سالفة الديوانية",
+    source: "نص أصلي — لهجة كويتية", level: "سهل",
+    text: `الديوانية مو بس مكان تقعد فيه — هي أقرب شي عندنا لمدرسة ما فيها معلم. تدش وأنت ما تعرف شي عن الموضوع، وتطلع وعندك ثلاث وجهات نظر ما كانت ببالك.
+
+اللي يميّزها إن ماكو أحد يقاطعك عشان يخلص كلامه، بس بنفس الوقت ماكو أحد بيسكت لك إذا قلت شي ما يسوى. يعني تتعلم تحچي وتتعلم تسمع بنفس الجلسة.
+
+وأهم شي فيها إنها ما تفرّق: الشايب والشاب على نفس الكنبة، والحچي على قد صاحبه مو على قد اسمه. هذي اللي لازم نحافظ عليها، مو شكل المجلس ولا حجم الشاي.`,
+  },
+  {
+    id: "rd13", kind: "kuwaiti", title: "شنو تغيّر بالكويت؟",
+    source: "نص أصلي — لهجة كويتية", level: "سهل",
+    text: `إذا تسألني شنو أكثر شي تغيّر، ما بقول لك المباني ولا الشوارع. اللي تغيّر إن الناس صارت مستعجلة.
+
+قبل، السالفة تاخذ وقتها. تسولف، تشرب چاي، وعقب تدخل بالموضوع. الحين كل شي على السريع — رسالة، رد بكلمتين، وخلصنا. الأمور تمشي أسرع، بس الونسة نقصت.
+
+وأنا مو ضد التطور، بالعكس. بس أشوف إن اللي نكسبه بالوقت نخسره بالعلاقات، وهذي معادلة لازم نراجعها كل فترة، ونسأل نفسنا: نستعجل على شنو بالضبط؟`,
+  },
+  {
+    id: "rd14", kind: "column", title: "في مديح الاختلاف",
+    source: "نص أصلي — بأسلوب المقال الرأي", level: "متوسط",
+    text: `أسوأ ما يصيب مجلسًا أن يتفق الجميع فيه بسرعة. الاتفاق السريع ليس دليل حكمة، بل دليل أن أحدًا لم يفكر بعد.
+
+الرأي المخالف خدمة تُقدَّم مجانًا: هو يختبر فكرتك قبل أن يختبرها الواقع، والواقع أقسى بكثير. ومع ذلك نتعامل مع المخالف كخصم، فنخسر الاختبار ونخسر صاحبه معًا.
+
+الفارق بين الجدال والمحاورة أن الأول يبحث عن غالب، والثاني يبحث عن أصح. ومن أراد أن يكون محاورًا حقيقيًا فليتمرّن على جملة واحدة: أتفق معك في هذا، وأختلف معك في ذاك — ثم يشرح لماذا، بهدوء.`,
+  },
+];
+
+/* ── One-take monologue prompts ───────────────────────────────────────
+ * Written to put you on the spot: each is answerable in 90–120 seconds and
+ * each has a trap — a number to commit to, a position to defend, or a
+ * concession to make. Bland prompts produce bland speech.
+ */
+const LIB_MONO = [
+  { id: "mn01", domain: "أعمال", q: "عرّف عن نفسك وعن شغلك في تسعين ثانية، لشخص ما سمع عنك أبدًا." },
+  { id: "mn02", domain: "أعمال", q: "شنو أصعب قرار أخذته بشغلك، وليش كان صعب؟" },
+  { id: "mn03", domain: "أعمال", q: "مشروع فشل عليك — شنو صار، وشنو نصيبك أنت من الفشل؟" },
+  { id: "mn04", domain: "أعمال", q: "أقنعني بخمس جمل ليش أستثمر في شركتك بدال شركة منافسة." },
+  { id: "mn05", domain: "أعمال", q: "شنو الشي اللي يعرفه أهل مجالك ولا يعرفه الناس؟" },
+  { id: "mn06", domain: "أعمال", q: "لو انخفضت ميزانيتك للنص باچر، شنو أول شي تقطعه ولماذا؟" },
+  { id: "mn07", domain: "أعمال", q: "شلون تعرف إن موظف مناسب لفريقك قبل لا توظفه؟" },
+  { id: "mn08", domain: "إنتاج", q: "اشرح لغير المختص شنو تسوي بالضبط بالمؤثرات البصرية." },
+  { id: "mn09", domain: "إنتاج", q: "ليش أغلب الأفلام الخليجية ما تنجح تجاريًا؟ جاوب بصراحة." },
+  { id: "mn10", domain: "إنتاج", q: "شنو الفرق بين فيلم غالي وفيلم زين؟ اضرب مثال." },
+  { id: "mn11", domain: "إنتاج", q: "لو عندك ميزانية غير محدودة لفيلم كويتي، شنو تسوي؟ وليش هذا بالذات؟" },
+  { id: "mn12", domain: "إنتاج", q: "دافع عن الصناعة المحلية قدام شخص يقول إنها ما تستاهل الدعم." },
+  { id: "mn13", domain: "علوم", q: "اشرح الجاذبية لطفل عمره عشر سنين، بدون معادلات." },
+  { id: "mn14", domain: "علوم", q: "شنو الفرق بين الفرضية والنظرية؟ وليش الفرق مهم بالنقاش العام؟" },
+  { id: "mn15", domain: "علوم", q: "ليش نثق بالعلم مع إنه يغيّر رأيه؟" },
+  { id: "mn16", domain: "علوم", q: "اشرح شنو يعني «الارتباط لا يعني السببية» بمثال من الأخبار." },
+  { id: "mn17", domain: "فضاء", q: "بررلي إنفاق دولة صغيرة على برنامج فضائي." },
+  { id: "mn18", domain: "فضاء", q: "شنو أصعب شي بالسفر للفضاء؟ ومو الجواب اللي يتوقعه الناس." },
+  { id: "mn19", domain: "فضاء", q: "لو صرت أول رائد فضاء كويتي، شنو أول شي تقوله من هناك؟" },
+  { id: "mn20", domain: "فضاء", q: "اشرح ليش إعادة الدخول أخطر من الإقلاع." },
+  { id: "mn21", domain: "هندسة", q: "اشرح مشروع هندسي معقد لشخص بيموّله ومو مهندس." },
+  { id: "mn22", domain: "هندسة", q: "شنو يعني «عامل أمان»، وليش المهندس يصمم لأكثر من المتوقع؟" },
+  { id: "mn23", domain: "هندسة", q: "متى يكون الحل البسيط أفضل من الحل الذكي؟ اضرب مثال." },
+  { id: "mn24", domain: "اقتصاد", q: "اشرح التضخم لشخص يقول: ليش راتبي نفسه بس ما يكفيني؟" },
+  { id: "mn25", domain: "اقتصاد", q: "شنو معنى «دولة ريعية»، وشنو خطرها على المدى الطويل؟" },
+  { id: "mn26", domain: "اقتصاد", q: "لو كنت مسؤول عن تنويع الاقتصاد، شنو أول ثلاث خطوات؟" },
+  { id: "mn27", domain: "اقتصاد", q: "دافع عن فرض ضرائب بالخليج قدام جمهور معارض." },
+  { id: "mn28", domain: "سياسة", q: "اشرح ليش الفصل بين السلطات مهم، بدون ما تستخدم كلمة «ديمقراطية»." },
+  { id: "mn29", domain: "سياسة", q: "شنو دور الكويت الطبيعي بالمنطقة؟ وليش؟" },
+  { id: "mn30", domain: "سياسة", q: "اشرح اختلال التركيبة السكانية بحياد، بدون ما تلوم أحد." },
+  { id: "mn31", domain: "تاريخ", q: "احكِ لي عن الكويت قبل النفط في دقيقتين." },
+  { id: "mn32", domain: "تاريخ", q: "شنو أكثر حدث شكّل الكويت الحديثة؟ ودافع عن اختيارك." },
+  { id: "mn33", domain: "تاريخ", q: "ليش نقرأ التاريخ إذا ما نقدر نغيّره؟" },
+  { id: "mn34", domain: "مجتمع", q: "شنو الشي اللي نسويه بالكويت ونعتبره عادي وهو مو عادي؟" },
+  { id: "mn35", domain: "مجتمع", q: "شنو أهم شي تعلمته من كبار السن، وشلون طبقته؟" },
+  { id: "mn36", domain: "مجتمع", q: "انتقد شي تحبه — بصراحة وبإنصاف." },
+  { id: "mn37", domain: "شخصي", q: "شنو الشي اللي غيّر رأيك خلال آخر سنتين؟ وليش؟" },
+  { id: "mn38", domain: "شخصي", q: "شنو أكبر غلطة سويتها، وشنو تعلمت منها فعلًا؟" },
+  { id: "mn39", domain: "شخصي", q: "وين تشوف نفسك بعد عشر سنين؟ كن محددًا، لا تتفلسف." },
+  { id: "mn40", domain: "شخصي", q: "شنو الشي اللي يزعجك بنفسك وتشتغل عليه الحين؟" },
+  { id: "mn41", domain: "أعمال", q: "منافسك سوّى شي أحسن منك — اعترف فيه واشرح ردك." },
+  { id: "mn42", domain: "أعمال", q: "شلون تقول «لا» لعميل مهم بدون ما تخسره؟" },
+  { id: "mn43", domain: "مجتمع", q: "شنو رأيك بالواسطة؟ جاوب بدون مجاملة." },
+  { id: "mn44", domain: "علوم", q: "اشرح فكرة معقدة تعلمتها مؤخرًا — بلغة بسيطة." },
+  { id: "mn45", domain: "شخصي", q: "منو الشخص اللي أثّر فيك أكثر، وشلون بالضبط؟" },
+  { id: "mn46", domain: "أعمال", q: "لو رجع فيك الزمن خمس سنين، شنو تنصح نفسك؟" },
+  { id: "mn47", domain: "فضاء", q: "الاستثمار بالفضاء تجاريًا: فقاعة ولا فرصة؟ خذ موقف." },
+  { id: "mn48", domain: "إنتاج", q: "شلون تحكم على سيناريو إنه زين قبل ما ينتصور؟" },
+  { id: "mn49", domain: "سياسة", q: "شنو الفرق بين النقد والتشكيك؟ ووين الخط؟" },
+  { id: "mn50", domain: "هندسة", q: "اشرح ليش المشاريع تتأخر دايمًا، من واقع تجربتك." },
+  { id: "mn51", domain: "اقتصاد", q: "انصح شاب عمره ٢٥ بأول قرار مالي يسويه." },
+  { id: "mn52", domain: "مجتمع", q: "شنو اللي يخلي مجتمع «متحضر»؟ عرّفها بكلامك." },
+  { id: "mn53", domain: "شخصي", q: "شنو الشي اللي تعرفه وما تقدر تثبته؟" },
+  { id: "mn54", domain: "علوم", q: "ليش أغلب الناس تفهم الإحصاء غلط؟ اضرب مثالين." },
+  { id: "mn55", domain: "أعمال", q: "اشرح نموذج عملك بجملة وحدة، عقب اشرحه بدقيقة." },
+  { id: "mn56", domain: "تاريخ", q: "شنو الدرس اللي ما تعلمناه من الغزو؟" },
+  { id: "mn57", domain: "إنتاج", q: "الذكاء الاصطناعي والإنتاج البصري: تهديد ولا أداة؟ خذ موقف واضح." },
+  { id: "mn58", domain: "فضاء", q: "اشرح ليش الفضاء مهم اقتصاديًا، مو بس علميًا." },
+  { id: "mn59", domain: "مجتمع", q: "شنو الشي اللي تتمنى الناس تسأل عنه أكثر؟" },
+  { id: "mn60", domain: "شخصي", q: "اذكر رأيًا تحمله وتعرف إن أغلب ربعك يخالفك فيه — ودافع عنه." },
+];
+
+/* ── Circumlocution drills ────────────────────────────────────────────
+ * The banned list always contains the obvious word AND its nearest
+ * synonyms, so the only way through is to describe the concept.
+ */
+const LIB_CIRCUM = [
+  { id: "cr01", concept: "leverage (رافعة مالية)", banned: ["رافعة", "قرض", "دين", "استدانة"] },
+  { id: "cr02", concept: "iteration (تكرار محسّن)", banned: ["تكرار", "إعادة", "نسخة", "دورة"] },
+  { id: "cr03", concept: "compromise (حل وسط)", banned: ["حل وسط", "تنازل", "تسوية", "منتصف"] },
+  { id: "cr04", concept: "deadline (موعد نهائي)", banned: ["موعد", "تاريخ", "نهائي", "تسليم"] },
+  { id: "cr05", concept: "bottleneck (عنق الزجاجة)", banned: ["عنق", "زجاجة", "اختناق", "تأخير"] },
+  { id: "cr06", concept: "prototype (نموذج أولي)", banned: ["نموذج", "أولي", "تجربة", "عينة"] },
+  { id: "cr07", concept: "scalability (قابلية التوسع)", banned: ["توسع", "كبر", "نمو", "حجم"] },
+  { id: "cr08", concept: "accountability (المساءلة)", banned: ["مساءلة", "محاسبة", "مسؤولية", "رقابة"] },
+  { id: "cr09", concept: "inflation (التضخم)", banned: ["تضخم", "أسعار", "غلاء", "نقود"] },
+  { id: "cr10", concept: "conflict of interest (تضارب مصالح)", banned: ["تضارب", "مصلحة", "تعارض"] },
+  { id: "cr11", concept: "burnout (الاحتراق الوظيفي)", banned: ["احتراق", "تعب", "إرهاق", "ضغط"] },
+  { id: "cr12", concept: "momentum (الزخم)", banned: ["زخم", "سرعة", "قوة", "دفع"] },
+  { id: "cr13", concept: "redundancy (تكرار احتياطي)", banned: ["تكرار", "احتياطي", "نسخة", "بديل"] },
+  { id: "cr14", concept: "opportunity cost (تكلفة الفرصة البديلة)", banned: ["تكلفة", "فرصة", "بديل", "خسارة"] },
+  { id: "cr15", concept: "precedent (سابقة)", banned: ["سابقة", "قبل", "مثال", "تاريخ"] },
+  { id: "cr16", concept: "nuance (فرق دقيق)", banned: ["فرق", "دقيق", "تفصيل", "تمييز"] },
+  { id: "cr17", concept: "outsourcing (الإسناد الخارجي)", banned: ["إسناد", "خارجي", "شركة", "تعاقد"] },
+  { id: "cr18", concept: "depreciation (الإهلاك)", banned: ["إهلاك", "قيمة", "نقص", "استهلاك"] },
+  { id: "cr19", concept: "sustainability (الاستدامة)", banned: ["استدامة", "بيئة", "مستقبل", "أجيال"] },
+  { id: "cr20", concept: "bias (التحيّز)", banned: ["تحيّز", "ميل", "ظلم", "عدل"] },
+  { id: "cr21", concept: "workflow (سير العمل)", banned: ["سير", "عمل", "خطوات", "مراحل"] },
+  { id: "cr22", concept: "render (معالجة اللقطة)", banned: ["معالجة", "لقطة", "كمبيوتر", "برنامج"] },
+  { id: "cr23", concept: "orbit (المدار)", banned: ["مدار", "دوران", "حول", "فلك"] },
+  { id: "cr24", concept: "friction (الاحتكاك)", banned: ["احتكاك", "مقاومة", "سطح", "حركة"] },
+  { id: "cr25", concept: "calibration (المعايرة)", banned: ["معايرة", "ضبط", "قياس", "دقة"] },
+  { id: "cr26", concept: "consensus (الإجماع)", banned: ["إجماع", "اتفاق", "كل", "رأي"] },
+  { id: "cr27", concept: "leverage (نفوذ تفاوضي)", banned: ["نفوذ", "قوة", "ضغط", "تفاوض"] },
+  { id: "cr28", concept: "liquidity (السيولة)", banned: ["سيولة", "نقد", "كاش", "فلوس"] },
+  { id: "cr29", concept: "diversification (التنويع)", banned: ["تنويع", "متعدد", "مختلف", "توزيع"] },
+  { id: "cr30", concept: "escalation (التصعيد)", banned: ["تصعيد", "زيادة", "أزمة", "توتر"] },
+  { id: "cr31", concept: "empathy (التعاطف)", banned: ["تعاطف", "إحساس", "شعور", "مكان"] },
+  { id: "cr32", concept: "infrastructure (البنية التحتية)", banned: ["بنية", "تحتية", "طرق", "خدمات"] },
+  { id: "cr33", concept: "prototype fatigue (ملل التجريب)", banned: ["ملل", "تجريب", "تعب", "محاولات"] },
+  { id: "cr34", concept: "delegation (التفويض)", banned: ["تفويض", "توكيل", "تسليم", "مسؤولية"] },
+  { id: "cr35", concept: "milestone (محطة إنجاز)", banned: ["محطة", "إنجاز", "هدف", "مرحلة"] },
+  { id: "cr36", concept: "gravity well (بئر الجاذبية)", banned: ["جاذبية", "بئر", "كتلة", "سحب"] },
+  { id: "cr37", concept: "turnover (دوران الموظفين)", banned: ["دوران", "موظفين", "استقالة", "ترك"] },
+  { id: "cr38", concept: "due diligence (العناية الواجبة)", banned: ["عناية", "واجبة", "فحص", "تدقيق"] },
+  { id: "cr39", concept: "narrative (السردية)", banned: ["سردية", "قصة", "حكاية", "رواية"] },
+  { id: "cr40", concept: "threshold (العتبة)", banned: ["عتبة", "حد", "نقطة", "بداية"] },
+];
+
+/* ── Message bank starters ────────────────────────────────────────────
+ * The questions you will be asked repeatedly in public. Answers are yours
+ * to write; these are the prompts worth having a rehearsed answer for.
+ */
+const LIB_MSG = [
+  { id: "mb01", q: "عرّف عن نفسك.", domain: "شخصي" },
+  { id: "mb02", q: "شنو تسوي بالضبط؟", domain: "أعمال" },
+  { id: "mb03", q: "شلون بدأت بهذا المجال؟", domain: "أعمال" },
+  { id: "mb04", q: "شنو يميّز شركتكم عن غيرها؟", domain: "أعمال" },
+  { id: "mb05", q: "شنو أكبر تحدٍ تواجهونه الحين؟", domain: "أعمال" },
+  { id: "mb06", q: "وين تشوفون نفسكم بعد خمس سنين؟", domain: "أعمال" },
+  { id: "mb07", q: "ليش الكويت بالذات؟", domain: "مجتمع" },
+  { id: "mb08", q: "شنو رأيك بمستقبل الصناعة عندنا؟", domain: "أعمال" },
+  { id: "mb09", q: "شنو نصيحتك لشاب يبي يدخل مجالك؟", domain: "شخصي" },
+  { id: "mb10", q: "شنو أكثر مشروع تفتخر فيه؟", domain: "أعمال" },
+  { id: "mb11", q: "شلون تشوف دور الذكاء الاصطناعي بشغلكم؟", domain: "أعمال" },
+  { id: "mb12", q: "شنو اللي يحتاجه القطاع عشان يتطور؟", domain: "سياسة" },
+  { id: "mb13", q: "شنو أصعب درس تعلمته؟", domain: "شخصي" },
+  { id: "mb14", q: "منو مصادر إلهامك؟", domain: "شخصي" },
+  { id: "mb15", q: "شلون توازن بين الشغل والحياة؟", domain: "شخصي" },
+  { id: "mb16", q: "شنو رأيك بالتعليم عندنا؟", domain: "سياسة" },
+  { id: "mb17", q: "ليش يهمك موضوع الفضاء؟", domain: "فضاء" },
+  { id: "mb18", q: "شنو الشي اللي تتمنى الناس يفهمونه عن مجالك؟", domain: "أعمال" },
+  { id: "mb19", q: "شنو خططكم القادمة؟", domain: "أعمال" },
+  { id: "mb20", q: "شلون نقدر نتواصل معكم؟", domain: "أعمال" },
+];
+</script>
+<script>
+/*
  * ARENA — التمرين. The game mode you enter and play, separate from the
  * daily spaced-repetition session.
  *
@@ -2162,6 +2695,803 @@ function createArena(ctx) {
   }
 
   return { render, wire, game, rankOf, applyFreeze, RANKS, inRound: () => !!round };
+}
+</script>
+<script>
+/*
+ * PRACTICE — the six production-side exercises, plus the dashboard.
+ *
+ * Everything except audio lives in the synced JSON state. Audio recordings
+ * stay in IndexedDB on the device that made them: they are large, and a
+ * one-take monologue is evidence for you, not something to ship to a server.
+ * The metadata (prompt, date, unlock date, rating, notes) does sync, so the
+ * review queue is correct on every device even where the audio is absent.
+ *
+ * Chart colours were validated against the dark surface with the dataviz
+ * validator: lightness band, chroma, CVD separation, and contrast all pass.
+ */
+const EX_COLORS = { shadow: "#29a463", read: "#4d93d2", mono: "#b0862f", circum: "#9d80d0" };
+
+/* ── audio store ─────────────────────────────────────────────────────── */
+const AudioStore = (() => {
+  const DB = "khosh-kalam-audio", STORE = "clips";
+  let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const r = indexedDB.open(DB, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbp;
+  }
+  const tx = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(STORE, mode);
+      const rq = fn(t.objectStore(STORE));
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => rej(rq.error);
+    });
+  };
+  return {
+    put: (id, blob) => tx("readwrite", (s) => s.put(blob, id)),
+    get: (id) => tx("readonly", (s) => s.get(id)),
+    del: (id) => tx("readwrite", (s) => s.delete(id)),
+    keys: () => tx("readonly", (s) => s.getAllKeys()),
+  };
+})();
+
+/* ── SM-2, as specified ──────────────────────────────────────────────── */
+function sm2(card, q) {
+  const c = { ef: 2.5, n: 0, int: 0, due: 0, ...card };
+  if (q < 3) { c.n = 0; c.int = 1; }
+  else {
+    c.n += 1;
+    c.int = c.n === 1 ? 1 : c.n === 2 ? 6 : Math.round(c.int * c.ef);
+  }
+  c.ef = Math.max(1.3, c.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+  c.due = Date.now() + c.int * 86400000;
+  c.last = Date.now();
+  return c;
+}
+
+function createPractice(ctx) {
+  const { esc, t, ti, ts, S, bilingual, save, todayKey } = ctx;
+  const store = () => ctx.store();
+
+  const P = () => {
+    const s = store();
+    s.practice ||= {};
+    const p = s.practice;
+    p.sessions ??= []; p.lexicon ??= []; p.monologues ??= [];
+    p.circum ??= []; p.msgs ??= []; p.recent ??= [];
+    return p;
+  };
+
+  let mode = null;      // null = hub, else the exercise key
+  let ui = {};          // per-exercise transient state
+  const DAY = 86400000;
+
+  const logSession = (type, minutes) => {
+    if (minutes < 0.5) return;
+    P().sessions.push({ d: todayKey(), type, min: Math.round(minutes * 10) / 10 });
+    save();
+  };
+
+  // ── 1. shadowing ────────────────────────────────────────────────────
+  let yt = null, ytReady = false, loopTimer = null, shadowTimer = null;
+
+  function loadYT(cb) {
+    if (window.YT && window.YT.Player) return cb();
+    if (!document.getElementById("ytapi")) {
+      const s = document.createElement("script");
+      s.id = "ytapi"; s.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(s);
+    }
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { prev?.(); ytReady = true; cb(); };
+    if (window.YT?.Player) cb();
+  }
+
+  function mountPlayer(videoId) {
+    ui.videoId = videoId;
+    ui.a = null; ui.b = null; ui.elapsed = 0; ui.playing = false;
+    ctx.rerender();
+    loadYT(() => {
+      const host = document.getElementById("ytHost");
+      if (!host) return;
+      yt = new YT.Player(host, {
+        videoId, playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
+        events: {
+          onReady: (e) => { e.target.setPlaybackRate(ui.rate || 1); },
+          onStateChange: (e) => {
+            ui.playing = e.data === YT.PlayerState.PLAYING;
+            if (ui.playing) startShadowClock(); else stopShadowClock();
+          },
+          onError: () => { ui.ytError = true; ctx.rerender(); },
+        },
+      });
+      clearInterval(loopTimer);
+      loopTimer = setInterval(() => {
+        if (!yt?.getCurrentTime || ui.a == null || ui.b == null) return;
+        const tNow = yt.getCurrentTime();
+        if (tNow > ui.b || tNow < ui.a - 0.5) yt.seekTo(ui.a, true);
+      }, 250);
+    });
+  }
+
+  function startShadowClock() {
+    if (shadowTimer) return;
+    ui.t0 = Date.now();
+    shadowTimer = setInterval(() => {
+      ui.elapsed = (ui.elapsed || 0) + 1;
+      const el = document.getElementById("shadowClock");
+      if (el) el.textContent = fmtClock(ui.elapsed);
+      const bar = document.getElementById("shadowBar");
+      if (bar) bar.style.width = Math.min(100, (ui.elapsed / 900) * 100) + "%";
+    }, 1000);
+  }
+  function stopShadowClock() { clearInterval(shadowTimer); shadowTimer = null; }
+  function teardownShadow() {
+    stopShadowClock(); clearInterval(loopTimer); loopTimer = null;
+    if (ui.elapsed > 30) logSession("shadow", ui.elapsed / 60);
+    try { yt?.destroy?.(); } catch {}
+    yt = null;
+  }
+  const fmtClock = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  function renderShadow() {
+    const p = P();
+    if (!ui.videoId) {
+      return `
+        ${hdr("exShadow")}
+        <div class="panel">
+          <div class="microlabel">${t("shPaste")}</div>
+          <div class="v-actions" style="margin-top:0.5rem">
+            <input id="ytUrl" dir="ltr" placeholder="https://youtube.com/watch?v=..." style="flex:1" />
+            <button class="btn btn-sm btn-primary" id="ytGo">${t("shOpen")}</button>
+          </div>
+          ${p.recent.length ? `<div class="microlabel" style="margin-top:0.9rem">${t("shRecent")}</div>
+            <div class="chips">${p.recent.slice(0, 6).map((r) => `<button class="chip" data-vid="${esc(r.id)}">${esc(r.title || r.id)}</button>`).join("")}</div>` : ""}
+        </div>
+        <div class="panel">
+          <div class="microlabel">${t("shStarters")}</div>
+          ${LIB_SHADOW.starters.map((s) => `<button class="src-row" data-vid="${esc(s.id)}" data-title="${esc(s.title)}">
+              <div class="src-title">${esc(s.title)}</div><div class="src-note">${esc(s.note)}</div></button>`).join("")}
+        </div>
+        <div class="panel">
+          <div class="microlabel">${t("shChannels")}</div>
+          <div class="note-info" style="margin:0.35rem 0 0.6rem">${t("shChannelsNote")}</div>
+          ${LIB_SHADOW.channels.map((c) => `<a class="src-row" href="${esc(c.url)}" target="_blank" rel="noopener">
+              <div class="src-title">${esc(c.name)} <span class="tag">${esc(c.level)}</span></div>
+              <div class="src-note">${esc(bilingual() ? c.note + " · " + c.noteEn : c.note)}</div></a>`).join("")}
+          <div class="chips" style="margin-top:0.7rem">
+            ${LIB_SHADOW.searches.map((s) => `<a class="chip" target="_blank" rel="noopener"
+                href="https://www.youtube.com/results?search_query=${encodeURIComponent(s.q)}">🔎 ${esc(s.label)}</a>`).join("")}
+          </div>
+        </div>`;
+    }
+    const seg = ui.a != null && ui.b != null ? `${ui.a.toFixed(1)}s → ${ui.b.toFixed(1)}s (${(ui.b - ui.a).toFixed(1)}s)` : "—";
+    return `
+      ${hdr("exShadow", true)}
+      <div class="panel">
+        ${ui.ytError ? `<div class="note-info" style="color:var(--red)">${t("shDead")}</div>` : ""}
+        <div class="yt-wrap"><div id="ytHost"></div></div>
+        <div class="h-row" style="margin:0.8rem 0 0.4rem">
+          <span class="clock" id="shadowClock">${fmtClock(ui.elapsed || 0)}</span>
+          <span class="microlabel">${ti("shTarget")}</span>
+        </div>
+        <div class="xpbar"><div id="shadowBar" style="width:${Math.min(100, ((ui.elapsed || 0) / 900) * 100)}%"></div></div>
+        <div class="ctrl-row">
+          <span class="microlabel">${t("shSpeed")}</span>
+          ${[0.75, 1].map((r) => `<button class="chip ${(ui.rate || 1) === r ? "on" : ""}" data-rate="${r}">${r}×</button>`).join("")}
+        </div>
+        <div class="ctrl-row">
+          <span class="microlabel">${t("shLoop")}</span>
+          <button class="chip" id="setA">A</button>
+          <button class="chip" id="setB">B</button>
+          <button class="chip" id="clrAB">${t("shClear")}</button>
+          <span class="seg" dir="ltr">${esc(seg)}</span>
+        </div>
+        <div class="note-info" style="margin-top:0.5rem">${t("shHow")}</div>
+      </div>`;
+  }
+
+  function wireShadow(el) {
+    el.querySelector("#ytGo")?.addEventListener("click", () => {
+      const v = parseVideoId(document.getElementById("ytUrl").value);
+      if (v) { pushRecent(v, null); mountPlayer(v); } else alert(ts("shBadUrl"));
+    });
+    el.querySelectorAll("[data-vid]").forEach((b) => b.addEventListener("click", () => {
+      pushRecent(b.dataset.vid, b.dataset.title); mountPlayer(b.dataset.vid);
+    }));
+    el.querySelectorAll("[data-rate]").forEach((b) => b.addEventListener("click", () => {
+      ui.rate = +b.dataset.rate; yt?.setPlaybackRate?.(ui.rate); ctx.rerender();
+    }));
+    el.querySelector("#setA")?.addEventListener("click", () => { ui.a = yt?.getCurrentTime?.() ?? 0; ctx.rerender(); });
+    el.querySelector("#setB")?.addEventListener("click", () => {
+      const b = yt?.getCurrentTime?.() ?? 0;
+      if (ui.a == null || b <= ui.a) return alert(ts("shSetAFirst"));
+      ui.b = b; ctx.rerender();
+    });
+    el.querySelector("#clrAB")?.addEventListener("click", () => { ui.a = ui.b = null; ctx.rerender(); });
+  }
+  function parseVideoId(u) {
+    if (!u) return null;
+    const m = String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/) || String(u).trim().match(/^([\w-]{11})$/);
+    return m ? m[1] : null;
+  }
+  function pushRecent(id, title) {
+    const p = P();
+    p.recent = [{ id, title }, ...p.recent.filter((r) => r.id !== id)].slice(0, 12);
+    save();
+  }
+
+  // ── 2. read-aloud ───────────────────────────────────────────────────
+  let readTimer = null;
+  function renderRead() {
+    const p = P();
+    if (!ui.text) {
+      const kinds = { column: "مقال رأي", poetry: "شعر", literary: "نثر أدبي", kuwaiti: "لهجة كويتية" };
+      return `${hdr("exRead")}
+        <div class="panel"><div class="note-info">${t("rdPick")}</div></div>
+        ${LIB_READ.map((r) => `<button class="src-row" data-text="${esc(r.id)}">
+            <div class="src-title">${esc(r.title)} <span class="tag">${esc(kinds[r.kind] || r.kind)}</span></div>
+            <div class="src-note">${esc(r.source)} · ${esc(r.level)} · ${r.text.split(/\s+/).length} ${ts("rdWords")}</div>
+          </button>`).join("")}`;
+    }
+    const words = ui.text.text.split(/(\s+)/);
+    let wi = -1;
+    const body = words.map((w) => {
+      if (/^\s+$/.test(w)) return w.includes("\n\n") ? "</p><p>" : w;
+      wi++;
+      const stumbled = ui.stumbled?.has(wi);
+      return `<span class="rw ${stumbled ? "stumble" : ""}" data-w="${wi}">${esc(w)}</span>`;
+    }).join("");
+    return `
+      ${hdr("exRead", true)}
+      <div class="panel">
+        <div class="h-row" style="margin:0">
+          <span class="clock" id="readClock">${fmtClock(ui.elapsed || 0)}</span>
+          <div class="v-actions" style="margin:0">
+            <button class="btn btn-sm ${ui.running ? "" : "btn-primary"}" id="readToggle">${ui.running ? t("rdPause") : t("rdStart")}</button>
+            <button class="btn btn-sm" id="readDone">${t("rdFinish")}</button>
+          </div>
+        </div>
+        <div class="microlabel" style="margin-top:0.5rem">${t("rdTapHint")} · ${ui.stumbled?.size || 0} ${ts("rdMarked")}</div>
+      </div>
+      <div class="panel reader"><p>${body}</p></div>`;
+  }
+  function wireRead(el) {
+    el.querySelectorAll("[data-text]").forEach((b) => b.addEventListener("click", () => {
+      ui.text = LIB_READ.find((r) => r.id === b.dataset.text);
+      ui.elapsed = 0; ui.stumbled = new Set(); ui.running = false;
+      ctx.rerender();
+    }));
+    el.querySelector("#readToggle")?.addEventListener("click", () => {
+      ui.running = !ui.running;
+      clearInterval(readTimer);
+      if (ui.running) readTimer = setInterval(() => {
+        ui.elapsed++; const c = document.getElementById("readClock"); if (c) c.textContent = fmtClock(ui.elapsed);
+      }, 1000);
+      ctx.rerender();
+    });
+    el.querySelector("#readDone")?.addEventListener("click", finishRead);
+    el.querySelectorAll(".rw").forEach((s) => s.addEventListener("click", () => {
+      const i = +s.dataset.w;
+      ui.stumbled.has(i) ? ui.stumbled.delete(i) : ui.stumbled.add(i);
+      s.classList.toggle("stumble");
+      const m = el.querySelector(".microlabel"); if (m) m.innerHTML = `${t("rdTapHint")} · ${ui.stumbled.size} ${ts("rdMarked")}`;
+    }));
+  }
+  function finishRead() {
+    clearInterval(readTimer); readTimer = null;
+    if (ui.elapsed > 20) logSession("read", ui.elapsed / 60);
+    // every stumble becomes a lexicon entry, carrying its neighbours so the
+    // phrase rule is satisfied by construction rather than by nagging
+    const toks = ui.text.text.split(/\s+/);
+    let added = 0;
+    for (const i of ui.stumbled || []) {
+      const phrase = toks.slice(Math.max(0, i - 1), i + 2).join(" ").replace(/[،.؟!]$/, "");
+      if (phrase.split(/\s+/).length < 2) continue;
+      P().lexicon.push({
+        id: "lx" + Date.now() + "_" + i, ar: phrase, gender: "", plural: "", en: "",
+        src: ui.text.title, domain: "abstract", needs: true, sm2: { ef: 2.5, n: 0, int: 0, due: Date.now() },
+      });
+      added++;
+    }
+    save();
+    alert(added ? ts("rdSaved").replace("{n}", added) : ts("rdNoMarks"));
+    ui = {}; ctx.rerender();
+  }
+
+  // ── 3. one-take monologue ───────────────────────────────────────────
+  let rec = null, recChunks = [], recTimer = null;
+  function renderMono() {
+    const p = P();
+    const ready = p.monologues.filter((m) => !m.rating && m.unlock <= Date.now());
+    const locked = p.monologues.filter((m) => !m.rating && m.unlock > Date.now());
+    if (ui.review) return renderMonoReview(ui.review);
+    if (ui.prompt) {
+      return `${hdr("exMono", true)}
+        <div class="panel">
+          <div class="microlabel">${esc(ui.prompt.domain)}</div>
+          <div class="mono-q">${esc(ui.prompt.q)}</div>
+          <div class="h-row"><span class="clock">${fmtClock(ui.elapsed || 0)}</span>
+            <span class="microlabel">${ui.recording ? t("mnRecording") : t("mnOneTake")}</span></div>
+          ${ui.recording
+            ? `<button class="btn btn-danger" id="mnStop" style="width:100%">${t("mnStop")}</button>`
+            : `<button class="btn btn-primary" id="mnStart" style="width:100%">${t("mnStart")}</button>`}
+          <div class="note-info" style="margin-top:0.6rem">${t("mnRule")}</div>
+        </div>`;
+    }
+    return `${hdr("exMono")}
+      ${ready.length ? `<div class="panel">
+        <div class="microlabel">${t("mnReady")} (${ready.length})</div>
+        ${ready.map((m) => `<button class="src-row" data-review="${esc(m.id)}">
+            <div class="src-title">${esc(m.q)}</div>
+            <div class="src-note">${new Date(m.at).toLocaleDateString(bilingual() ? "en-GB" : "ar-KW")}</div></button>`).join("")}
+      </div>` : ""}
+      ${locked.length ? `<div class="panel">
+        <div class="microlabel">${t("mnLocked")} (${locked.length})</div>
+        ${locked.map((m) => `<div class="src-row"><div class="src-title" style="opacity:.6">${esc(m.q)}</div>
+            <div class="src-note">🔒 ${ti("mnUnlocksIn", Math.ceil((m.unlock - Date.now()) / DAY))}</div></div>`).join("")}
+      </div>` : ""}
+      <div class="panel">
+        <div class="note-info">${t("mnIntro")}</div>
+        <button class="btn btn-primary" id="mnNew" style="width:100%; margin-top:0.7rem">${t("mnDraw")}</button>
+      </div>`;
+  }
+  function renderMonoReview(m) {
+    return `${hdr("exMono", true)}
+      <div class="panel">
+        <div class="mono-q">${esc(m.q)}</div>
+        <div class="microlabel">${new Date(m.at).toLocaleDateString(bilingual() ? "en-GB" : "ar-KW")}</div>
+        <audio id="mnAudio" controls style="width:100%; margin-top:0.8rem"></audio>
+        <div class="microlabel" style="margin-top:0.9rem">${t("mnRate")}</div>
+        <div class="grade-row">${[1, 2, 3, 4, 5].map((n) => `<button class="btn" data-rate5="${n}">${n}</button>`).join("")}</div>
+        <label class="f" style="margin-top:0.7rem">${t("mnNotes")}<textarea id="mnNotes" rows="3"></textarea></label>
+        <button class="btn btn-primary" id="mnSaveReview" style="width:100%; margin-top:0.6rem">${t("mnSaveReview")}</button>
+      </div>`;
+  }
+  function wireMono(el) {
+    el.querySelector("#mnNew")?.addEventListener("click", () => {
+      const done = new Set(P().monologues.map((m) => m.promptId));
+      const pool = LIB_MONO.filter((q) => !done.has(q.id));
+      ui.prompt = (pool.length ? pool : LIB_MONO)[Math.floor(Math.random() * (pool.length || LIB_MONO.length))];
+      ui.elapsed = 0; ui.recording = false; ctx.rerender();
+    });
+    el.querySelector("#mnStart")?.addEventListener("click", startRec);
+    el.querySelector("#mnStop")?.addEventListener("click", stopRec);
+    el.querySelectorAll("[data-review]").forEach((b) => b.addEventListener("click", async () => {
+      ui.review = P().monologues.find((m) => m.id === b.dataset.review);
+      ui.rating = 0; ctx.rerender();
+      const blob = await AudioStore.get(ui.review.id).catch(() => null);
+      const a = document.getElementById("mnAudio");
+      if (a && blob) a.src = URL.createObjectURL(blob);
+      else if (a) { a.replaceWith(Object.assign(document.createElement("div"), { className: "note-info", textContent: ts("mnNoAudio") })); }
+    }));
+    el.querySelectorAll("[data-rate5]").forEach((b) => b.addEventListener("click", () => {
+      ui.rating = +b.dataset.rate5;
+      el.querySelectorAll("[data-rate5]").forEach((x) => x.classList.toggle("btn-primary", +x.dataset.rate5 === ui.rating));
+    }));
+    el.querySelector("#mnSaveReview")?.addEventListener("click", () => {
+      if (!ui.rating) return alert(ts("mnPickRating"));
+      const m = P().monologues.find((x) => x.id === ui.review.id);
+      m.rating = ui.rating; m.notes = document.getElementById("mnNotes").value.trim(); m.reviewedAt = Date.now();
+      save(); ui = {}; ctx.rerender();
+    });
+  }
+  async function startRec() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recChunks = [];
+      rec = new MediaRecorder(stream);
+      rec.ondataavailable = (e) => e.data.size && recChunks.push(e.data);
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(recChunks, { type: rec.mimeType || "audio/webm" });
+        const id = "mo" + Date.now();
+        await AudioStore.put(id, blob).catch(() => {});
+        P().monologues.push({
+          id, promptId: ui.prompt.id, q: ui.prompt.q, domain: ui.prompt.domain,
+          at: Date.now(), unlock: Date.now() + 7 * DAY, secs: ui.elapsed,
+        });
+        logSession("mono", (ui.elapsed || 0) / 60);
+        save();
+        clearInterval(recTimer); recTimer = null;
+        ui = {}; ctx.rerender();
+        alert(ts("mnSaved"));
+      };
+      rec.start();
+      ui.recording = true; ui.elapsed = 0;
+      recTimer = setInterval(() => { ui.elapsed++; const c = document.querySelector(".clock"); if (c) c.textContent = fmtClock(ui.elapsed); }, 1000);
+      ctx.rerender();
+    } catch { alert(ts("mnNoMic")); }
+  }
+  function stopRec() { try { rec?.stop(); } catch {} ui.recording = false; }
+
+  // ── 4. circumlocution ───────────────────────────────────────────────
+  let cirTimer = null;
+  function renderCircum() {
+    const p = P();
+    const rate = successRate(p.circum);
+    if (!ui.card) {
+      return `${hdr("exCircum")}
+        <div class="panel">
+          <div class="h-row" style="margin:0"><span class="microlabel">${t("crRate")}</span>
+            <span class="big-num">${rate === null ? "—" : rate + "٪"}</span></div>
+          <div class="microlabel">${ti("crRuns", p.circum.length)}</div>
+          <button class="btn btn-primary" id="crGo" style="width:100%; margin-top:0.9rem">${t("crStart")}</button>
+          <div class="note-info" style="margin-top:0.7rem">${t("crHow")}</div>
+        </div>`;
+    }
+    const left = ui.left ?? 45;
+    return `${hdr("exCircum", true)}
+      <div class="panel">
+        <div class="countdown ${left <= 10 ? "low" : ""}">${left}</div>
+        <div class="concept">${esc(ui.card.concept)}</div>
+        <div class="microlabel" style="margin-top:0.9rem">${t("crBanned")}</div>
+        <div class="chips banned">${ui.card.banned.map((w) => `<span class="chip no">${esc(w)}</span>`).join("")}</div>
+        ${ui.done
+          ? `<div class="microlabel" style="margin-top:1rem">${t("crSelfScore")}</div>
+             <div class="v-actions">
+               <button class="btn btn-primary" data-cr="1" style="flex:1">${t("crPass")}</button>
+               <button class="btn btn-danger" data-cr="0" style="flex:1">${t("crFail")}</button>
+             </div>`
+          : `<button class="btn" id="crStop" style="width:100%; margin-top:1rem">${t("crStop")}</button>`}
+      </div>`;
+  }
+  function wireCircum(el) {
+    el.querySelector("#crGo")?.addEventListener("click", () => {
+      ui.card = LIB_CIRCUM[Math.floor(Math.random() * LIB_CIRCUM.length)];
+      ui.left = 45; ui.done = false; ctx.rerender();
+      clearInterval(cirTimer);
+      cirTimer = setInterval(() => {
+        ui.left--;
+        const c = document.querySelector(".countdown");
+        if (c) { c.textContent = ui.left; c.classList.toggle("low", ui.left <= 10); }
+        if (ui.left <= 0) { clearInterval(cirTimer); ui.done = true; ctx.rerender(); }
+      }, 1000);
+    });
+    el.querySelector("#crStop")?.addEventListener("click", () => { clearInterval(cirTimer); ui.done = true; ctx.rerender(); });
+    el.querySelectorAll("[data-cr]").forEach((b) => b.addEventListener("click", () => {
+      P().circum.push({ d: todayKey(), id: ui.card.id, ok: b.dataset.cr === "1", sec: 45 - (ui.left || 0) });
+      logSession("circum", (45 - (ui.left || 0)) / 60);
+      save(); ui = {}; ctx.rerender();
+    }));
+  }
+  const successRate = (arr) => (arr.length ? Math.round((arr.filter((x) => x.ok).length / arr.length) * 100) : null);
+
+  // ── 5. lexicon ──────────────────────────────────────────────────────
+  const DOMAINS = [
+    { k: "creative", ar: "عمل إبداعي", en: "creative work" },
+    { k: "business", ar: "أعمال", en: "business" },
+    { k: "politics", ar: "سياسة", en: "politics" },
+    { k: "abstract", ar: "مجرد", en: "abstract" },
+    { k: "everyday", ar: "يومي", en: "everyday" },
+  ];
+  /** The phrase rule: never a bare noun. Two words, or a bound demonstrative. */
+  function phraseOk(s) {
+    const v = (s || "").trim();
+    if (!v) return false;
+    if (/^(هال|هذا |هذي |هذه |ذاك |ذيچ )/.test(v)) return true;
+    return v.split(/\s+/).filter(Boolean).length >= 2;
+  }
+  function renderLex() {
+    const p = P();
+    const due = p.lexicon.filter((e) => e.en && (e.sm2?.due || 0) <= Date.now());
+    const needs = p.lexicon.filter((e) => !e.en);
+    if (ui.lexReview) return renderLexReview();
+    return `${hdr("exLex")}
+      <div class="panel">
+        <div class="day-summary">
+          <div class="cell"><b>${p.lexicon.length}</b><span>${ti("lxTotal")}</span></div>
+          <div class="cell"><b>${due.length}</b><span>${ti("lxDue")}</span></div>
+          <div class="cell"><b>${needs.length}</b><span>${ti("lxIncomplete")}</span></div>
+        </div>
+        ${due.length ? `<button class="btn btn-primary" id="lxReview" style="width:100%; margin-top:0.9rem">${t("lxStartReview", due.length)}</button>` : ""}
+      </div>
+      <div class="panel form-grid">
+        <div class="microlabel">${t("lxAdd")}</div>
+        <label class="f">${t("lxPhrase")} <input id="lxAr" placeholder="مثال: القرار الصعب" /></label>
+        <div class="note-info" style="margin-top:-0.3rem">${t("lxPhraseRule")}</div>
+        <div style="display:flex; gap:0.6rem">
+          <label class="f" style="flex:1">${t("lxGender")}
+            <select id="lxGen"><option value="m">مذكر</option><option value="f">مؤنث</option></select></label>
+          <label class="f" style="flex:1">${t("lxPlural")} <input id="lxPl" placeholder="القرارات الصعبة" /></label>
+        </div>
+        <label class="f">${t("lxGloss")} <input id="lxEn" dir="ltr" placeholder="the hard decision" /></label>
+        <label class="f">${t("lxSource")} <input id="lxSrc" placeholder="وين سمعتها؟" /></label>
+        <label class="f">${t("lxDomain")}
+          <select id="lxDom">${DOMAINS.map((d) => `<option value="${d.k}">${d.ar}${bilingual() ? " · " + d.en : ""}</option>`).join("")}</select></label>
+        <button class="btn btn-primary" id="lxSave">${t("lxSaveBtn")}</button>
+      </div>
+      ${needs.length ? `<div class="panel">
+        <div class="microlabel">${t("lxNeedsWork")}</div>
+        ${needs.slice(0, 20).map((e) => `<div class="word-row"><div class="w-main">
+            <span class="w-ar">${esc(e.ar)}</span>
+            <div class="w-meta">${esc(e.src || "")} — ${ti("lxAddGloss")}</div></div>
+            <button class="btn btn-sm" data-lxfill="${esc(e.id)}">${t("lxComplete")}</button></div>`).join("")}
+      </div>` : ""}
+      <div class="panel" style="padding:0.3rem 1.1rem">
+        ${p.lexicon.filter((e) => e.en).slice(-40).reverse().map((e) => `<div class="word-row"><div class="w-main">
+            <span class="w-ar">${esc(e.ar)}</span>
+            <div class="w-meta">${esc(domLabel(e.domain))} · ${e.gender === "f" ? "مؤنث" : "مذكر"}${e.plural ? " · " + esc(e.plural) : ""}${e.src ? " · " + esc(e.src) : ""}</div>
+          </div><div class="w-en">${esc(e.en)}</div></div>`).join("") || `<div class="empty">${t("lxEmpty")}</div>`}
+      </div>`;
+  }
+  const domLabel = (k) => { const d = DOMAINS.find((x) => x.k === k); return d ? (bilingual() ? d.ar + " · " + d.en : d.ar) : k; };
+
+  function renderLexReview() {
+    const e = ui.lexReview;
+    return `${hdr("exLex", true)}
+      <div class="panel">
+        <div class="microlabel">${t("lxProduce")}</div>
+        <div class="q-en" style="margin:1.4rem 0; font-size:1.5rem">${esc(e.en)}</div>
+        ${ui.lexShown
+          ? `<div class="card-ar">${esc(e.ar)}</div>
+             <div class="microlabel" style="margin-top:0.5rem">${e.gender === "f" ? "مؤنث" : "مذكر"}${e.plural ? " · " + esc(e.plural) : ""}${e.src ? " · " + esc(e.src) : ""}</div>
+             <div class="microlabel" style="margin-top:1rem">${t("lxRate")}</div>
+             <div class="grade-row">${[1, 2, 3, 4, 5].map((n) => `<button class="btn" data-sm2="${n}">${n}</button>`).join("")}</div>`
+          : `<button class="btn btn-primary" id="lxShow" style="width:100%">${t("lxShow")}</button>
+             <div class="flip-hint">${t("lxSayFirst")}</div>`}
+      </div>`;
+  }
+  function wireLex(el) {
+    el.querySelector("#lxSave")?.addEventListener("click", () => {
+      const ar = document.getElementById("lxAr").value.trim();
+      if (!phraseOk(ar)) return alert(ts("lxRejectBare"));
+      const en = document.getElementById("lxEn").value.trim();
+      if (!en) return alert(ts("lxNeedGloss"));
+      const p = P();
+      if (ui.fillId) {
+        const e = p.lexicon.find((x) => x.id === ui.fillId);
+        Object.assign(e, { ar, en, gender: document.getElementById("lxGen").value,
+          plural: document.getElementById("lxPl").value.trim(), src: document.getElementById("lxSrc").value.trim(),
+          domain: document.getElementById("lxDom").value, needs: false });
+        ui.fillId = null;
+      } else {
+        p.lexicon.push({ id: "lx" + Date.now(), ar, en,
+          gender: document.getElementById("lxGen").value,
+          plural: document.getElementById("lxPl").value.trim(),
+          src: document.getElementById("lxSrc").value.trim(),
+          domain: document.getElementById("lxDom").value,
+          sm2: { ef: 2.5, n: 0, int: 0, due: Date.now() } });
+      }
+      save(); ctx.rerender();
+    });
+    el.querySelectorAll("[data-lxfill]").forEach((b) => b.addEventListener("click", () => {
+      const e = P().lexicon.find((x) => x.id === b.dataset.lxfill);
+      ui.fillId = e.id;
+      ctx.rerender();
+      setTimeout(() => {
+        document.getElementById("lxAr").value = e.ar;
+        document.getElementById("lxSrc").value = e.src || "";
+        document.getElementById("lxEn").focus();
+      }, 0);
+    }));
+    el.querySelector("#lxReview")?.addEventListener("click", () => {
+      const due = P().lexicon.filter((e) => e.en && (e.sm2?.due || 0) <= Date.now());
+      ui.lexReview = due[0]; ui.lexShown = false; ctx.rerender();
+    });
+    el.querySelector("#lxShow")?.addEventListener("click", () => { ui.lexShown = true; ctx.rerender(); });
+    el.querySelectorAll("[data-sm2]").forEach((b) => b.addEventListener("click", () => {
+      const e = P().lexicon.find((x) => x.id === ui.lexReview.id);
+      e.sm2 = sm2(e.sm2, +b.dataset.sm2);
+      save();
+      const due = P().lexicon.filter((x) => x.en && (x.sm2?.due || 0) <= Date.now());
+      ui.lexReview = due[0] || null; ui.lexShown = false;
+      ctx.rerender();
+    }));
+  }
+
+  // ── 6. message bank ─────────────────────────────────────────────────
+  function renderMsg() {
+    const p = P();
+    const rows = [...p.msgs].sort((a, b) => (a.last || 0) - (b.last || 0));
+    return `${hdr("exMsg")}
+      <div class="panel">
+        <div class="note-info">${t("mgIntro")}</div>
+        <div class="chips" style="margin-top:0.6rem">
+          ${LIB_MSG.filter((q) => !p.msgs.some((m) => m.q === q.q)).slice(0, 8)
+            .map((q) => `<button class="chip" data-mgadd="${esc(q.q)}">＋ ${esc(q.q)}</button>`).join("")}
+        </div>
+      </div>
+      ${ui.mgEdit !== undefined ? msgForm(ui.mgEdit) : `<button class="btn btn-primary" id="mgNew" style="width:100%">${t("mgAdd")}</button>`}
+      ${rows.map((m) => {
+        const days = m.last ? Math.floor((Date.now() - m.last) / DAY) : null;
+        const stale = days === null || days > 30;
+        return `<div class="panel">
+          <div class="src-title">${esc(m.q)}</div>
+          <div class="msg-answer">${esc(m.a || "")}</div>
+          <div class="h-row" style="margin:0.6rem 0 0">
+            <span class="microlabel ${stale ? "stale" : ""}">${m.reps || 0} ${ts("mgReps")} · ${days === null ? ts("mgNever") : ti("mgDaysAgo", days)}</span>
+            <div class="v-actions" style="margin:0">
+              <button class="btn btn-sm btn-primary" data-mgrehearse="${esc(m.id)}">${t("mgRehearsed")}</button>
+              <button class="btn btn-sm" data-mgedit="${esc(m.id)}">${t("mgEdit")}</button>
+            </div>
+          </div>
+        </div>`;
+      }).join("")}`;
+  }
+  function msgForm(m) {
+    return `<div class="panel form-grid">
+      <label class="f">${t("mgQ")} <input id="mgQ" value="${esc(m?.q || "")}" /></label>
+      <label class="f">${t("mgA")} <textarea id="mgA" rows="5">${esc(m?.a || "")}</textarea></label>
+      <div class="v-actions">
+        <button class="btn btn-primary" id="mgSave">${t("mgSave")}</button>
+        <button class="btn btn-ghost" id="mgCancel">${t("close")}</button>
+      </div>
+    </div>`;
+  }
+  function wireMsg(el) {
+    el.querySelector("#mgNew")?.addEventListener("click", () => { ui.mgEdit = null; ctx.rerender(); });
+    el.querySelectorAll("[data-mgadd]").forEach((b) => b.addEventListener("click", () => {
+      ui.mgEdit = { q: b.dataset.mgadd, a: "" }; ctx.rerender();
+    }));
+    el.querySelectorAll("[data-mgedit]").forEach((b) => b.addEventListener("click", () => {
+      ui.mgEdit = P().msgs.find((m) => m.id === b.dataset.mgedit); ctx.rerender();
+    }));
+    el.querySelector("#mgSave")?.addEventListener("click", () => {
+      const q = document.getElementById("mgQ").value.trim();
+      const a = document.getElementById("mgA").value.trim();
+      if (!q) return;
+      const p = P();
+      if (ui.mgEdit?.id) Object.assign(p.msgs.find((m) => m.id === ui.mgEdit.id), { q, a });
+      else p.msgs.push({ id: "mg" + Date.now(), q, a, reps: 0, last: null });
+      ui.mgEdit = undefined; save(); ctx.rerender();
+    });
+    el.querySelector("#mgCancel")?.addEventListener("click", () => { ui.mgEdit = undefined; ctx.rerender(); });
+    el.querySelectorAll("[data-mgrehearse]").forEach((b) => b.addEventListener("click", () => {
+      const m = P().msgs.find((x) => x.id === b.dataset.mgrehearse);
+      m.reps = (m.reps || 0) + 1; m.last = Date.now();
+      logSession("msg", 1); save(); ctx.rerender();
+    }));
+  }
+
+  // ── dashboard ───────────────────────────────────────────────────────
+  const EX_KEYS = [
+    { k: "shadow", labelKey: "exShadow" }, { k: "read", labelKey: "exRead" },
+    { k: "mono", labelKey: "exMono" }, { k: "circum", labelKey: "exCircum" },
+  ];
+  function renderDash() {
+    const p = P();
+    const since = Date.now() - 30 * DAY;
+    const recent = p.sessions.filter((s) => new Date(s.d).getTime() >= since);
+    const byType = {};
+    for (const s of recent) byType[s.type] = (byType[s.type] || 0) + s.min;
+    const maxMin = Math.max(1, ...Object.values(byType));
+    const totalMin = Math.round(Object.values(byType).reduce((a, b) => a + b, 0));
+
+    const byDomain = {};
+    for (const e of p.lexicon) byDomain[e.domain] = (byDomain[e.domain] || 0) + 1;
+    const maxDom = Math.max(1, ...Object.values(byDomain));
+
+    // circumlocution success in weekly buckets, oldest first
+    const weeks = [];
+    for (let w = 4; w >= 0; w--) {
+      const lo = Date.now() - (w + 1) * 7 * DAY, hi = Date.now() - w * 7 * DAY;
+      const runs = p.circum.filter((c) => { const t2 = new Date(c.d).getTime(); return t2 >= lo && t2 < hi; });
+      weeks.push({ n: runs.length, rate: runs.length ? Math.round((runs.filter((r) => r.ok).length / runs.length) * 100) : null });
+    }
+    const pending = p.monologues.filter((m) => !m.rating && m.unlock <= Date.now()).length;
+
+    return `
+      <div class="h-row"><h2>${t("dashTitle")}</h2></div>
+      <div class="stat-grid">
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${ctx.streak()}</b><div class="microlabel">${t("statStreak")}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${totalMin}</b><div class="microlabel">${t("dashMinutes")}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${p.lexicon.length}</b><div class="microlabel">${t("dashLexicon")}</div></div>
+        <div class="panel" style="margin:0"><b style="font-size:1.6rem">${pending}</b><div class="microlabel">${t("dashPending")}</div></div>
+      </div>
+
+      <div class="panel" style="margin-top:0.9rem">
+        <div class="microlabel">${t("dashByType")}</div>
+        ${totalMin ? EX_KEYS.map((e) => {
+          const v = Math.round(byType[e.k] || 0);
+          return `<div class="hbar-row">
+            <span class="hbar-label"><i style="background:${EX_COLORS[e.k]}"></i>${t(e.labelKey)}</span>
+            <span class="hbar-track"><span class="hbar-fill" style="width:${(v / maxMin) * 100}%; background:${EX_COLORS[e.k]}"></span></span>
+            <span class="hbar-val">${v}</span></div>`;
+        }).join("") : `<div class="empty">${t("dashNoData")}</div>`}
+      </div>
+
+      <div class="panel">
+        <div class="microlabel">${t("dashDomains")}</div>
+        ${p.lexicon.length ? DOMAINS.map((d) => {
+          const v = byDomain[d.k] || 0;
+          return `<div class="hbar-row">
+            <span class="hbar-label">${esc(bilingual() ? d.ar + " · " + d.en : d.ar)}</span>
+            <span class="hbar-track"><span class="hbar-fill" style="width:${(v / maxDom) * 100}%; background:var(--green)"></span></span>
+            <span class="hbar-val">${v}</span></div>`;
+        }).join("") : `<div class="empty">${t("dashNoLex")}</div>`}
+      </div>
+
+      <div class="panel">
+        <div class="microlabel">${t("dashCircum")}</div>
+        ${p.circum.length ? trendSvg(weeks) : `<div class="empty">${t("dashNoCircum")}</div>`}
+      </div>`;
+  }
+
+  /** Five weekly points, 2px line, 8px markers, direct label on the last. */
+  function trendSvg(weeks) {
+    const W = 300, H = 90, pad = 18;
+    const pts = weeks.map((w, i) => ({
+      x: pad + (i * (W - pad * 2)) / (weeks.length - 1),
+      y: w.rate === null ? null : H - pad - ((w.rate / 100) * (H - pad * 2)),
+      rate: w.rate, n: w.n,
+    }));
+    const line = pts.filter((p2) => p2.y !== null);
+    const d = line.map((p2, i) => `${i ? "L" : "M"}${p2.x.toFixed(1)},${p2.y.toFixed(1)}`).join(" ");
+    const last = line[line.length - 1];
+    return `<svg viewBox="0 0 ${W} ${H}" class="trend" role="img"
+        aria-label="${esc(ts("dashCircum"))}: ${weeks.map((w) => (w.rate === null ? "—" : w.rate + "%")).join(", ")}">
+      ${[0, 50, 100].map((g) => { const y = H - pad - (g / 100) * (H - pad * 2);
+        return `<line x1="${pad}" x2="${W - pad}" y1="${y}" y2="${y}" stroke="rgb(233 237 243 / 0.10)" stroke-width="1"/>
+                <text x="${pad - 4}" y="${y + 3}" text-anchor="end" font-size="8" fill="rgb(233 237 243 / 0.4)">${g}</text>`; }).join("")}
+      ${line.length > 1 ? `<path d="${d}" fill="none" stroke="${EX_COLORS.circum}" stroke-width="2" stroke-linejoin="round"/>` : ""}
+      ${line.map((p2) => `<circle cx="${p2.x.toFixed(1)}" cy="${p2.y.toFixed(1)}" r="4"
+          fill="${EX_COLORS.circum}" stroke="var(--bg-card)" stroke-width="2"><title>${p2.rate}٪ · ${p2.n}</title></circle>`).join("")}
+      ${last ? `<text x="${last.x}" y="${last.y - 9}" text-anchor="middle" font-size="10" fill="rgb(233 237 243 / 0.64)">${last.rate}٪</text>` : ""}
+    </svg>
+    <div class="microlabel" style="text-align:center">${t("dashWeeks")}</div>`;
+  }
+
+  // ── hub & dispatch ──────────────────────────────────────────────────
+  const MODES = [
+    { k: "shadow", labelKey: "exShadow", descKey: "exShadowD", icon: "▶" },
+    { k: "read", labelKey: "exRead", descKey: "exReadD", icon: "❡" },
+    { k: "mono", labelKey: "exMono", descKey: "exMonoD", icon: "●" },
+    { k: "circum", labelKey: "exCircum", descKey: "exCircumD", icon: "⟳" },
+    { k: "lex", labelKey: "exLex", descKey: "exLexD", icon: "▤" },
+    { k: "msg", labelKey: "exMsg", descKey: "exMsgD", icon: "✉" },
+  ];
+  const hdr = (key, back) => `<div class="h-row">
+      ${back ? `<button class="btn btn-ghost btn-sm" id="pBack">◂</button>` : ""}
+      <h2 style="flex:1">${t(key)}</h2></div>`;
+
+  const RENDER = { shadow: renderShadow, read: renderRead, mono: renderMono, circum: renderCircum, lex: renderLex, msg: renderMsg };
+  const WIRE = { shadow: wireShadow, read: wireRead, mono: wireMono, circum: wireCircum, lex: wireLex, msg: wireMsg };
+
+  function render() {
+    if (!mode) {
+      const p = P();
+      const due = p.lexicon.filter((e) => e.en && (e.sm2?.due || 0) <= Date.now()).length;
+      const pending = p.monologues.filter((m) => !m.rating && m.unlock <= Date.now()).length;
+      const badge = { lex: due, mono: pending };
+      return `<div class="h-row"><h2>${t("tabPractice")}</h2></div>
+        <div class="mode-grid">
+          ${MODES.map((m) => `<button class="mode-card" data-pmode="${m.k}">
+              <span class="mode-ico">${m.icon}</span>
+              <span class="mode-name">${t(m.labelKey)}</span>
+              <span class="mode-best">${t(m.descKey)}</span>
+              ${badge[m.k] ? `<span class="pill-inline">${badge[m.k]}</span>` : ""}
+            </button>`).join("")}
+        </div>`;
+    }
+    return RENDER[mode]();
+  }
+
+  function wire(el) {
+    el.querySelectorAll("[data-pmode]").forEach((b) => b.addEventListener("click", () => {
+      mode = b.dataset.pmode; ui = {}; ctx.rerender();
+    }));
+    el.querySelector("#pBack")?.addEventListener("click", () => {
+      if (mode === "shadow" && ui.videoId) teardownShadow();
+      if (mode === "read" && ui.text) { clearInterval(readTimer); readTimer = null; }
+      if (mode === "mono" && ui.recording) return alert(ts("mnCannotLeave"));
+      clearInterval(cirTimer);
+      if (Object.keys(ui).length) ui = {}; else mode = null;
+      ctx.rerender();
+    });
+    WIRE[mode]?.(el);
+  }
+
+  return { render, wire, renderDash, P, sm2, phraseOk, DOMAINS, successRate,
+    leave: () => { if (mode === "shadow") teardownShadow(); clearInterval(readTimer); clearInterval(cirTimer); mode = null; ui = {}; } };
 }
 </script>
 <script>
@@ -2641,6 +3971,7 @@ function createSync(ctx) {
   function dayActive(k) {
     return (store.log[k]?.reviews || 0) > 0
       || (store.game?.xpLog?.[k] || 0) > 0
+      || (store.practice?.sessions || []).some((x) => x.d === k)
       || (store.game?.frozen || []).includes(k);
   }
   function streak() {
@@ -2738,7 +4069,8 @@ function createSync(ctx) {
     document.getElementById("streakCount").textContent = streak();
     const pending = SEED_VERIFY.filter((v) => !store.verify[v.id]).length;
     document.getElementById("verifyPill").textContent = pending || "";
-    ({ today: renderToday, arena: renderArena, words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
+    ({ today: renderToday, arena: renderArena, practice: renderPractice,
+       words: renderWords, verify: renderVerify, packs: renderPacks, stats: renderStats }[view])();
   }
 
   // ── today ──
@@ -2868,6 +4200,12 @@ function createSync(ctx) {
     }
   });
 
+  // ── practice ──
+  function renderPractice() {
+    stage.innerHTML = practice.render();
+    practice.wire(stage);
+  }
+
   // ── auth gate ──
   function renderAuth() {
     document.body.classList.add("auth-mode");
@@ -2946,6 +4284,7 @@ function createSync(ctx) {
 
     stage.innerHTML = `
       <div class="h-row"><h2>${t("wordsTitle", words.length)}</h2>
+        <button class="btn btn-sm" id="goPacks">${t("tabPacks")}</button>
         <button class="btn btn-sm ${showAddForm ? "" : "btn-primary"}" id="addToggle">${showAddForm ? t("close") : t("addNew")}</button></div>
       ${showAddForm ? addFormHTML() : ""}
       <div class="toolbar">
@@ -2991,6 +4330,7 @@ function createSync(ctx) {
           </div>` : ""}
       </div>`;
 
+    document.getElementById("goPacks")?.addEventListener("click", () => { view = "packs"; render(); });
     document.getElementById("addToggle").addEventListener("click", () => { showAddForm = !showAddForm; render(); });
     document.getElementById("q").addEventListener("input", (e) => { wordsFilter.q = e.target.value; render(); document.getElementById("q").focus(); const el = document.getElementById("q"); el.setSelectionRange(el.value.length, el.value.length); });
     document.getElementById("fReg").addEventListener("change", (e) => { wordsFilter.reg = e.target.value; render(); });
@@ -3273,7 +4613,7 @@ function createSync(ctx) {
     }
     const max = Math.max(1, ...days.map((x) => x.n));
 
-    stage.innerHTML = `
+    stage.innerHTML = practice.renderDash() + `
       <div class="h-row"><h2>${t("statsTitle")}</h2></div>
       <div class="stat-grid">
         <div class="panel" style="margin:0"><b style="font-size:1.6rem">${active.length}</b><div class="microlabel">${t("statActive", words.length)}</div></div>
@@ -3308,6 +4648,11 @@ function createSync(ctx) {
     allWords, isStudyable,
     rerender: () => render(),
   });
+  const practice = createPractice({
+    store: () => store,
+    todayKey, streak, save, esc, t, ti, ts, S, bilingual,
+    rerender: () => render(),
+  });
   const sync = createSync({
     revision: () => store.revision,
     exportState: () => JSON.parse(JSON.stringify(store)),
@@ -3323,7 +4668,12 @@ function createSync(ctx) {
   sync.probe().then((ok) => { netOK = ok; if (view === "words") render(); });
 
   document.querySelectorAll(".tab").forEach((el) =>
-    el.addEventListener("click", () => { view = el.dataset.view; session = null; render(); }));
+    el.addEventListener("click", () => {
+      // tapping التدريب while inside an exercise returns to its hub, and
+      // leaving the tab entirely stops its timers and logs the session
+      if (view === "practice") practice.leave();
+      view = el.dataset.view; session = null; render();
+    }));
   document.querySelectorAll("[data-lang]").forEach((b) =>
     b.addEventListener("click", () => { store.settings.lang = b.dataset.lang; save(); render(); }));
   render();
@@ -3333,19 +4683,16 @@ function createSync(ctx) {
 })();
 </script>
 <script>
-  // The app is served as a single file, so the manifest and icon are built
-  // at runtime as blobs rather than fetched as separate assets.
   (() => {
     const icon = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#0d1117"/><rect x="72" y="128" width="368" height="72" rx="24" fill="#2fbf71"/><rect x="72" y="228" width="368" height="72" rx="24" fill="#e9edf3"/><rect x="72" y="328" width="240" height="72" rx="24" fill="#e5545e"/><circle cx="392" cy="364" r="36" fill="#e3b45c"/></svg>')));
-    const manifest = {"name": "خوش كلام — تدريب اللهجة الكويتية", "short_name": "خوش كلام", "lang": "ar", "dir": "rtl", "start_url": ".", "display": "standalone", "background_color": "#0d1117", "theme_color": "#0d1117", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}]};
-    manifest.icons = [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }];
-    manifest.start_url = location.pathname;
-    const link = document.getElementById('manifestLink');
-    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
-    const fav = document.createElement('link');
-    fav.rel = 'icon'; fav.type = 'image/svg+xml'; fav.href = icon;
-    document.head.appendChild(fav);
+    const m = {"name": "خوش كلام — تدريب اللهجة الكويتية", "short_name": "خوش كلام", "lang": "ar", "dir": "rtl", "display": "standalone", "background_color": "#0d1117", "theme_color": "#0d1117"};
+    m.icons = [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }];
+    m.start_url = location.pathname;
+    document.getElementById('manifestLink').href =
+      URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+    const f = document.createElement('link'); f.rel = 'icon'; f.type = 'image/svg+xml'; f.href = icon;
+    document.head.appendChild(f);
   })();
 </script>
 </body>
