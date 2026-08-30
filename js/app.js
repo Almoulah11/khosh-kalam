@@ -453,7 +453,21 @@
           <div class="auth-brand">خوش كلام</div>
           <div class="auth-sub">${t("brandSub")}</div>
           <div class="note-info" style="margin:1rem 0 1.2rem">${t("authIntro")}</div>
-          ${authStep === "email"
+          <div class="authways" role="group">
+            <button type="button" data-way="pw" class="${authWay === "pw" ? "on" : ""}">${ti("wayPw")}</button>
+            <button type="button" data-way="code" class="${authWay === "code" ? "on" : ""}">${ti("wayCode")}</button>
+          </div>
+          ${authWay === "pw"
+            ? `<label class="f">${t("emailLabel")}
+                 <input type="email" id="authEmail" dir="ltr" autocomplete="email" inputmode="email"
+                        value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+               <label class="f">${t("pwLabel")}
+                 <input type="password" id="authPw" dir="ltr"
+                        autocomplete="${pwMode === "up" ? "new-password" : "current-password"}" /></label>
+               <button class="btn btn-primary" id="pwBtn" style="width:100%; margin-top:0.8rem">${t(pwMode === "up" ? "pwSignUp" : "pwSignIn")}</button>
+               <button class="btn btn-ghost btn-sm" id="pwSwapBtn" style="width:100%; margin-top:0.4rem">${t(pwMode === "up" ? "pwToSignIn" : "pwToSignUp")}</button>
+               <div class="note-info" style="margin-top:0.8rem">${t("pwHint")}</div>`
+            : authStep === "email"
             ? `<label class="f">${t("emailLabel")}
                  <input type="email" id="authEmail" dir="ltr" autocomplete="email" inputmode="email"
                         value="${esc(authEmail)}" placeholder="you@example.com" /></label>
@@ -490,8 +504,39 @@
         render();
       } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     };
+    /* The password door: one submit path for both signing in and signing up,
+       so Enter behaves the same either way. */
+    const pwGo = async () => {
+      authEmail = (document.getElementById("authEmail")?.value || authEmail).trim();
+      const pw = document.getElementById("authPw")?.value || "";
+      if (!authEmail || !pw) return;
+      if (pwMode === "up" && pw.length < 8) { syncMsg = ts("pwShort"); render(); return; }
+      syncMsg = ts("syncing"); render();
+      try {
+        await (pwMode === "up" ? sync.signUp(authEmail, pw) : sync.signIn(authEmail, pw));
+        syncMsg = null;
+        startSync();
+        render();
+      } catch (e) {
+        // "already registered" is a wrong-door error, so flip the door for them
+        if (e?.key === "pwExists") pwMode = "in";
+        syncMsg = authMsg(e, "pwBad");
+        render();
+      }
+    };
+    document.getElementById("pwBtn")?.addEventListener("click", pwGo);
+    document.getElementById("authPw")?.addEventListener("keydown", (e) => { if (e.key === "Enter") pwGo(); });
+    document.getElementById("pwSwapBtn")?.addEventListener("click", () => {
+      pwMode = pwMode === "up" ? "in" : "up"; syncMsg = null; render();
+    });
+    stage.querySelectorAll(".authways button").forEach((b) =>
+      b.addEventListener("click", () => { authWay = b.dataset.way; authStep = "email"; syncMsg = null; render(); }));
+
     document.getElementById("sendCodeBtn")?.addEventListener("click", send);
-    document.getElementById("authEmail")?.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+    document.getElementById("authEmail")?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      authWay === "pw" ? document.getElementById("authPw")?.focus() : send();
+    });
     document.getElementById("verifyBtn")?.addEventListener("click", verify);
     const codeEl = document.getElementById("authCode");
     codeEl?.focus();
@@ -690,6 +735,8 @@
 
   // ── account & sync ────────────────────────────────────────────────────
   let authStep = "email"; // email | code
+  let authWay = "pw";     // pw | code — which door the gate is showing
+  let pwMode = "in";      // in | up
   let authEmail = "";
   let syncMsg = null;
   let netOK = null; // null = unknown, false = blocked (no network reachable)
@@ -713,9 +760,26 @@
                <div class="v-actions">
                  <button class="btn btn-sm btn-primary" id="syncBtn">${t("syncNow")}</button>
                  <button class="btn btn-sm btn-ghost" id="signOutBtn">${t("signOut")}</button>
-               </div>`
+               </div>
+               <label class="f" style="margin-top:0.9rem">${t("pwNew")}
+                 <input type="password" id="newPw" dir="ltr" autocomplete="new-password" /></label>
+               <div class="v-actions"><button class="btn btn-sm btn-ghost" id="setPwBtn">${t("pwChange")}</button></div>`
             : `<div class="note-info" style="margin:0.4rem 0 0.6rem">${t("accountNote")}</div>
-               ${authStep === "email"
+               <div class="authways" role="group">
+                 <button type="button" data-way="pw" class="${authWay === "pw" ? "on" : ""}">${ti("wayPw")}</button>
+                 <button type="button" data-way="code" class="${authWay === "code" ? "on" : ""}">${ti("wayCode")}</button>
+               </div>
+               ${authWay === "pw"
+                 ? `<label class="f">${t("emailLabel")}
+                      <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+                    <label class="f">${t("pwLabel")}
+                      <input type="password" id="authPw" dir="ltr"
+                             autocomplete="${pwMode === "up" ? "new-password" : "current-password"}" /></label>
+                    <div class="v-actions">
+                      <button class="btn btn-sm btn-primary" id="pwBtn">${t(pwMode === "up" ? "pwSignUp" : "pwSignIn")}</button>
+                      <button class="btn btn-sm btn-ghost" id="pwSwapBtn">${t(pwMode === "up" ? "pwToSignIn" : "pwToSignUp")}</button>
+                    </div>`
+                 : authStep === "email"
                  ? `<label class="f">${t("emailLabel")}
                       <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
                     <div class="v-actions"><button class="btn btn-sm btn-primary" id="sendCodeBtn">${t("sendCode")}</button></div>`
@@ -748,6 +812,32 @@
         await doSync();
       } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     });
+    document.getElementById("pwBtn")?.addEventListener("click", async () => {
+      authEmail = (document.getElementById("authEmail")?.value || "").trim();
+      const pw = document.getElementById("authPw")?.value || "";
+      if (!authEmail || !pw) return;
+      if (pwMode === "up" && pw.length < 8) return setMsg("pwShort");
+      syncMsg = ts("syncing"); render();
+      try {
+        await (pwMode === "up" ? sync.signUp(authEmail, pw) : sync.signIn(authEmail, pw));
+        await doSync();
+      } catch (e) {
+        if (e?.key === "pwExists") pwMode = "in";
+        syncMsg = authMsg(e, "pwBad"); render();
+      }
+    });
+    document.getElementById("pwSwapBtn")?.addEventListener("click", () => {
+      pwMode = pwMode === "up" ? "in" : "up"; syncMsg = null; render();
+    });
+    document.getElementById("setPwBtn")?.addEventListener("click", async () => {
+      const pw = document.getElementById("newPw")?.value || "";
+      if (pw.length < 8) return setMsg("pwShort");
+      syncMsg = ts("syncing"); render();
+      try { await sync.setPassword(pw); setMsg("pwChanged"); }
+      catch (e) { syncMsg = authMsg(e); render(); }
+    });
+    document.querySelectorAll(".authways button").forEach((b) =>
+      b.addEventListener("click", () => { authWay = b.dataset.way; authStep = "email"; syncMsg = null; render(); }));
     document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
     document.getElementById("syncBtn")?.addEventListener("click", doSync);
     document.getElementById("signOutBtn")?.addEventListener("click", () => {

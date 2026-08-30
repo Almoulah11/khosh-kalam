@@ -3,8 +3,11 @@
  *
  * The whole app state is one JSON document per user in Supabase (kk_state),
  * protected by row-level security so a token can only ever reach its own row.
- * Auth is an emailed 6-digit code: no password to manage, no redirect to
- * handle inside a PWA.
+ * Auth has two doors, both landing on the same account:
+ *   1. an emailed 6-digit code — nothing to remember, but it depends on the
+ *      project's mail being able to actually send
+ *   2. an email + password — no mail round-trip at all, which is what you
+ *      want when SMTP is down, rate-limited, or not set up yet
  *
  * IMPORTANT — where this works:
  *   ✅ a real host (GitHub Pages, Netlify, Vercel, localhost)
@@ -34,7 +37,14 @@ function createSync(ctx) {
   const api = (path, opts = {}) =>
     fetch(SUPA.url + path, {
       ...opts,
-      headers: { apikey: SUPA.key, "Content-Type": "application/json", ...(opts.headers || {}) },
+      // Both headers, as the official client sends them. An authed call
+      // passes its own Authorization through opts and wins the spread.
+      headers: {
+        apikey: SUPA.key,
+        Authorization: `Bearer ${SUPA.key}`,
+        "Content-Type": "application/json",
+        ...(opts.headers || {}),
+      },
     });
 
   const authed = (path, opts = {}) =>
@@ -63,9 +73,14 @@ function createSync(ctx) {
     const err = new Error(msg || `HTTP ${r.status}`);
     err.status = r.status;
     err.serverMsg = msg;
+    const code = j.error_code || j.code || "";
     err.key =
       r.status === 429 || /rate limit|too many/i.test(msg) ? "syncRate"
       : r.status >= 500 || /deadline exceeded|smtp|sending (the )?email|error sending/i.test(msg) ? "syncMail"
+      : /invalid_credentials|invalid login credentials/i.test(code + msg) ? "pwBad"
+      : /email_not_confirmed|email not confirmed/i.test(code + msg) ? "pwUnconfirmed"
+      : /user_already_exists|already registered/i.test(code + msg) ? "pwExists"
+      : /weak_password|password should be|at least \d+ characters/i.test(code + msg) ? "pwShort"
       : fallback;
     return err;
   }
@@ -96,6 +111,60 @@ function createSync(ctx) {
     if (!j.access_token) throw Object.assign(new Error("bad code"), { key: "codeBad" });
     saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
     return session;
+  }
+
+  /*
+   * The password door. It touches the mail server only once — on the very
+   * first signUp, and only if the project still has "confirm email" on — so
+   * it keeps working when the code route can't.
+   */
+  async function signIn(email, password) {
+    let r;
+    try {
+      r = await api("/auth/v1/token?grant_type=password", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "pwBad");
+    const j = await r.json().catch(() => ({}));
+    if (!j.access_token) throw Object.assign(new Error("no token"), { key: "pwBad" });
+    saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
+    return session;
+  }
+
+  /**
+   * Create the account, then sign straight in. A project with email
+   * confirmation still on returns a user with no session — that's the one
+   * case where a new account has to wait on an email, and the caller is told
+   * so by key rather than left staring at a dead screen.
+   */
+  async function signUp(email, password) {
+    let r;
+    try {
+      r = await api("/auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password }) });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "syncFail");
+    const j = await r.json().catch(() => ({}));
+    if (j.access_token) {
+      saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
+      return session;
+    }
+    // No session back: the row exists but is unconfirmed.
+    throw Object.assign(new Error("confirm required"), { key: "pwUnconfirmed" });
+  }
+
+  /** Change the signed-in account's password. */
+  async function setPassword(password) {
+    // Without this, authed() dereferences a null session and the failure
+    // surfaces as "check your connection" — the wrong thing to tell someone.
+    if (!session) throw Object.assign(new Error("signed out"), { key: "syncFail" });
+    let r;
+    try {
+      r = await authed("/auth/v1/user", { method: "PUT", body: JSON.stringify({ password }) });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "syncFail");
+    return true;
   }
 
   async function refresh() {
@@ -340,7 +409,7 @@ function createSync(ctx) {
 
   return {
     probe, adoptLinkSession,
-    sendCode, verifyCode, syncNow, mergeState,
+    sendCode, verifyCode, signIn, signUp, setPassword, syncNow, mergeState,
     start, markDirty, flush: () => run("manual"),
     signOut: () => { saveSession(null); dirty = false; },
     session: () => session,

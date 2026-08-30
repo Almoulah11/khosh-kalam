@@ -30,10 +30,33 @@ Point either at this repository with **no build command** and an output
 directory containing `index.html`. Both have free tiers that work with
 private repositories.
 
-## After deploying — one required Supabase step
+## After deploying — signing in
 
-The sign-in code is emailed by Supabase, and the default email template
-sends a *link* rather than the 6-digit code the app asks for. Fix it once:
+The app has two doors to the same account, and they need different things
+from Supabase.
+
+### The password door (needs no email at all)
+
+This is the default, and the one to use if mail isn't set up. **Create
+account**, then sign in with the same email and password on every device.
+
+One dashboard setting decides whether it works out of the box:
+**Authentication → Sign In / Providers → Email → Confirm email**.
+
+- **Off** — signing up returns a session immediately. Nothing is emailed,
+  nothing can rate-limit, and the account is usable the moment it's made.
+  For a single-user personal app this is the right setting.
+- **On** (the default) — signing up still tries to email a confirmation, so
+  it fails exactly the way the code route does. The app says so rather than
+  hanging. Either turn it off, or confirm the row once from the dashboard
+  (**Authentication → Users →** the user **→ Confirm email**).
+
+Password changes live in the app: **الكلمات → الحساب → كلمة سر جديدة**.
+
+### The emailed-code door (needs working mail)
+
+The default email template sends a *link* rather than the 6-digit code the
+app asks for. Fix it once:
 
 **Dashboard → Authentication → Emails → Magic Link**, and make the body:
 
@@ -48,7 +71,7 @@ The app also accepts the emailed link as a fallback, but for that to work
 you must add your deployed URL under **Authentication → URL Configuration →
 Redirect URLs**. The code is the simpler path.
 
-### The second required step: your own SMTP
+### Why the code door needs your own SMTP
 
 Supabase's built-in mail service is a *testing* facility, not a mail
 provider. It is shared, slow, capped at a couple of messages an hour, and

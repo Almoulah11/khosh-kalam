@@ -298,6 +298,25 @@ body.auth-mode .topbar { visibility: hidden; }
 .auth-card .f { text-align: start; }
 .auth-msg { margin-top: 0.9rem; font-size: 0.85rem; color: var(--gold); line-height: 1.7; white-space: pre-line; }
 .sync-msg { white-space: pre-line; color: var(--gold); }
+/* which door: password or emailed code. Same shape as the language toggle. */
+.authways {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 99px;
+  padding: 0.2rem;
+}
+.authways button {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.authways button.on { background: rgb(47 191 113 / 0.16); color: var(--green); }
+.authways button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .code-input {
   text-align: center; font-size: 1.6rem; letter-spacing: 0.45em;
   font-variant-numeric: tabular-nums; padding-inline-start: 0.45em;

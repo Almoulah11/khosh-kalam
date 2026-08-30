@@ -270,6 +270,31 @@ const UI = {
     ar: "ما وصلنا للخادم — تأكد من الإنترنت وجرب مرة ثانية.",
     en: "Couldn't reach the server — check your connection and try again.",
   },
+  // ── the password door ──
+  wayCode: { ar: "رمز على الإيميل", en: "Emailed code" },
+  wayPw: { ar: "كلمة سر", en: "Password" },
+  pwLabel: { ar: "كلمة السر", en: "Password" },
+  pwSignIn: { ar: "دخول", en: "Sign in" },
+  pwSignUp: { ar: "سجّل حساب", en: "Create account" },
+  pwToSignIn: { ar: "عندي حساب — دخول", en: "I have an account — sign in" },
+  pwToSignUp: { ar: "أول مرة؟ سجّل حساب", en: "First time? Create an account" },
+  pwHint: {
+    ar: "كلمة السر ما تحتاج إيميل كل مرة — أفضل باب إذا الإرسال متعطل.",
+    en: "A password needs no email round-trip — the better door when mail is down.",
+  },
+  pwBad: { ar: "الإيميل أو كلمة السر مو صحيحة", en: "That email or password isn't right" },
+  pwShort: { ar: "كلمة السر قصيرة — ٨ حروف على الأقل", en: "Password too short — use at least 8 characters" },
+  pwExists: {
+    ar: "الحساب موجود من قبل — استخدم «دخول» بدال التسجيل.",
+    en: "That account already exists — use Sign in instead of Create.",
+  },
+  pwUnconfirmed: {
+    ar: "انحفظ الحساب بس ينتظر تأكيد بالإيميل — نفس مشكلة الإرسال. لازم يتأكد مرة وحدة من لوحة Supabase، وبعدها كلمة السر تشتغل عدل.",
+    en: "The account was created but is waiting on an email confirmation — the same mail problem. It needs confirming once from the Supabase dashboard; after that the password works normally.",
+  },
+  pwChange: { ar: "غيّر كلمة السر", en: "Change password" },
+  pwNew: { ar: "كلمة سر جديدة", en: "New password" },
+  pwChanged: { ar: "تغيرت كلمة السر ✅", en: "Password changed ✅" },
   syncBlocked: {
     ar: "ما نقدر نوصل للخادم من هني. إذا كنت فاتح الملف مباشرة من جهازك أو من عارض ما يسمح بالاتصال، المزامنة ما تشتغل — استضف التطبيق على أي استضافة ثابتة وبتشتغل. النسخة الاحتياطية بالنص تشتغل بأي حال.",
     en: "The server isn't reachable from here. If you opened the file directly, or from a viewer that blocks network calls, sync stays off — host the app anywhere static and it works. Text backup works either way.",
@@ -277,8 +302,8 @@ const UI = {
   arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 
   authIntro: {
-    ar: "سجل دخولك بإيميلك — بنرسل لك رمز من ٦ أرقام. تقدمك ونقاطك ينحفظون ويمشون وياك على أي جهاز.",
-    en: "Sign in with your email — we'll send a 6-digit code. Your progress and XP save automatically and follow you to any device.",
+    ar: "سجل دخولك بإيميلك — بكلمة سر أو برمز ٦ أرقام يوصلك بالإيميل. تقدمك ونقاطك ينحفظون ويمشون وياك على أي جهاز.",
+    en: "Sign in with your email — by password, or by a 6-digit code we email you. Your progress and XP save automatically and follow you to any device.",
   },
   useLocalOnly: { ar: "استخدمه بدون حساب (هالجهاز بس)", en: "Use without an account (this device only)" },
   changeEmail: { ar: "غيّر الإيميل", en: "Change email" },

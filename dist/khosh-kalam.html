@@ -303,6 +303,25 @@ body.auth-mode .topbar { visibility: hidden; }
 .auth-card .f { text-align: start; }
 .auth-msg { margin-top: 0.9rem; font-size: 0.85rem; color: var(--gold); line-height: 1.7; white-space: pre-line; }
 .sync-msg { white-space: pre-line; color: var(--gold); }
+/* which door: password or emailed code. Same shape as the language toggle. */
+.authways {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 99px;
+  padding: 0.2rem;
+}
+.authways button {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.authways button.on { background: rgb(47 191 113 / 0.16); color: var(--green); }
+.authways button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 .code-input {
   text-align: center; font-size: 1.6rem; letter-spacing: 0.45em;
   font-variant-numeric: tabular-nums; padding-inline-start: 0.45em;
@@ -796,6 +815,31 @@ const UI = {
     ar: "ما وصلنا للخادم — تأكد من الإنترنت وجرب مرة ثانية.",
     en: "Couldn't reach the server — check your connection and try again.",
   },
+  // ── the password door ──
+  wayCode: { ar: "رمز على الإيميل", en: "Emailed code" },
+  wayPw: { ar: "كلمة سر", en: "Password" },
+  pwLabel: { ar: "كلمة السر", en: "Password" },
+  pwSignIn: { ar: "دخول", en: "Sign in" },
+  pwSignUp: { ar: "سجّل حساب", en: "Create account" },
+  pwToSignIn: { ar: "عندي حساب — دخول", en: "I have an account — sign in" },
+  pwToSignUp: { ar: "أول مرة؟ سجّل حساب", en: "First time? Create an account" },
+  pwHint: {
+    ar: "كلمة السر ما تحتاج إيميل كل مرة — أفضل باب إذا الإرسال متعطل.",
+    en: "A password needs no email round-trip — the better door when mail is down.",
+  },
+  pwBad: { ar: "الإيميل أو كلمة السر مو صحيحة", en: "That email or password isn't right" },
+  pwShort: { ar: "كلمة السر قصيرة — ٨ حروف على الأقل", en: "Password too short — use at least 8 characters" },
+  pwExists: {
+    ar: "الحساب موجود من قبل — استخدم «دخول» بدال التسجيل.",
+    en: "That account already exists — use Sign in instead of Create.",
+  },
+  pwUnconfirmed: {
+    ar: "انحفظ الحساب بس ينتظر تأكيد بالإيميل — نفس مشكلة الإرسال. لازم يتأكد مرة وحدة من لوحة Supabase، وبعدها كلمة السر تشتغل عدل.",
+    en: "The account was created but is waiting on an email confirmation — the same mail problem. It needs confirming once from the Supabase dashboard; after that the password works normally.",
+  },
+  pwChange: { ar: "غيّر كلمة السر", en: "Change password" },
+  pwNew: { ar: "كلمة سر جديدة", en: "New password" },
+  pwChanged: { ar: "تغيرت كلمة السر ✅", en: "Password changed ✅" },
   syncBlocked: {
     ar: "ما نقدر نوصل للخادم من هني. إذا كنت فاتح الملف مباشرة من جهازك أو من عارض ما يسمح بالاتصال، المزامنة ما تشتغل — استضف التطبيق على أي استضافة ثابتة وبتشتغل. النسخة الاحتياطية بالنص تشتغل بأي حال.",
     en: "The server isn't reachable from here. If you opened the file directly, or from a viewer that blocks network calls, sync stays off — host the app anywhere static and it works. Text backup works either way.",
@@ -803,8 +847,8 @@ const UI = {
   arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 
   authIntro: {
-    ar: "سجل دخولك بإيميلك — بنرسل لك رمز من ٦ أرقام. تقدمك ونقاطك ينحفظون ويمشون وياك على أي جهاز.",
-    en: "Sign in with your email — we'll send a 6-digit code. Your progress and XP save automatically and follow you to any device.",
+    ar: "سجل دخولك بإيميلك — بكلمة سر أو برمز ٦ أرقام يوصلك بالإيميل. تقدمك ونقاطك ينحفظون ويمشون وياك على أي جهاز.",
+    en: "Sign in with your email — by password, or by a 6-digit code we email you. Your progress and XP save automatically and follow you to any device.",
   },
   useLocalOnly: { ar: "استخدمه بدون حساب (هالجهاز بس)", en: "Use without an account (this device only)" },
   changeEmail: { ar: "غيّر الإيميل", en: "Change email" },
@@ -3876,8 +3920,11 @@ function createPractice(ctx) {
  *
  * The whole app state is one JSON document per user in Supabase (kk_state),
  * protected by row-level security so a token can only ever reach its own row.
- * Auth is an emailed 6-digit code: no password to manage, no redirect to
- * handle inside a PWA.
+ * Auth has two doors, both landing on the same account:
+ *   1. an emailed 6-digit code — nothing to remember, but it depends on the
+ *      project's mail being able to actually send
+ *   2. an email + password — no mail round-trip at all, which is what you
+ *      want when SMTP is down, rate-limited, or not set up yet
  *
  * IMPORTANT — where this works:
  *   ✅ a real host (GitHub Pages, Netlify, Vercel, localhost)
@@ -3907,7 +3954,14 @@ function createSync(ctx) {
   const api = (path, opts = {}) =>
     fetch(SUPA.url + path, {
       ...opts,
-      headers: { apikey: SUPA.key, "Content-Type": "application/json", ...(opts.headers || {}) },
+      // Both headers, as the official client sends them. An authed call
+      // passes its own Authorization through opts and wins the spread.
+      headers: {
+        apikey: SUPA.key,
+        Authorization: `Bearer ${SUPA.key}`,
+        "Content-Type": "application/json",
+        ...(opts.headers || {}),
+      },
     });
 
   const authed = (path, opts = {}) =>
@@ -3936,9 +3990,14 @@ function createSync(ctx) {
     const err = new Error(msg || `HTTP ${r.status}`);
     err.status = r.status;
     err.serverMsg = msg;
+    const code = j.error_code || j.code || "";
     err.key =
       r.status === 429 || /rate limit|too many/i.test(msg) ? "syncRate"
       : r.status >= 500 || /deadline exceeded|smtp|sending (the )?email|error sending/i.test(msg) ? "syncMail"
+      : /invalid_credentials|invalid login credentials/i.test(code + msg) ? "pwBad"
+      : /email_not_confirmed|email not confirmed/i.test(code + msg) ? "pwUnconfirmed"
+      : /user_already_exists|already registered/i.test(code + msg) ? "pwExists"
+      : /weak_password|password should be|at least \d+ characters/i.test(code + msg) ? "pwShort"
       : fallback;
     return err;
   }
@@ -3969,6 +4028,60 @@ function createSync(ctx) {
     if (!j.access_token) throw Object.assign(new Error("bad code"), { key: "codeBad" });
     saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
     return session;
+  }
+
+  /*
+   * The password door. It touches the mail server only once — on the very
+   * first signUp, and only if the project still has "confirm email" on — so
+   * it keeps working when the code route can't.
+   */
+  async function signIn(email, password) {
+    let r;
+    try {
+      r = await api("/auth/v1/token?grant_type=password", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "pwBad");
+    const j = await r.json().catch(() => ({}));
+    if (!j.access_token) throw Object.assign(new Error("no token"), { key: "pwBad" });
+    saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
+    return session;
+  }
+
+  /**
+   * Create the account, then sign straight in. A project with email
+   * confirmation still on returns a user with no session — that's the one
+   * case where a new account has to wait on an email, and the caller is told
+   * so by key rather than left staring at a dead screen.
+   */
+  async function signUp(email, password) {
+    let r;
+    try {
+      r = await api("/auth/v1/signup", { method: "POST", body: JSON.stringify({ email, password }) });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "syncFail");
+    const j = await r.json().catch(() => ({}));
+    if (j.access_token) {
+      saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
+      return session;
+    }
+    // No session back: the row exists but is unconfirmed.
+    throw Object.assign(new Error("confirm required"), { key: "pwUnconfirmed" });
+  }
+
+  /** Change the signed-in account's password. */
+  async function setPassword(password) {
+    // Without this, authed() dereferences a null session and the failure
+    // surfaces as "check your connection" — the wrong thing to tell someone.
+    if (!session) throw Object.assign(new Error("signed out"), { key: "syncFail" });
+    let r;
+    try {
+      r = await authed("/auth/v1/user", { method: "PUT", body: JSON.stringify({ password }) });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "syncFail");
+    return true;
   }
 
   async function refresh() {
@@ -4213,7 +4326,7 @@ function createSync(ctx) {
 
   return {
     probe, adoptLinkSession,
-    sendCode, verifyCode, syncNow, mergeState,
+    sendCode, verifyCode, signIn, signUp, setPassword, syncNow, mergeState,
     start, markDirty, flush: () => run("manual"),
     signOut: () => { saveSession(null); dirty = false; },
     session: () => session,
@@ -4677,7 +4790,21 @@ function createSync(ctx) {
           <div class="auth-brand">خوش كلام</div>
           <div class="auth-sub">${t("brandSub")}</div>
           <div class="note-info" style="margin:1rem 0 1.2rem">${t("authIntro")}</div>
-          ${authStep === "email"
+          <div class="authways" role="group">
+            <button type="button" data-way="pw" class="${authWay === "pw" ? "on" : ""}">${ti("wayPw")}</button>
+            <button type="button" data-way="code" class="${authWay === "code" ? "on" : ""}">${ti("wayCode")}</button>
+          </div>
+          ${authWay === "pw"
+            ? `<label class="f">${t("emailLabel")}
+                 <input type="email" id="authEmail" dir="ltr" autocomplete="email" inputmode="email"
+                        value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+               <label class="f">${t("pwLabel")}
+                 <input type="password" id="authPw" dir="ltr"
+                        autocomplete="${pwMode === "up" ? "new-password" : "current-password"}" /></label>
+               <button class="btn btn-primary" id="pwBtn" style="width:100%; margin-top:0.8rem">${t(pwMode === "up" ? "pwSignUp" : "pwSignIn")}</button>
+               <button class="btn btn-ghost btn-sm" id="pwSwapBtn" style="width:100%; margin-top:0.4rem">${t(pwMode === "up" ? "pwToSignIn" : "pwToSignUp")}</button>
+               <div class="note-info" style="margin-top:0.8rem">${t("pwHint")}</div>`
+            : authStep === "email"
             ? `<label class="f">${t("emailLabel")}
                  <input type="email" id="authEmail" dir="ltr" autocomplete="email" inputmode="email"
                         value="${esc(authEmail)}" placeholder="you@example.com" /></label>
@@ -4714,8 +4841,39 @@ function createSync(ctx) {
         render();
       } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     };
+    /* The password door: one submit path for both signing in and signing up,
+       so Enter behaves the same either way. */
+    const pwGo = async () => {
+      authEmail = (document.getElementById("authEmail")?.value || authEmail).trim();
+      const pw = document.getElementById("authPw")?.value || "";
+      if (!authEmail || !pw) return;
+      if (pwMode === "up" && pw.length < 8) { syncMsg = ts("pwShort"); render(); return; }
+      syncMsg = ts("syncing"); render();
+      try {
+        await (pwMode === "up" ? sync.signUp(authEmail, pw) : sync.signIn(authEmail, pw));
+        syncMsg = null;
+        startSync();
+        render();
+      } catch (e) {
+        // "already registered" is a wrong-door error, so flip the door for them
+        if (e?.key === "pwExists") pwMode = "in";
+        syncMsg = authMsg(e, "pwBad");
+        render();
+      }
+    };
+    document.getElementById("pwBtn")?.addEventListener("click", pwGo);
+    document.getElementById("authPw")?.addEventListener("keydown", (e) => { if (e.key === "Enter") pwGo(); });
+    document.getElementById("pwSwapBtn")?.addEventListener("click", () => {
+      pwMode = pwMode === "up" ? "in" : "up"; syncMsg = null; render();
+    });
+    stage.querySelectorAll(".authways button").forEach((b) =>
+      b.addEventListener("click", () => { authWay = b.dataset.way; authStep = "email"; syncMsg = null; render(); }));
+
     document.getElementById("sendCodeBtn")?.addEventListener("click", send);
-    document.getElementById("authEmail")?.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+    document.getElementById("authEmail")?.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      authWay === "pw" ? document.getElementById("authPw")?.focus() : send();
+    });
     document.getElementById("verifyBtn")?.addEventListener("click", verify);
     const codeEl = document.getElementById("authCode");
     codeEl?.focus();
@@ -4914,6 +5072,8 @@ function createSync(ctx) {
 
   // ── account & sync ────────────────────────────────────────────────────
   let authStep = "email"; // email | code
+  let authWay = "pw";     // pw | code — which door the gate is showing
+  let pwMode = "in";      // in | up
   let authEmail = "";
   let syncMsg = null;
   let netOK = null; // null = unknown, false = blocked (no network reachable)
@@ -4937,9 +5097,26 @@ function createSync(ctx) {
                <div class="v-actions">
                  <button class="btn btn-sm btn-primary" id="syncBtn">${t("syncNow")}</button>
                  <button class="btn btn-sm btn-ghost" id="signOutBtn">${t("signOut")}</button>
-               </div>`
+               </div>
+               <label class="f" style="margin-top:0.9rem">${t("pwNew")}
+                 <input type="password" id="newPw" dir="ltr" autocomplete="new-password" /></label>
+               <div class="v-actions"><button class="btn btn-sm btn-ghost" id="setPwBtn">${t("pwChange")}</button></div>`
             : `<div class="note-info" style="margin:0.4rem 0 0.6rem">${t("accountNote")}</div>
-               ${authStep === "email"
+               <div class="authways" role="group">
+                 <button type="button" data-way="pw" class="${authWay === "pw" ? "on" : ""}">${ti("wayPw")}</button>
+                 <button type="button" data-way="code" class="${authWay === "code" ? "on" : ""}">${ti("wayCode")}</button>
+               </div>
+               ${authWay === "pw"
+                 ? `<label class="f">${t("emailLabel")}
+                      <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
+                    <label class="f">${t("pwLabel")}
+                      <input type="password" id="authPw" dir="ltr"
+                             autocomplete="${pwMode === "up" ? "new-password" : "current-password"}" /></label>
+                    <div class="v-actions">
+                      <button class="btn btn-sm btn-primary" id="pwBtn">${t(pwMode === "up" ? "pwSignUp" : "pwSignIn")}</button>
+                      <button class="btn btn-sm btn-ghost" id="pwSwapBtn">${t(pwMode === "up" ? "pwToSignIn" : "pwToSignUp")}</button>
+                    </div>`
+                 : authStep === "email"
                  ? `<label class="f">${t("emailLabel")}
                       <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
                     <div class="v-actions"><button class="btn btn-sm btn-primary" id="sendCodeBtn">${t("sendCode")}</button></div>`
@@ -4972,6 +5149,32 @@ function createSync(ctx) {
         await doSync();
       } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     });
+    document.getElementById("pwBtn")?.addEventListener("click", async () => {
+      authEmail = (document.getElementById("authEmail")?.value || "").trim();
+      const pw = document.getElementById("authPw")?.value || "";
+      if (!authEmail || !pw) return;
+      if (pwMode === "up" && pw.length < 8) return setMsg("pwShort");
+      syncMsg = ts("syncing"); render();
+      try {
+        await (pwMode === "up" ? sync.signUp(authEmail, pw) : sync.signIn(authEmail, pw));
+        await doSync();
+      } catch (e) {
+        if (e?.key === "pwExists") pwMode = "in";
+        syncMsg = authMsg(e, "pwBad"); render();
+      }
+    });
+    document.getElementById("pwSwapBtn")?.addEventListener("click", () => {
+      pwMode = pwMode === "up" ? "in" : "up"; syncMsg = null; render();
+    });
+    document.getElementById("setPwBtn")?.addEventListener("click", async () => {
+      const pw = document.getElementById("newPw")?.value || "";
+      if (pw.length < 8) return setMsg("pwShort");
+      syncMsg = ts("syncing"); render();
+      try { await sync.setPassword(pw); setMsg("pwChanged"); }
+      catch (e) { syncMsg = authMsg(e); render(); }
+    });
+    document.querySelectorAll(".authways button").forEach((b) =>
+      b.addEventListener("click", () => { authWay = b.dataset.way; authStep = "email"; syncMsg = null; render(); }));
     document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
     document.getElementById("syncBtn")?.addEventListener("click", doSync);
     document.getElementById("signOutBtn")?.addEventListener("click", () => {
