@@ -474,7 +474,7 @@
                <button class="btn btn-primary" id="sendCodeBtn" style="width:100%; margin-top:0.8rem">${t("sendCode")}</button>`
             : `<label class="f">${t("codeLabel")}
                  <input type="text" id="authCode" dir="ltr" inputmode="numeric" autocomplete="one-time-code"
-                        maxlength="6" placeholder="123456" class="code-input" /></label>
+                        placeholder="123456" class="code-input" /></label>
                <button class="btn btn-primary" id="verifyBtn" style="width:100%; margin-top:0.8rem">${t("verifyCode")}</button>
                <button class="btn btn-ghost btn-sm" id="backEmailBtn" style="width:100%; margin-top:0.4rem">${t("changeEmail")}</button>`}
           ${syncMsg ? `<div class="auth-msg">${esc(syncMsg)}</div>` : ""}
@@ -494,8 +494,9 @@
       render();
     };
     const verify = async () => {
-      const code = (document.getElementById("authCode")?.value || "").trim();
-      if (code.length < 6) return;
+      const code = digitsOnly(document.getElementById("authCode")?.value);
+      if (code.length < OTP_MIN) return;
+      lastTried = code;
       syncMsg = ts("syncing"); render();
       try {
         await sync.verifyCode(authEmail, code);
@@ -538,10 +539,7 @@
       authWay === "pw" ? document.getElementById("authPw")?.focus() : send();
     });
     document.getElementById("verifyBtn")?.addEventListener("click", verify);
-    const codeEl = document.getElementById("authCode");
-    codeEl?.focus();
-    // six digits in and it goes straight through — no extra tap
-    codeEl?.addEventListener("input", (e) => { if (e.target.value.trim().length === 6) verify(); });
+    wireCodeInput(verify);
     document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
     document.getElementById("localOnlyBtn")?.addEventListener("click", () => {
       store.localOnly = true; save(); render();
@@ -734,6 +732,48 @@
 
 
   // ── account & sync ────────────────────────────────────────────────────
+  /*
+   * GoTrue's email OTP is 6 digits by default but the project can set any
+   * length from 6 to 10 (Auth → Providers → Email → Email OTP Length). The
+   * input used to cap at 6 and fire the moment it saw 6, which silently
+   * truncated a longer code and then reported it as wrong.
+   */
+  const OTP_MIN = 6;
+  const OTP_MAX = 10;
+  const digitsOnly = (s) => (s || "").replace(/\D/g, "").slice(0, OTP_MAX);
+  let lastTried = "";      // don't re-send a code the server already rejected
+  let idleTimer = null;
+
+  /**
+   * Wire a code field for a length we don't know. Since the code may be
+   * anywhere from 6 to 10 digits, submitting the moment it reaches 6 would
+   * spend an attempt on a prefix of a longer code — so it waits for typing
+   * to stop instead, and Enter or the button always work immediately.
+   *
+   * The length cap lives here rather than in a maxlength attribute: the
+   * attribute clips the raw text first, so pasting "code: 123 456" from an
+   * email would survive as "123" once the non-digits came out.
+   */
+  function wireCodeInput(verify) {
+    const el = document.getElementById("authCode");
+    if (!el) return;
+    lastTried = "";
+    el.focus();
+    el.addEventListener("input", () => {
+      const v = digitsOnly(el.value);
+      if (el.value !== v) el.value = v; // paste of "123 456" or "code: 123456"
+      clearTimeout(idleTimer);
+      if (v.length < OTP_MIN || v === lastTried) return;
+      idleTimer = setTimeout(() => { if (digitsOnly(el.value) === v) verify(); }, 1200);
+    });
+    el.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      clearTimeout(idleTimer);
+      verify();
+    });
+  }
+
   let authStep = "email"; // email | code
   let authWay = "pw";     // pw | code — which door the gate is showing
   let pwMode = "in";      // in | up
@@ -784,7 +824,8 @@
                       <input type="email" id="authEmail" dir="ltr" value="${esc(authEmail)}" placeholder="you@example.com" /></label>
                     <div class="v-actions"><button class="btn btn-sm btn-primary" id="sendCodeBtn">${t("sendCode")}</button></div>`
                  : `<label class="f">${t("codeLabel")}
-                      <input type="text" id="authCode" dir="ltr" inputmode="numeric" maxlength="8" placeholder="123456" /></label>
+                      <input type="text" id="authCode" dir="ltr" inputmode="numeric" autocomplete="one-time-code"
+                             placeholder="123456" /></label>
                     <div class="v-actions">
                       <button class="btn btn-sm btn-primary" id="verifyBtn">${t("verifyCode")}</button>
                       <button class="btn btn-sm btn-ghost" id="backEmailBtn">${t("close")}</button>
@@ -803,15 +844,19 @@
       try { await sync.sendCode(authEmail); authStep = "code"; setMsg("codeSent"); }
       catch (e) { syncMsg = authMsg(e); render(); }
     });
-    document.getElementById("verifyBtn")?.addEventListener("click", async () => {
-      const code = document.getElementById("authCode").value.trim();
+    const panelVerify = async () => {
+      const code = digitsOnly(document.getElementById("authCode")?.value);
+      if (code.length < OTP_MIN) return;
+      lastTried = code;
       syncMsg = ts("syncing"); render();
       try {
         await sync.verifyCode(authEmail, code);
         authStep = "email";
         await doSync();
       } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
-    });
+    };
+    document.getElementById("verifyBtn")?.addEventListener("click", panelVerify);
+    wireCodeInput(panelVerify);
     document.getElementById("pwBtn")?.addEventListener("click", async () => {
       authEmail = (document.getElementById("authEmail")?.value || "").trim();
       const pw = document.getElementById("authPw")?.value || "";
