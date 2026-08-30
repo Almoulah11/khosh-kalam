@@ -259,8 +259,8 @@ const UI = {
   codeSent: { ar: "أرسلنا لك رمز على الإيميل", en: "We emailed you a code" },
   codeBad: { ar: "الرمز مو صحيح أو منتهي", en: "That code is wrong or expired" },
   syncBlocked: {
-    ar: "المزامنة ما تشتغل داخل عارض Claude لأنه يمنع الاتصال بالشبكة. استضف التطبيق على Netlify أو GitHub Pages وبتشتغل المزامنة على طول — والنسخة الاحتياطية بالنص تشتغل هني عادي.",
-    en: "Sync can't run inside the Claude artifact viewer — it blocks network calls. Host the app on Netlify or GitHub Pages and sync works immediately. Text backup works fine here.",
+    ar: "ما نقدر نوصل للخادم من هني. إذا كنت فاتح الملف مباشرة من جهازك أو من عارض ما يسمح بالاتصال، المزامنة ما تشتغل — استضف التطبيق على أي استضافة ثابتة وبتشتغل. النسخة الاحتياطية بالنص تشتغل بأي حال.",
+    en: "The server isn't reachable from here. If you opened the file directly, or from a viewer that blocks network calls, sync stays off — host the app anywhere static and it works. Text backup works either way.",
   },
   arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 

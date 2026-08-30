@@ -329,7 +329,7 @@ function createArena(ctx) {
 
       <div class="panel">
         <div class="h-row" style="margin:0"><span class="microlabel">${t("dailyGoal")}</span>
-          <span class="goal-num">${todayXp} / ${g.dailyGoal} XP</span></div>
+          <span class="goal-num" dir="ltr">${todayXp} / ${g.dailyGoal} XP</span></div>
         <div class="xpbar goal"><div style="width:${goalPct}%"></div></div>
         ${goalPct >= 100 ? `<div class="goal-done">${t("goalMet")}</div>` : ""}
         <label class="f" style="margin-top:0.7rem">${t("goalSize")}

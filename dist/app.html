@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>خوش كلام — تدريب اللهجة الكويتية</title>
+<meta name="description" content="مدرّب اللهجة الكويتية — تكرار متباعد، تمارين نطق، وبراغماتية" />
 <meta name="theme-color" content="#0d1117" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -792,8 +793,8 @@ const UI = {
   codeSent: { ar: "أرسلنا لك رمز على الإيميل", en: "We emailed you a code" },
   codeBad: { ar: "الرمز مو صحيح أو منتهي", en: "That code is wrong or expired" },
   syncBlocked: {
-    ar: "المزامنة ما تشتغل داخل عارض Claude لأنه يمنع الاتصال بالشبكة. استضف التطبيق على Netlify أو GitHub Pages وبتشتغل المزامنة على طول — والنسخة الاحتياطية بالنص تشتغل هني عادي.",
-    en: "Sync can't run inside the Claude artifact viewer — it blocks network calls. Host the app on Netlify or GitHub Pages and sync works immediately. Text backup works fine here.",
+    ar: "ما نقدر نوصل للخادم من هني. إذا كنت فاتح الملف مباشرة من جهازك أو من عارض ما يسمح بالاتصال، المزامنة ما تشتغل — استضف التطبيق على أي استضافة ثابتة وبتشتغل. النسخة الاحتياطية بالنص تشتغل بأي حال.",
+    en: "The server isn't reachable from here. If you opened the file directly, or from a viewer that blocks network calls, sync stays off — host the app anywhere static and it works. Text backup works either way.",
   },
   arenaMissFirst: { ar: "الكلمات اللي عثرت فيها بالتمرين تجيك أول", en: "Words you missed in the arena come first" },
 
@@ -2961,7 +2962,7 @@ function createArena(ctx) {
 
       <div class="panel">
         <div class="h-row" style="margin:0"><span class="microlabel">${t("dailyGoal")}</span>
-          <span class="goal-num">${todayXp} / ${g.dailyGoal} XP</span></div>
+          <span class="goal-num" dir="ltr">${todayXp} / ${g.dailyGoal} XP</span></div>
         <div class="xpbar goal"><div style="width:${goalPct}%"></div></div>
         ${goalPct >= 100 ? `<div class="goal-done">${t("goalMet")}</div>` : ""}
         <label class="f" style="margin-top:0.7rem">${t("goalSize")}
@@ -5044,21 +5045,19 @@ function createSync(ctx) {
   document.querySelectorAll("[data-lang]").forEach((b) =>
     b.addEventListener("click", () => { store.settings.lang = b.dataset.lang; save(); render(); }));
   render();
-
-  if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
-    navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
 </script>
 <script>
   (() => {
     const icon = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#0d1117"/><rect x="72" y="128" width="368" height="72" rx="24" fill="#2fbf71"/><rect x="72" y="228" width="368" height="72" rx="24" fill="#e9edf3"/><rect x="72" y="328" width="240" height="72" rx="24" fill="#e5545e"/><circle cx="392" cy="364" r="36" fill="#e3b45c"/></svg>')));
-    const m = {"name": "خوش كلام — تدريب اللهجة الكويتية", "short_name": "خوش كلام", "lang": "ar", "dir": "rtl", "display": "standalone", "background_color": "#0d1117", "theme_color": "#0d1117"};
+    const m = {"name":"خوش كلام — تدريب اللهجة الكويتية","short_name":"خوش كلام","lang":"ar","dir":"rtl","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117"};
     m.icons = [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }];
     m.start_url = location.pathname;
-    document.getElementById('manifestLink').href =
-      URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
-    const f = document.createElement('link'); f.rel='icon'; f.type='image/svg+xml'; f.href=icon;
+    const link = document.getElementById('manifestLink');
+    if (link) link.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+    const f = document.createElement('link');
+    f.rel = 'icon'; f.type = 'image/svg+xml'; f.href = icon;
     document.head.appendChild(f);
   })();
 </script>
