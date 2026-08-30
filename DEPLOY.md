@@ -48,12 +48,41 @@ The app also accepts the emailed link as a fallback, but for that to work
 you must add your deployed URL under **Authentication → URL Configuration →
 Redirect URLs**. The code is the simpler path.
 
-### Email sending limits
+### The second required step: your own SMTP
 
-Supabase's built-in SMTP is rate-limited (a handful of messages per hour)
-and is intended for testing. Since you sign in rarely, this is usually
-fine. If you hit the limit, add your own SMTP under **Project Settings →
-Authentication → SMTP** (Resend and Postmark both have free tiers).
+Supabase's built-in mail service is a *testing* facility, not a mail
+provider. It is shared, slow, capped at a couple of messages an hour, and
+under load it simply times out — the project's auth log showed exactly that
+on the first real sign-in attempt:
+
+```
+16:24:09  POST /otp   context deadline exceeded      ← built-in SMTP timed out
+16:24:20  POST /otp   context deadline exceeded
+16:24:21  POST /otp   429: email rate limit exceeded ← the retries ate the quota
+   …      (six more 429s)
+```
+
+Nothing was wrong with the app, the key, or the host. The mail never left.
+
+Fix it once, and sign-in stops being fragile:
+
+1. Create a free account at <https://resend.com> and verify a domain (or use
+   their sandbox sender while testing).
+2. Make an API key.
+3. **Supabase → Project Settings → Authentication → SMTP Settings → Enable
+   custom SMTP**, then:
+   - Host `smtp.resend.com`, port `465`
+   - Username `resend`
+   - Password: the API key
+   - Sender email: an address on the verified domain
+   - Sender name: `خوش كلام`
+4. **Authentication → Rate Limits** — raise "Emails per hour" (the built-in
+   cap is deliberately tiny; with your own SMTP it no longer needs to be).
+
+Until custom SMTP is on, a failed send is worth waiting out rather than
+retrying: each retry spends quota without sending anything. The app now says
+so — a 429 shows "wait it out, then try once" with the server's own wording,
+instead of a generic failure.
 
 ## What the app talks to
 

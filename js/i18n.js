@@ -258,6 +258,18 @@ const UI = {
   syncFail: { ar: "ما نجحت المزامنة — جرب مرة ثانية", en: "Sync failed — try again" },
   codeSent: { ar: "أرسلنا لك رمز على الإيميل", en: "We emailed you a code" },
   codeBad: { ar: "الرمز مو صحيح أو منتهي", en: "That code is wrong or expired" },
+  syncRate: {
+    ar: "محاولات وايد بوقت قصير — الخادم وقف الإرسال مؤقتًا. انتظر شوي وجرب مرة وحدة بس، لا تعيد الإرسال.",
+    en: "Too many attempts in a short window — the server has paused sending. Wait it out, then try once.",
+  },
+  syncMail: {
+    ar: "الخادم ما قدر يرسل الإيميل هالمرة. انتظر دقيقة وجرب مرة وحدة — لا تعيد الإرسال مرات وايد.",
+    en: "The server could not send the email this time. Wait a minute and try once — repeated taps make it worse.",
+  },
+  syncNet: {
+    ar: "ما وصلنا للخادم — تأكد من الإنترنت وجرب مرة ثانية.",
+    en: "Couldn't reach the server — check your connection and try again.",
+  },
   syncBlocked: {
     ar: "ما نقدر نوصل للخادم من هني. إذا كنت فاتح الملف مباشرة من جهازك أو من عارض ما يسمح بالاتصال، المزامنة ما تشتغل — استضف التطبيق على أي استضافة ثابتة وبتشتغل. النسخة الاحتياطية بالنص تشتغل بأي حال.",
     en: "The server isn't reachable from here. If you opened the file directly, or from a viewer that blocks network calls, sync stays off — host the app anywhere static and it works. Text backup works either way.",

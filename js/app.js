@@ -266,6 +266,21 @@
     const s = S(k, ...a);
     return bilingual() ? `${s.ar}\n${s.en}` : s.ar;
   }
+  /*
+   * Auth failures must say what actually happened. sync.js tags each error
+   * with an i18n key; when it has none of its own we fall back and append the
+   * server's raw sentence, because a generic "try again" is what sends
+   * someone retrying into a rate limit.
+   */
+  function authMsg(err, fallback = "syncFail") {
+    const key = err?.key || fallback;
+    const base = ts(key);
+    // The raw sentence carries the specifics our copy can't — "after 51
+    // seconds" versus the hourly cap. Only a wrong code needs no elaboration.
+    const quiet = key === "codeBad" || key === "syncNet";
+    return !quiet && err?.serverMsg ? `${base}\n${err.serverMsg}` : base;
+  }
+
   const REG_KEY = { kw: "regKw", msa: "regMsa", phrase: "regPhrase", pair: "regPair", prag: "regPrag", tip: "regTip", idiom: "regIdiom" };
   const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_KEY[reg] ? ti(REG_KEY[reg]) : esc(reg)}</span>`;
   const topicLabel = (tp) =>
@@ -461,7 +476,7 @@
       if (!authEmail) return;
       syncMsg = ts("syncing"); render();
       try { await sync.sendCode(authEmail); authStep = "code"; syncMsg = ts("codeSent"); }
-      catch { syncMsg = ts("syncFail"); }
+      catch (e) { syncMsg = authMsg(e); }
       render();
     };
     const verify = async () => {
@@ -473,7 +488,7 @@
         syncMsg = null; authStep = "email";
         startSync();
         render();
-      } catch { syncMsg = ts("codeBad"); render(); }
+      } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     };
     document.getElementById("sendCodeBtn")?.addEventListener("click", send);
     document.getElementById("authEmail")?.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
@@ -710,7 +725,7 @@
                       <button class="btn btn-sm btn-primary" id="verifyBtn">${t("verifyCode")}</button>
                       <button class="btn btn-sm btn-ghost" id="backEmailBtn">${t("close")}</button>
                     </div>`}`}
-        ${syncMsg ? `<div class="note-info" style="margin-top:0.6rem">${esc(syncMsg)}</div>` : ""}
+        ${syncMsg ? `<div class="note-info sync-msg" style="margin-top:0.6rem">${esc(syncMsg)}</div>` : ""}
       </div>`;
   }
 
@@ -722,7 +737,7 @@
       if (!authEmail) return;
       syncMsg = ts("syncing"); render();
       try { await sync.sendCode(authEmail); authStep = "code"; setMsg("codeSent"); }
-      catch { setMsg("syncFail"); }
+      catch (e) { syncMsg = authMsg(e); render(); }
     });
     document.getElementById("verifyBtn")?.addEventListener("click", async () => {
       const code = document.getElementById("authCode").value.trim();
@@ -731,7 +746,7 @@
         await sync.verifyCode(authEmail, code);
         authStep = "email";
         await doSync();
-      } catch { setMsg("codeBad"); }
+      } catch (e) { syncMsg = authMsg(e, "codeBad"); render(); }
     });
     document.getElementById("backEmailBtn")?.addEventListener("click", () => { authStep = "email"; syncMsg = null; render(); });
     document.getElementById("syncBtn")?.addEventListener("click", doSync);

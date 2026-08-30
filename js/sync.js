@@ -51,21 +51,49 @@ function createSync(ctx) {
     return reachable;
   }
 
+  /*
+   * Turn a failed auth response into an error the screen can actually use.
+   * The server's own words are the only thing that separates "wait an hour"
+   * from "try again" — swallowing them (as this once did) leaves a
+   * rate-limited user retrying straight back into the limit.
+   */
+  async function authError(r, fallback = "syncFail") {
+    const j = await r.json().catch(() => ({}));
+    const msg = j.msg || j.error_description || j.message || j.error || "";
+    const err = new Error(msg || `HTTP ${r.status}`);
+    err.status = r.status;
+    err.serverMsg = msg;
+    err.key =
+      r.status === 429 || /rate limit|too many/i.test(msg) ? "syncRate"
+      : r.status >= 500 || /deadline exceeded|smtp|sending (the )?email|error sending/i.test(msg) ? "syncMail"
+      : fallback;
+    return err;
+  }
+
+  const netError = () => Object.assign(new Error("network"), { key: "syncNet" });
+
   async function sendCode(email) {
-    const r = await api("/auth/v1/otp", {
-      method: "POST",
-      body: JSON.stringify({ email, create_user: true }),
-    });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).msg || "send failed");
+    let r;
+    try {
+      r = await api("/auth/v1/otp", {
+        method: "POST",
+        body: JSON.stringify({ email, create_user: true }),
+      });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r);
   }
 
   async function verifyCode(email, token) {
-    const r = await api("/auth/v1/verify", {
-      method: "POST",
-      body: JSON.stringify({ email, token, type: "email" }),
-    });
-    const j = await r.json();
-    if (!r.ok || !j.access_token) throw new Error(j.msg || j.error_description || "bad code");
+    let r;
+    try {
+      r = await api("/auth/v1/verify", {
+        method: "POST",
+        body: JSON.stringify({ email, token, type: "email" }),
+      });
+    } catch { throw netError(); }
+    if (!r.ok) throw await authError(r, "codeBad");
+    const j = await r.json().catch(() => ({}));
+    if (!j.access_token) throw Object.assign(new Error("bad code"), { key: "codeBad" });
     saveSession({ access_token: j.access_token, refresh_token: j.refresh_token, email, user_id: j.user.id, at: Date.now() });
     return session;
   }

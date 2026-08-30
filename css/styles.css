@@ -297,6 +297,7 @@ body.auth-mode .topbar { visibility: hidden; }
 .auth-sub { font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.15rem; }
 .auth-card .f { text-align: start; }
 .auth-msg { margin-top: 0.9rem; font-size: 0.85rem; color: var(--gold); line-height: 1.7; white-space: pre-line; }
+.sync-msg { white-space: pre-line; color: var(--gold); }
 .code-input {
   text-align: center; font-size: 1.6rem; letter-spacing: 0.45em;
   font-variant-numeric: tabular-nums; padding-inline-start: 0.45em;
