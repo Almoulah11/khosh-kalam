@@ -48,7 +48,7 @@
   const log = () => (store.log[todayKey()] ||= { reviews: 0, correct: 0, intro: 0 });
 
   /** Every pack the app offers, from all pack files. */
-  const ALL_PACKS = [...SEED_PACKS, ...SEED_DOMAINS, ...SEED_COLLOQUIAL];
+  const ALL_PACKS = [...SEED_PACKS, ...SEED_DOMAINS, ...SEED_COLLOQUIAL, SEED_PRAG];
 
   // ── word assembly ─────────────────────────────────────────────────────
   function allWords() {
@@ -266,7 +266,7 @@
     const s = S(k, ...a);
     return bilingual() ? `${s.ar}\n${s.en}` : s.ar;
   }
-  const REG_KEY = { kw: "regKw", msa: "regMsa", phrase: "regPhrase", pair: "regPair", tip: "regTip", idiom: "regIdiom" };
+  const REG_KEY = { kw: "regKw", msa: "regMsa", phrase: "regPhrase", pair: "regPair", prag: "regPrag", tip: "regTip", idiom: "regIdiom" };
   const regTag = (reg) => `<span class="tag tag-${esc(reg)}">${REG_KEY[reg] ? ti(REG_KEY[reg]) : esc(reg)}</span>`;
   const topicLabel = (tp) =>
     bilingual() && TOPIC_EN[tp] ? `${esc(tp)} <span class="bi-inline">${esc(TOPIC_EN[tp])}</span>` : esc(tp);
@@ -894,6 +894,7 @@
       // tapping التدريب while inside an exercise returns to its hub, and
       // leaving the tab entirely stops its timers and logs the session
       if (view === "practice") practice.leave();
+      if (view === "arena") arena.leave();
       view = el.dataset.view; session = null; render();
     }));
   document.querySelectorAll("[data-lang]").forEach((b) =>

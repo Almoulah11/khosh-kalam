@@ -366,3 +366,10 @@ body.auth-mode .topbar { visibility: hidden; }
 .hbar-fill { display: block; height: 100%; border-radius: 3px; }
 .hbar-val { flex: 0 0 2.2rem; text-align: end; font-variant-numeric: tabular-nums; color: var(--ink); }
 .trend { width: 100%; height: auto; display: block; margin-top: 0.5rem; }
+.tag-prag { color: #e88fb0; border-color: rgb(232 143 176 / 0.45); }
+/* context for a situation drill — who you're talking to, and where.
+   Not a rejected phrasing, so it must not wear the strikethrough. */
+.q-context {
+  margin-top: 0.7rem; font-size: 0.85rem; color: var(--gold);
+  letter-spacing: 0.02em;
+}

@@ -26,6 +26,7 @@ const SCRIPTS = [
   "js/seed-colloquial.js",
   "js/seed-drills.js",
   "js/seed-library.js",
+  "js/seed-pragmatics.js",
   "js/arena.js",
   "js/practice.js",
   "js/sync.js",

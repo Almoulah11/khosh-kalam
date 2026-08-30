@@ -415,6 +415,10 @@ const UI = {
   dashNoLex: { ar: "المعجم فاضي.", en: "Lexicon is empty." },
   dashNoCircum: { ar: "ماكو جولات التفاف بعد.", en: "No circumlocution runs yet." },
 
+  modeSituation: { ar: "اقرأ الموقف", en: "Read the room" },
+  modeLadder: { ar: "سلّم السجل", en: "Register ladder" },
+  regPrag: { ar: "حركة اجتماعية", en: "Social move" },
+
   // ── labels ──
   regKw: { ar: "كويتي", en: "Kuwaiti" },
   regMsa: { ar: "فصحى بالحچي", en: "MSA in speech" },

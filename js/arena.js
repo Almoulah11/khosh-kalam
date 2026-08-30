@@ -158,6 +158,43 @@ function createArena(ctx) {
         });
       },
     },
+    // اقرأ الموقف — situational judgement. The distractors are all sayable;
+    // they are wrong for who is being addressed, not for grammar.
+    situation: {
+      key: "situation", labelKey: "modeSituation", icon: "☰",
+      available: () => true,
+      build() {
+        return sample(SEED_DCT, ROUND_LEN).map((d) => {
+          const order = shuffle(d.options.map((_, i) => i));
+          return {
+            id: d.id, prompt: d.sit, sub: d.who, subClass: "q-context", promptClass: "q-ar",
+            options: order.map((i) => d.options[i]), answer: order.indexOf(d.answer),
+            why: d.why, ref: d.options[d.answer], long: true,
+          };
+        });
+      },
+    },
+    // سلّم السجل — same intent, three audiences; pick the right rung
+    ladder: {
+      key: "ladder", labelKey: "modeLadder", icon: "≡",
+      available: () => true,
+      build() {
+        const items = [];
+        for (const l of shuffle([...SEED_LADDER])) {
+          for (const target of shuffle([0, 1, 2]).slice(0, 1)) {
+            const order = shuffle([0, 1, 2]);
+            items.push({
+              id: l.id + target, prompt: l.intent, sub: `→ ${l.rungs[target].who}`, subClass: "q-context", promptClass: "q-ar",
+              options: order.map((i) => l.rungs[i].ar), answer: order.indexOf(target),
+              why: l.rungs.map((r) => `${r.who}: ${r.ar}`).join("\n"),
+              ref: l.rungs[target].ar, long: true,
+            });
+          }
+          if (items.length >= ROUND_LEN) break;
+        }
+        return items.slice(0, ROUND_LEN);
+      },
+    },
     proverb: {
       key: "proverb", labelKey: "modeProverbGame", icon: "❝",
       available: () => proverbPool().length >= 6,
@@ -338,7 +375,7 @@ function createArena(ctx) {
         </div>
         <div class="q-face">
           <div class="${q.promptClass}">${esc(q.prompt)}</div>
-          ${q.sub ? `<div class="q-weak">${esc(q.sub)}</div>` : ""}
+          ${q.sub ? `<div class="${q.subClass || "q-weak"}">${esc(q.sub)}</div>` : ""}
         </div>
         <div class="opts">${opts}</div>
         ${a ? `<div class="verdict-box ${a.right ? "ok" : "no"}">
@@ -388,5 +425,8 @@ function createArena(ctx) {
     stage.querySelector("#goalSel")?.addEventListener("change", (e) => { game().dailyGoal = +e.target.value; save(); ctx.rerender(); });
   }
 
-  return { render, wire, game, rankOf, applyFreeze, RANKS, inRound: () => !!round };
+  return { render, wire, game, rankOf, applyFreeze, RANKS,
+    inRound: () => !!round,
+    /** Tapping the arena tab mid-round returns to the mode list. */
+    leave: () => { round = null; } };
 }

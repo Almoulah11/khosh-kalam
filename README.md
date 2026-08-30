@@ -102,6 +102,31 @@ Everything in the reading library is either public-domain classical verse
 of an opinion column, literary prose, or Kuwaiti dialect. Nothing is copied
 from a living newspaper or author.
 
+
+## Modern Kuwaiti pragmatics
+
+Vocabulary tells you what a word means; pragmatics tells you which move to
+make. A grammatically perfect sentence still lands wrong if it is too blunt,
+too formal, too familiar, or missing the ritual the moment required. Three
+pieces cover it:
+
+- **A 42-card pack** of the formulaic moves themselves — indirect refusal
+  («الموضوع مو بيدي», «أشوف لك شنو أقدر أسوي»), compliment deflection, address
+  and deference (بو فلان, عمّي, the طال عمرك → حضرتك → معاليك → سموك ladder),
+  hedging, floor management (ترا, «عفوًا خلني أكمل», back-channels), condolence,
+  the تعارض ritual, and the modern digital register: greet-then-ask on WhatsApp,
+  «تم» versus «تم، يوصلك خلال ساعة», out-of-hours softeners.
+- **اقرأ الموقف** — 28 situational-judgement items in the discourse-completion
+  format used in pragmatics research. Each names the relationship and the
+  setting, because both change the answer. Every distractor is something a real
+  person might say; it is wrong only for *this* person in *this* room.
+- **سلّم السجل** — 12 register ladders: one intent, three audiences (a close
+  friend, a colleague, someone senior). The wrong answer is never
+  ungrammatical — it is the right sentence aimed at the wrong person.
+
+The pragmatics cards carry their own register tag (**حركة اجتماعية**) so a
+social move is never mistaken for a vocabulary item.
+
 ## Bilingual interface
 
 The app ships **bilingual** — Arabic leads, English sits beneath it in a
