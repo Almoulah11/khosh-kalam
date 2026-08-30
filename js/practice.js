@@ -76,7 +76,8 @@ function createPractice(ctx) {
 
   const logSession = (type, minutes) => {
     if (minutes < 0.5) return;
-    P().sessions.push({ d: todayKey(), type, min: Math.round(minutes * 10) / 10 });
+    P().sessions.push({ id: "s" + Date.now() + Math.random().toString(36).slice(2, 6),
+      d: todayKey(), type, min: Math.round(minutes * 10) / 10 });
     save();
   };
 
@@ -458,7 +459,8 @@ function createPractice(ctx) {
     });
     el.querySelector("#crStop")?.addEventListener("click", () => { clearInterval(cirTimer); ui.done = true; ctx.rerender(); });
     el.querySelectorAll("[data-cr]").forEach((b) => b.addEventListener("click", () => {
-      P().circum.push({ d: todayKey(), id: ui.card.id, ok: b.dataset.cr === "1", sec: 45 - (ui.left || 0) });
+      P().circum.push({ id: "c" + Date.now() + Math.random().toString(36).slice(2, 6),
+        d: todayKey(), concept: ui.card.id, ok: b.dataset.cr === "1", sec: 45 - (ui.left || 0) });
       logSession("circum", (45 - (ui.left || 0)) / 60);
       save(); ui = {}; ctx.rerender();
     }));
@@ -543,6 +545,9 @@ function createPractice(ctx) {
   function wireLex(el) {
     el.querySelector("#lxSave")?.addEventListener("click", () => {
       const ar = document.getElementById("lxAr").value.trim();
+      // an empty field is a stray tap (the form re-renders blank after a save),
+      // not an attempt to store a bare noun — say nothing rather than scold
+      if (!ar) return;
       if (!phraseOk(ar)) return alert(ts("lxRejectBare"));
       const en = document.getElementById("lxEn").value.trim();
       if (!en) return alert(ts("lxNeedGloss"));

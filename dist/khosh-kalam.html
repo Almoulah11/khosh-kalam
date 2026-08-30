@@ -3134,7 +3134,8 @@ function createPractice(ctx) {
 
   const logSession = (type, minutes) => {
     if (minutes < 0.5) return;
-    P().sessions.push({ d: todayKey(), type, min: Math.round(minutes * 10) / 10 });
+    P().sessions.push({ id: "s" + Date.now() + Math.random().toString(36).slice(2, 6),
+      d: todayKey(), type, min: Math.round(minutes * 10) / 10 });
     save();
   };
 
@@ -3516,7 +3517,8 @@ function createPractice(ctx) {
     });
     el.querySelector("#crStop")?.addEventListener("click", () => { clearInterval(cirTimer); ui.done = true; ctx.rerender(); });
     el.querySelectorAll("[data-cr]").forEach((b) => b.addEventListener("click", () => {
-      P().circum.push({ d: todayKey(), id: ui.card.id, ok: b.dataset.cr === "1", sec: 45 - (ui.left || 0) });
+      P().circum.push({ id: "c" + Date.now() + Math.random().toString(36).slice(2, 6),
+        d: todayKey(), concept: ui.card.id, ok: b.dataset.cr === "1", sec: 45 - (ui.left || 0) });
       logSession("circum", (45 - (ui.left || 0)) / 60);
       save(); ui = {}; ctx.rerender();
     }));
@@ -3601,6 +3603,9 @@ function createPractice(ctx) {
   function wireLex(el) {
     el.querySelector("#lxSave")?.addEventListener("click", () => {
       const ar = document.getElementById("lxAr").value.trim();
+      // an empty field is a stray tap (the form re-renders blank after a save),
+      // not an attempt to store a bare noun — say nothing rather than scold
+      if (!ar) return;
       if (!phraseOk(ar)) return alert(ts("lxRejectBare"));
       const en = document.getElementById("lxEn").value.trim();
       if (!en) return alert(ts("lxNeedGloss"));
@@ -4023,7 +4028,49 @@ function createSync(ctx) {
           .map((k) => [k, Math.max(lg.misses?.[k] || 0, rg.misses?.[k] || 0)])),
     };
 
-    out.settings = { ...rg.settings, ...remote.settings, ...local.settings };
+    /*
+     * The practice modes' data. Without this block `{...remote, ...local}`
+     * hands the whole object to whichever device wrote last, so a laptop that
+     * has been offline for a week silently destroys everything captured on the
+     * phone since. Each collection merges by what it means:
+     *   lexicon/monologues/msgs — keyed records: union by id, richer row wins
+     *   sessions/circum         — append-only history: union, never dropped
+     */
+    const lp = local.practice || {}, rp = remote.practice || {};
+    const byKey = (a = [], b = [], pick) => {
+      const m = new Map();
+      for (const row of [...b, ...a]) {
+        const prev = m.get(row.id);
+        m.set(row.id, prev ? pick(row, prev) : row);
+      }
+      return [...m.values()];
+    };
+    // an entry that has been given a gloss, or reviewed more recently, is the
+    // one worth keeping
+    const richerLex = (x, y) =>
+      (x.en ? 1 : 0) !== (y.en ? 1 : 0) ? (x.en ? x : y)
+        : (x.sm2?.last || 0) >= (y.sm2?.last || 0) ? x : y;
+    const richerMono = (x, y) => (x.rating ? x : y.rating ? y : x);
+    const richerMsg = (x, y) => ((x.reps || 0) >= (y.reps || 0) ? x : y);
+    // history rows carry an id from now on; older rows fall back to their shape
+    const histKey = (r) => r.id || JSON.stringify(r);
+    const unionHist = (a = [], b = []) => {
+      const m = new Map();
+      for (const row of [...b, ...a]) m.set(histKey(row), row);
+      return [...m.values()];
+    };
+
+    out.practice = {
+      ...rp, ...lp,
+      lexicon: byKey(lp.lexicon, rp.lexicon, richerLex),
+      monologues: byKey(lp.monologues, rp.monologues, richerMono),
+      msgs: byKey(lp.msgs, rp.msgs, richerMsg),
+      sessions: unionHist(lp.sessions, rp.sessions),
+      circum: unionHist(lp.circum, rp.circum),
+      recent: byKey(lp.recent, rp.recent, (x) => x),
+    };
+
+    out.settings = { ...remote.settings, ...local.settings };
     return out;
   }
 
